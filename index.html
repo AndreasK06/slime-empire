@@ -3021,7 +3021,7 @@ function buildUI(){
   ui.eggBtn.onclick=()=>{ audioUnlock(); buyEgg(); };
   $('#btnSettings').onclick=()=>{ sfx('click'); openSettings(); };
   $('#modalX').onclick=closeModal;
-  ui.modal.addEventListener('pointerdown',e=>{ if(e.target===ui.modal) closeModal(); });
+  ui.modal.addEventListener('pointerdown',e=>{ if(e.target===ui.modal){ blockGhost(e.clientX,e.clientY); closeModal(); } });
   ui.golden.addEventListener('pointerdown',clickGolden);
   document.addEventListener('pointerdown',e=>{ if(!(e.target.closest&&e.target.closest('#tiaPop'))) closeTiaPop(); },true);
   buildPenUps(); setupCst();
@@ -3094,14 +3094,18 @@ function renderBoard(){
   }
   popSet.clear();
 }
-// iOS can swallow "click" on a page that changes this often, so touch taps on buttons fire on pointerup instead
+// iOS can swallow "click" on a page that changes this often, so touch taps on buttons fire on pointerup instead.
+// Safari still sends its own click a moment later. If the screen changed in between (a window closed or opened),
+// that late "ghost" click would land on whatever is now under the finger, so it is blocked wherever it lands.
+let ghost=null;
+function blockGhost(x,y){ ghost={x,y,t:Date.now()}; }
 function setupTouchTaps(){
-  let down=null, synth=null;
+  let down=null;
   document.addEventListener('pointerdown',e=>{ const b=e.pointerType!=='mouse'&&e.target.closest?e.target.closest('button'):null; down=b?{b,x:e.clientX,y:e.clientY,id:e.pointerId}:null; },true);
   document.addEventListener('pointercancel',()=>{ down=null; },true);
   document.addEventListener('pointerup',e=>{ const d=down; down=null; if(!d||e.pointerId!==d.id||d.b.disabled||!d.b.isConnected) return;
-    if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>14) return; synth={b:d.b,t:Date.now()}; d.b.click(); },true);
-  document.addEventListener('click',e=>{ if(!e.isTrusted||!synth||Date.now()-synth.t>900) return; const b=e.target.closest?e.target.closest('button'):null; if(b===synth.b){ e.stopImmediatePropagation(); e.preventDefault(); synth=null; } },true);
+    if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>14) return; blockGhost(e.clientX,e.clientY); d.b.click(); },true);
+  document.addEventListener('click',e=>{ if(!e.isTrusted||!ghost||Date.now()-ghost.t>800) return; if(Math.hypot(e.clientX-ghost.x,e.clientY-ghost.y)>40) return; e.stopImmediatePropagation(); e.preventDefault(); },true);
 }
 let drag=null;
 function setupDrag(){
