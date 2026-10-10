@@ -12,9 +12,18 @@
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
+<meta name="build" content="3.2">
 <script>
 // install as an app: works offline and opens full screen from the home screen
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+// a home-screen app often resumes instead of reloading, so check for a newer upload and offer a one-tap update
+(function(){ var cur=(document.querySelector('meta[name=build]')||{}).content, shown=false; if(!cur||!/^https?:$/.test(location.protocol)) return;
+  function show(){ if(shown) return; shown=true; var b=document.createElement('button'); b.textContent='✨ New version ready. Tap to update';
+    b.style.cssText='position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:99999;padding:12px 18px;border-radius:14px;border:3px solid #070514;background:#98f25a;color:#070514;font:700 15px system-ui,sans-serif;box-shadow:0 4px 0 #070514;white-space:nowrap';
+    b.onclick=function(){ location.reload(); }; document.body.appendChild(b); }
+  function check(){ if(shown) return; fetch(location.pathname,{cache:'no-store'}).then(function(r){ return r.ok?r.text():''; }).then(function(t){ var m=t.match(/<meta name="build" content="([^"]+)"/); if(m&&m[1]!==cur) show(); }).catch(function(){}); }
+  addEventListener('load',function(){ setTimeout(check,5000); }); document.addEventListener('visibilitychange',function(){ if(!document.hidden) setTimeout(check,1500); });
+})();
 </script>
 </head>
 <body>
@@ -300,7 +309,7 @@ h3.sec span{flex:none}
 .toast.disc{border-color:var(--sky)}
 
 /* Modal */
-#modal{position:absolute;inset:0;z-index:90;display:grid;place-items:center;background:rgba(6,4,18,.72);padding:16px}
+#modal{position:absolute;inset:0;z-index:90;display:grid;place-items:center;background:rgba(6,4,18,.72);padding:74px 16px 16px}
 .modal-card{width:min(540px,100%);max-height:100%;overflow:auto;background:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1.3px) 0 0/16px 16px,linear-gradient(180deg,#1d1747,var(--plum-800));border:3px solid var(--ink);border-radius:var(--r-frame);box-shadow:0 5px 0 var(--ink),inset 0 1px 0 var(--shine);padding:18px;position:relative;animation:modalIn .3s cubic-bezier(.2,1.4,.4,1);overscroll-behavior:contain}
 .modal-x{position:absolute;right:10px;top:10px;width:36px;height:36px;border-radius:50%;border:2px solid var(--ink);background:linear-gradient(180deg,#3f3488,#2c2463);color:#fff;font:19px/1 var(--f-display);cursor:pointer;box-shadow:0 2px 0 var(--ink)}
 .mh{font:28px var(--f-display);margin:0 40px 10px 0;color:var(--goo);text-wrap:balance;line-height:1.1;font-weight:400}
@@ -525,6 +534,104 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
 @keyframes spin{to{transform:rotate(360deg)}}
 @keyframes tabpop{0%{transform:scale(.4);opacity:0}100%{transform:scale(1);opacity:1}}
 @keyframes icopulse{0%{transform:rotate(-45deg) scale(1)}40%{transform:rotate(-45deg) scale(1.35)}100%{transform:rotate(-45deg) scale(1)}}
+/* ---- 3.2: pen panel, tap-to-merge, research, dock, welcome back, goals, wheel, backpack, Royal Road ---- */
+.board{touch-action:pan-y}
+.cell.lift{transform:scale(1.1);z-index:2;box-shadow:0 0 0 3px var(--gold),0 8px 18px rgba(0,0,0,.45)}
+.cell.sel{box-shadow:inset 0 0 0 3px var(--gold),0 0 16px rgba(255,212,63,.55);transform:scale(1.04)}
+.pen-btns{display:flex;gap:8px;align-items:center}
+.penup-btn{position:relative;font-size:15px;padding:9px 12px}
+.penup-btn .badge{top:-8px;left:auto;right:-6px}
+.mergeall-btn{display:flex;flex-direction:column;align-items:center;font-size:14px;padding:6px 10px;line-height:1.1}
+.mergeall-btn small{font:700 11px var(--f-body);opacity:.8}
+#sheet{position:absolute;inset:0;z-index:86;background:rgba(6,4,18,.6);display:flex;align-items:flex-end;justify-content:center}
+.sheet-card{width:100%;max-width:620px;max-height:80%;overflow:auto;-webkit-overflow-scrolling:touch;background:radial-gradient(rgba(255,255,255,.03) 1px,transparent 1.3px) 0 0/16px 16px,linear-gradient(180deg,#221b52,var(--plum-800));border:3px solid var(--ink);border-bottom:0;border-radius:22px 22px 0 0;padding:6px 14px calc(16px + env(safe-area-inset-bottom,0px));box-shadow:0 -6px 24px rgba(0,0,0,.45);animation:sheetUp .3s cubic-bezier(.2,1,.35,1)}
+.sheet-grab{width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,.3);margin:4px auto 6px;cursor:grab}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:6px;touch-action:none}
+.sheet-head h3{margin:0}
+.sheet-head .modal-x{position:static;flex:none}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:none}}
+.qbtn{width:32px;height:32px;border-radius:50%;border:2px solid var(--ink);background:linear-gradient(180deg,#4a3c94,#2c2463);color:#fff;font:17px var(--f-display);cursor:pointer;box-shadow:0 2px 0 var(--ink);flex:none;padding:0}
+.ucat{display:inline-block;vertical-align:2px;font:10px/13px var(--f-display);font-style:normal;letter-spacing:.5px;padding:0 5px;border-radius:6px;background:var(--cc);color:var(--ink);border:2px solid var(--ink);margin-right:5px;text-transform:uppercase}
+.rg-row{display:grid;grid-template-columns:34px 1fr auto;gap:4px 10px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)}
+.rg-row .ico{font-size:22px;text-align:center;grid-row:span 3}
+.rg-row b{font:15px var(--f-display);font-weight:400;color:#fff}
+.rg-row em{font-style:normal;font:14px var(--f-display);color:var(--gold)}
+.rg-row span.d{grid-column:2/4;font-size:12.5px;color:var(--muted)}
+.rg-row .bar{grid-column:2/4;height:6px}
+#dock{position:absolute;right:10px;top:76px;z-index:4;display:grid;grid-auto-flow:column;grid-template-rows:repeat(4,42px);gap:8px;direction:rtl;pointer-events:none}
+.dockbtn{pointer-events:auto;width:42px;height:42px;border-radius:50%;border:2px solid var(--ink);background:linear-gradient(180deg,#4a3c94,#2c2463);box-shadow:0 3px 0 var(--ink),inset 0 2px 0 var(--shine);font-size:21px;display:grid;place-items:center;cursor:pointer;position:relative;padding:0;animation:dockIn .5s cubic-bezier(.2,1.6,.4,1)}
+.dockbtn.event{background:linear-gradient(180deg,#ffb35c,#c4471a)}
+.dockbtn .badge{top:-6px;left:auto;right:-6px}
+@keyframes dockIn{from{transform:scale(0)}to{transform:none}}
+.wb{text-align:center}
+.wb canvas{width:160px;height:120px;display:block;margin:-6px auto 0}
+.wb-say{display:flex;gap:8px;align-items:center;text-align:left;background:rgba(7,5,20,.45);border:2px solid #3a3170;border-radius:14px;padding:8px 10px;margin:8px 0}
+.wb-say img{width:44px;height:44px;flex:none}
+.wb-say span{font-size:13.5px;color:#e9e4ff;line-height:1.3}
+.wb-rows{display:flex;flex-direction:column;gap:6px;margin:10px 0}
+.wb-row{display:grid;grid-template-columns:30px 1fr auto;align-items:center;gap:8px;padding:8px 12px;border-radius:12px;background:linear-gradient(180deg,#2a2260,#1e1848);border:2px solid var(--ink);text-align:left;animation:toastIn .45s cubic-bezier(.2,1.5,.4,1) both}
+.wb-row .i{font-size:20px}
+.wb-row span{font-size:14px;color:var(--muted);font-weight:600}
+.wb-row b{font:19px var(--f-display);font-weight:400;color:var(--gold);font-variant-numeric:tabular-nums}
+.wb-row.goo b{color:var(--goo);font-size:24px}
+.wb-pend{font-size:13px;color:#ffd9a0;background:rgba(255,154,60,.12);border:2px dashed rgba(255,154,60,.5);border-radius:12px;padding:8px 10px;margin:8px 0}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:8px 0 10px}
+.cal div{border-radius:10px;border:2px solid var(--ink);background:#1c1644;padding:4px 2px;font:11px var(--f-display);color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:1px;min-width:0}
+.cal div i{font-style:normal;font-size:18px}
+.cal div small{font:700 9.5px var(--f-body);line-height:1.15;text-align:center;overflow-wrap:anywhere;max-width:100%}
+.cal div.done{opacity:.45}
+.cal div.today{border-color:var(--gold);background:linear-gradient(180deg,#3d2f6e,#2a2058);color:#fff;box-shadow:0 0 12px rgba(255,212,63,.45)}
+.goal{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;padding:10px;border-radius:14px;background:linear-gradient(180deg,#251e55,var(--plum-700));border:2px solid var(--ink);margin-bottom:8px}
+.goal b{font:15px var(--f-display);font-weight:400;color:#fff}
+.goal .gr{font-size:12px;color:var(--muted)}
+.goal .bar{grid-column:1/3;height:8px}
+.goal.done{border-color:var(--goo)}
+.goal.claimed{opacity:.55}
+.goal .diff{font:10px/14px var(--f-display);padding:0 6px;border-radius:6px;border:2px solid var(--ink);color:var(--ink);margin-right:6px}
+.goal .btn{font-size:13px;padding:6px 10px}
+.wheel-wrap{position:relative;width:min(300px,76vw);aspect-ratio:1;margin:10px auto 6px}
+.wheel-wrap canvas{width:100%;height:100%;display:block}
+.wheel-ptr{position:absolute;left:50%;top:-8px;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-top:26px solid var(--gold);filter:drop-shadow(0 3px 0 var(--ink));z-index:1}
+.bp-tabs{display:flex;gap:6px;margin:0 0 10px}
+.bp-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.bp-item{display:grid;grid-template-columns:40px 1fr;gap:2px 8px;align-items:center;padding:8px;border-radius:14px;background:linear-gradient(180deg,#251e55,var(--plum-700));border:2px solid var(--ink)}
+.bp-item .ico{grid-row:span 2;font-size:28px;text-align:center;position:relative}
+.bp-item .ico i{position:absolute;right:-6px;bottom:-6px;font:11px/15px var(--f-display);font-style:normal;background:var(--gold);color:var(--ink);border-radius:7px;padding:0 4px;border:2px solid var(--ink)}
+.bp-item b{font:13.5px var(--f-display);font-weight:400;color:#fff;line-height:1.1}
+.bp-item span{font-size:11.5px;color:var(--muted);line-height:1.2}
+.bp-item .btn{grid-column:1/3;font-size:13px;padding:5px 8px;margin-top:4px}
+.ward{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.ward button{width:76px;border-radius:14px;border:2px solid var(--ink);background:#1c1644;color:#fff;padding:4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;font:11px var(--f-display);gap:2px}
+.ward button canvas,.ward button img{width:66px;height:66px}
+.ward button[aria-pressed="true"]{border-color:var(--gold);box-shadow:0 0 0 2px rgba(255,212,63,.4)}
+.ward button:disabled{opacity:.4;cursor:default}
+.rr-head{display:flex;align-items:center;gap:10px;padding:10px;border-radius:16px;background:linear-gradient(135deg,#4a1d0e,#1e0e24);border:2px solid #ff9a3c;margin-bottom:8px}
+.rr-head .big{font-size:40px}
+.rr-head b{font:20px var(--f-display);font-weight:400;color:#ffb35c;display:block}
+.rr-head span{font-size:12.5px;color:#f3d9c8}
+.rr-prog{display:flex;align-items:center;gap:8px;font:14px var(--f-display);color:#fff;margin:6px 0 10px}
+.rr-prog .bar{height:10px}
+.rr-cols{display:grid;grid-template-columns:34px 1fr 1fr;gap:6px;font:12px var(--f-display);color:var(--muted);text-align:center;margin-bottom:4px}
+.rr-row{display:grid;grid-template-columns:34px 1fr;gap:6px;align-items:stretch;margin-bottom:6px}
+.rr-row .t{font:16px var(--f-display);color:var(--muted);display:grid;place-items:center;border-radius:10px;background:#140f30;border:2px solid var(--ink)}
+.rr-row.reached .t{color:var(--ink);background:var(--gold)}
+.rr-cell{border-radius:12px;border:2px solid var(--ink);background:#1c1644;padding:5px 6px;display:grid;grid-template-columns:30px 1fr;gap:0 6px;align-items:center;min-height:52px;position:relative}
+.rr-cell.prem{background:linear-gradient(180deg,#3b2410,#24140c);border-color:#7a4a1a}
+.rr-cell .ico{grid-row:span 2;font-size:22px;text-align:center}
+.rr-cell b{font:12px var(--f-display);font-weight:400;color:#fff;line-height:1.1}
+.rr-cell small{font:700 10.5px var(--f-body);color:var(--muted)}
+.rr-cell .btn{grid-column:1/3;font-size:12px;padding:3px 6px;margin-top:3px}
+.rr-cell.got{opacity:.5}
+.rr-cell.got::after{content:"✓";position:absolute;right:6px;top:4px;color:var(--goo);font:16px var(--f-display)}
+.rr-cell.lock::after{content:"🔒";position:absolute;right:5px;top:3px;font-size:12px}
+.evcal{display:flex;gap:4px;overflow-x:auto;padding:4px 0 8px}
+.evcal div{flex:none;width:38px;border-radius:9px;border:2px solid var(--ink);background:#1c1644;text-align:center;font:12px var(--f-display);color:var(--muted);padding:3px 0}
+.evcal div small{display:block;font:600 9px var(--f-body)}
+.evcal div.past{opacity:.4}
+.evcal div.today{border-color:var(--gold);color:#fff;background:#3d2f6e}
+.evcal div.special{border-color:#ff9a3c;color:#ffb35c}
+.gems{color:#7fe8ff;font-weight:700}
+.mtabs{display:flex;gap:6px;margin:0 0 10px}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}
 }
@@ -554,6 +661,7 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
       <div id="heat" hidden><span class="rl">Heat</span><div class="hb"><div id="heatFill"></div><div id="heatZone"></div><div id="heatMark"></div></div></div>
       <div id="mentor"><img id="mentorImg" alt="Grandpa Gloop, your mentor. Tap for a tip"><div id="mentorBubble" hidden></div></div>
       <div id="tapHint">Tap the King!</div>
+      <div id="dock"></div>
     </section>
     <section id="panel">
       <nav id="tabs" role="tablist"></nav>
@@ -561,14 +669,13 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
         <div class="view" id="view-pen">
           <div class="pen-top">
             <button class="btn eggbtn" id="eggBtn"><img id="eggImg" alt=""><span><span id="eggLabel">Hatch egg</span><small id="eggCost">15 goo</small></span></button>
+            <div class="pen-btns"><button class="btn ghost penup-btn" id="penUpBtn" hidden>🏡 <span>Upgrades</span><span class="badge" hidden>!</span></button><button class="btn star mergeall-btn" id="mergeAllBtn" hidden>⚡ Merge all<small id="mergeAllTxt"></small></button></div>
             <div class="pen-stats"><div><span id="penLabel">Pen</span> makes <b id="penGps">0</b> goo/s</div><div><span id="penCount">0/12</span> spaces · eggs hatch at <b id="eggLvlTxt">Lv.1</b></div><div id="palRow" hidden>Pen Pals: factories <b id="palAmt">+0%</b></div></div>
           </div>
           <div id="hatchRow" class="hatchrow" hidden><b>Hatchery</b><div class="bar"><i id="hatchBar"></i></div><span id="hatchTxt"></span></div>
           <div id="amRow" class="hatchrow" hidden><b>Robot</b><div class="bar"><i id="amBar"></i></div><span id="amTxt"></span></div>
           <div id="board" class="board"></div>
           <p class="hint" id="penInfo">Drag a slime onto a matching one to merge them into a stronger slime.</p>
-          <h3 class="sec" id="penUpTitle">Pen upgrades</h3>
-          <div class="penups" id="penUps"></div>
         </div>
         <div class="view" id="view-orr" hidden>
           <div class="orr-wrap">
@@ -586,10 +693,10 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
           <div class="row-head"><h3 class="sec" id="facTitle">Goo factories</h3><div class="seg" id="buyMode"></div></div>
           <div class="capnote" id="capNote"></div>
           <div class="list" id="facList"></div>
-          <p class="hint">Each factory doubles its output at 10, 25, 50, 100 owned and beyond. Its ★ upgrades appear on its row.</p>
+          <p class="hint" id="facHint">Each factory doubles its output at 10, 25, 50, 100 owned and beyond. Its ★ upgrades appear on its row.</p>
         </div>
         <div class="view" id="view-upg" hidden>
-          <h3 class="sec">Upgrades</h3>
+          <div class="row-head"><h3 class="sec">Research <span id="upgCount" style="color:var(--muted);font-size:15px"></span></h3><button class="qbtn" id="upgHelp" aria-label="How Research works">?</button></div>
           <div class="uq" id="upgQueue"></div>
           <p class="uq-more" id="upgMore"></p>
         </div>
@@ -678,6 +785,7 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
   <div id="toasts" aria-live="polite"></div>
   <div id="coach" hidden><div id="coachHole"></div><div id="coachCard" role="dialog" aria-live="polite"><img id="coachImg" alt=""><p id="coachText"></p><button class="btn" id="coachBtn">Got it</button></div></div>
   <div id="announce" hidden></div>
+  <div id="sheet" hidden><div class="sheet-card" role="dialog" aria-modal="true" aria-labelledby="penUpTitle"><div class="sheet-grab" id="sheetGrab"></div><div class="sheet-head"><h3 class="sec" id="penUpTitle">Pen upgrades</h3><button class="modal-x" id="sheetX" aria-label="Close">✕</button></div><div class="penups" id="penUps"></div></div></div>
   <div id="modal" hidden><div class="modal-card" role="dialog" aria-modal="true"><button class="modal-x" id="modalX" aria-label="Close">✕</button><div id="modalBody"></div></div></div>
   <div id="cine" hidden><canvas id="cineCanvas"></canvas><div class="ctext"><h2 id="cineTitle">STARFALL</h2><p id="cineSub">The King rises to the stars.</p></div><button class="btn ghost skip" id="cineSkip">Skip</button></div>
 </div>
@@ -686,6 +794,11 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
 <script>
 (function(){
 'use strict';
+// the game clock: a phone's clock can be changed in Settings, so game time is checked against the server's clock,
+// and between checks it follows the phone's internal timer, which the clock setting cannot touch
+const TIME={off:0,trust:'none',anchorD:0,anchorP:0,fails:0,checking:false};
+function nowT(){ return Date.now()+TIME.off; }
+function anchorTime(){ TIME.anchorD=Date.now(); TIME.anchorP=performance.now(); }
 const TAU=Math.PI*2;
 const $=(s,r)=>(r||document).querySelector(s);
 const clamp=(v,a,b)=>v<a?a:v>b?b:v;
@@ -884,8 +997,8 @@ A('ga','Grand Design','See a Grand Alignment.','🪐',()=>S.grands>0);
 A('cs','Star Map','Complete a constellation.','✨',()=>CONST.some(k=>cstDone(k)));
 function fmtStatic(n){ const e=Math.floor(Math.log10(n)/3); return n<1000?String(n):(n/Math.pow(1000,e))+['','K','M','B','T','Qa','Qi','Sx'][e]; }
 
-const SKINS=[{n:'Lime',c:'#8CF25C',need:0},{n:'Bubblegum',c:'#FF8AD8',need:5},{n:'Ocean',c:'#5CD3FF',need:10},{n:'Sunset',c:'#FFA94D',need:15},{n:'Royal Gold',c:'#FFD23F',need:25},{n:'Rainbow',c:'#FF6FB5',rainbow:true,need:-1}];
-function skinOk(i){ const k=SKINS[i]; return k.need===-1?S.ascensions>0:Object.keys(S.ach).length>=k.need; }
+const SKINS=[{n:'Lime',c:'#8CF25C',need:0},{n:'Bubblegum',c:'#FF8AD8',need:5},{n:'Ocean',c:'#5CD3FF',need:10},{n:'Sunset',c:'#FFA94D',need:15},{n:'Royal Gold',c:'#FFD23F',need:25},{n:'Rainbow',c:'#FF6FB5',rainbow:true,need:-1},{n:'Pumpkin',c:'#ff9a1f',cos:'sk_pumpkin'},{n:'Ghost',c:'#ece9ff',glow:true,cos:'sk_ghost'}];
+function skinOk(i){ const k=SKINS[i]; if(k.cos) return !!(S.cos&&S.cos.owned[k.cos]); return k.need===-1?S.ascensions>0:Object.keys(S.ach).length>=k.need; }
 
 /* realm words: the same systems wear different names after Starfall */
 const REALM={
@@ -1003,13 +1116,13 @@ function cstAvail(k,i){ if(cstLit(k,i)) return false; if(!cstMask(k)) return i==
 const CST_EFFECT={tap:'Taps +25%',hatch:'Hatchery 12% faster',patrol:'Dragon Patrol +25%',gold:'Golden payouts +15%',conj:'Conjunctions +20%',goo:'All goo +15%'};
 
 /* ================= state ================= */
-const DEF_SET={music:.5,sfx:.7,track:0,particles:true,floaters:true,shake:true,fmt:'short',skin:0,mentor:true,eco:false};
+const DEF_SET={music:.5,sfx:.7,track:0,particles:true,floaters:true,shake:true,fmt:'short',skin:0,mentor:true,eco:false,silent:true};
 const BOARD_MAX=32;
 function freshHollow(){ return {embers:0,embersAll:0,heat:0,coolUntil:0,ups:{},dragons:[],exps:[],scales:0,scalesAll:0,sh:{},relics:[],nextId:1,hearts:0,tia:null,waking:false,eggsBought:0,visited:false,wisps:0}; }
 function freshOrr(){ return {rings:RING_N.map(n=>new Array(n).fill(0)),ups:{},t:0}; }
-function fresh(){ return {v:3,goo:0,earnedRun:0,earnedAll:0,earnedRealm:0,taps:0,crits:0,merges:0,pets:0,goldens:0,rushes:0,ascensions:0,skyAsc:0,twinLvl:0,ascSeen:[],offline:0,
+function fresh(){ return {v:4,goo:0,earnedRun:0,earnedAll:0,earnedRealm:0,taps:0,crits:0,merges:0,pets:0,goldens:0,rushes:0,ascensions:0,skyAsc:0,twinLvl:0,ascSeen:[],gems:0,items:{},bpNew:0,cos:{owned:{},hat:null,theme:null},login:{day:0,last:''},goals:{day:'',list:[],week:'',wlist:[],bonus:0,full:''},wheel:{last:''},season:{id:'',pts:0,prem:false,got:{}},bonusEggs:0,maLvl:0,maNext:0,offline:0,
   fac:FAC_BASE.map(()=>0),ups:{},perks:{},ach:{},board:new Array(BOARD_MAX).fill(0),penLvl:0,eggLevel:1,eggsBought:0,hatchLvl:0,amLvl:0,amOn:true,hatchProg:0,amProg:0,
-  maxSpecies:0,skyMax:0,runBest:0,jelly:0,jellyEarned:0,rush:0,rushUntil:0,buffs:[],playTime:0,bestGps:0,created:Date.now(),lastSave:Date.now(),
+  maxSpecies:0,skyMax:0,runBest:0,jelly:0,jellyEarned:0,rush:0,rushUntil:0,buffs:[],playTime:0,bestGps:0,created:nowT(),lastSave:nowT(),
   level:1,xp:0,tenPow:0,tut:{},freeEggs:0,arts:[0,0,0,0,0,0],bossNext:-1,bossKills:0,bossEscapes:0,world:'meadow',hollow:freshHollow(),
   realm:'meadow',starfalls:0,stardust:0,stardustAll:0,cst:{},orr:freshOrr(),conj:0,grands:0,seenTabs:{},
   settings:Object.assign({},DEF_SET)}; }
@@ -1023,6 +1136,7 @@ function parseSave(raw){
   const b=new Array(BOARD_MAX).fill(0); if(Array.isArray(d.board)) d.board.slice(0,BOARD_MAX).forEach((v,i)=>b[i]=clamp(v|0,0,MAXL)); o.board=b;
   ['ups','perks','ach','tut','cst','seenTabs'].forEach(k=>{ if(!o[k]||typeof o[k]!=='object') o[k]={}; });
   if(!Array.isArray(o.buffs)) o.buffs=[]; if(!Array.isArray(o.ascSeen)) o.ascSeen=[];
+  const fr=fresh(); for(const k of ['items','cos','login','goals','wheel','season']) if(!o[k]||typeof o[k]!=='object'||Array.isArray(o[k])) o[k]=fr[k]; if(!o.cos.owned) o.cos.owned={}; for(const k of ['list','wlist']) if(!Array.isArray(o.goals[k])) o.goals[k]=[]; if(!o.season.got) o.season.got={};
   o.arts=[0,1,2,3,4,5].map(i=>Math.max(0,(Array.isArray(d.arts)&&+d.arts[i])||0));
   const h=Object.assign(freshHollow(),d.hollow||{}); ['dragons','exps','relics'].forEach(k=>{ if(!Array.isArray(h[k])) h[k]=[]; }); ['ups','sh'].forEach(k=>{ if(!h[k]||typeof h[k]!=='object') h[k]={}; }); o.hollow=h;
   const or=Object.assign(freshOrr(),d.orr||{}); or.rings=RING_N.map((n,r)=>{ const a=(Array.isArray(or.rings)&&Array.isArray(or.rings[r]))?or.rings[r]:[]; return new Array(n).fill(0).map((_,k)=>clamp(a[k]|0,0,MAXL)); }); if(!or.ups||typeof or.ups!=='object') or.ups={}; o.orr=or;
@@ -1037,10 +1151,18 @@ function parseSave(raw){
     o.earnedRealm=o.earnedAll; o.runBest=Math.max(o.eggLevel||1,...o.board);
     ['pen','upg','fac','asc','col'].forEach(t=>o.seenTabs[t]=2);
   }
-  o.v=3;
+  if(!d.v||d.v<4){ // 3.1 saves: what the player has already seen stays open (milestones, pen upgrades, tips)
+    if(o.fac.some(c=>c>=10)){ o.tut.mile=1; o.tut.mileT=-999; o.tut.i_mile=1; }
+    if(o.hatchLvl||o.eggLevel>1||o.penLvl||o.amLvl){ o.tut.penups=1; o.tut.i_penups=1; o.tut.sheetSeen=1; }
+    if(o.playTime>900) ['lvl','streak','egg','merge','star'].forEach(k=>o.tut['i_'+k]=1);
+    for(const k of ['col','asc']) if(o.seenTabs[k]){ o.tut['u_'+k]=1; o.tut['i_u_'+k]=1; }
+    if(o.bossNext>=0||o.bossKills) { o.tut.u_boss=1; o.tut.i_u_boss=1; }
+    if(o.earnedAll>0) o.tut.new32=1; // a short tour of what changed
+  }
+  o.v=4;
   return o;
 }
-function serialize(){ S.lastSave=Date.now(); return JSON.stringify(S); }
+function serialize(){ S.lastSave=nowT(); return JSON.stringify(S); }
 function lsGet(){ try{ return localStorage.getItem(KEY); }catch(e){ return null; } }
 function saveLocal(){ try{ localStorage.setItem(KEY,serialize()); }catch(e){ serialize(); } }
 
@@ -1077,7 +1199,7 @@ function recalc(){
 }
 function facMult(i){ let m=M.fac[i]; const c=S.fac[i]; for(const t of MILES){ if(c>=t) m*=2; else break; } return m; }
 function penSize(){ return Math.min(BOARD_MAX,12+4*S.penLvl+(S.perks.pen?4:0)+(S.hollow.sh.row?4:0)); }
-function rushActive(){ return Date.now()<S.rushUntil; }
+function rushActive(){ return nowT()<S.rushUntil; }
 function buffMult(k){ let m=1; for(const b of S.buffs) if(b.k===k) m*=b.m; return m; }
 // factories: unlocked by creating a slime of the right level this run; capped by your best slime and your level
 function facUnlocked(i){ return S.fac[i]>0||S.runBest>=FAC_UNLOCK[i]; }
@@ -1093,7 +1215,7 @@ function computeG(){
   const pal=1+M.penPals*Math.sqrt(power); G.power=power; let tf=0;
   for(let i=0;i<FACT.length;i++){ const v=S.fac[i]?FACT[i].prod*S.fac[i]*facMult(i)*pal*M.all:0; G.fac[i]=v; tf+=v; }
   G.pen=penRaw*M.pen*(1+M.feeding*totalFac)*M.all; G.penRaw=penRaw; G.facTot=tf; G.base=tf+G.pen; G.pal=pal;
-  G.mult=(rushActive()?M.rushPow:1)*buffMult('frenzy')*buffMult('potion')*buffMult('star')*(kingAwake()?AWAKE_MULT:1); G.total=G.base*G.mult; G.totalFac=totalFac; G.slimes=slimes;
+  G.mult=(rushActive()?M.rushPow:1)*buffMult('frenzy')*buffMult('potion')*buffMult('star')*buffMult('boost2')*(kingAwake()?AWAKE_MULT:1); G.total=G.base*G.mult; G.totalFac=totalFac; G.slimes=slimes;
 }
 function facEach(i){ return FACT[i].prod*facMult(i)*(G.pal||1)*M.all; }
 // what buying n more of factory i really adds to goo/s right now: milestones, Factory Feeding and active boosts included
@@ -1105,12 +1227,13 @@ function tapBase(){ return M.tap*M.all+(.1+M.tapPct)*G.base; }
 function tapValue(){ return tapBase()*(rushActive()?M.rushPow:1)*buffMult('mania')*streakMult(); }
 // active play: the King stays awake (×1.5 goo) for a minute after you tap or merge; steady tapping builds a streak
 const AWAKE_MULT=1.5, AWAKE_SEC=60, STREAK=[0,12,35,70,120];
-function kingAwake(){ return Date.now()-lastTapAt<AWAKE_SEC*1000; }
-function streakTier(){ if(Date.now()-ST.streakLast>2000) return 1; let k=1; for(let i=1;i<STREAK.length;i++) if(ST.streakN>=STREAK[i]) k=i+1; return k; }
+function kingAwake(){ return nowT()-lastTapAt<AWAKE_SEC*1000; }
+function streakTier(){ if(nowT()-ST.streakLast>2000) return 1; let k=1; for(let i=1;i<STREAK.length;i++) if(ST.streakN>=STREAK[i]) k=i+1; return k; }
 function streakMult(){ return streakTier(); }
 function tiaAtKing(){ const T=S.hollow&&S.hollow.tia; return !!(T&&T.at==='king'); }
 function tiaHome(){ const T=S.hollow&&S.hollow.tia; return !!(T&&T.at==='home'); }
-function earn(v){ S.goo+=v; S.earnedRun+=v; S.earnedAll+=v; S.earnedRealm+=v; }
+// goo earned through play counts toward goals; goo paid for time away does not
+function earn(v,away){ S.goo+=v; S.earnedRun+=v; S.earnedAll+=v; S.earnedRealm+=v; if(!away&&S.goals&&S.goals.day) goalAdd('earn',v); }
 function facCost(i,n){ const b=FACT[i].cost*Math.pow(1.15,S.fac[i]); return b*(Math.pow(1.15,n)-1)/.15; }
 function facRoom(i){ return Math.max(0,facCap()-S.fac[i]); }
 function facMax(i){ const b=FACT[i].cost*Math.pow(1.15,S.fac[i]); return Math.min(facRoom(i),Math.max(0,Math.floor(Math.log(S.goo*.15/b+1)/Math.log(1.15)))); }
@@ -1134,7 +1257,11 @@ function starfallDust(){ return Math.max(5,Math.floor(4*Math.cbrt(S.jellyEarned)
 
 /* ================= audio ================= */
 const AU={ctx:null,master:null,music:null,sfx:null,noise:null,step:0,nextT:0,ti:-1};
+// iPhone: the "playback" audio session plays even with the silent switch on
+function applySilent(){ try{ if(!navigator.audioSession) return; const t=S.settings.silent&&(S.settings.music>0||S.settings.sfx>0)?'playback':'auto'; if(navigator.audioSession.type===t) return; navigator.audioSession.type=t;
+  if(AU.ctx&&AU.ctx.state==='running') AU.ctx.suspend().then(()=>AU.ctx.resume()).catch(()=>{}); }catch(e){} } // a running sound engine picks up the new mode after a quick restart
 function audioUnlock(){
+  if(!AU.ctx) applySilent();
   try{
     if(!AU.ctx){
       const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
@@ -1307,6 +1434,16 @@ function drawAcc(c,a,cx,by,w,h,ex,ey,o){
   else if(a==='crown'){ const cw=w*.42, chh=h*.27, b=top+h*.08; const g=c.createLinearGradient(0,b-chh,0,b); g.addColorStop(0,'#fff19a'); g.addColorStop(1,'#f2a900'); c.fillStyle=g; c.beginPath(); c.moveTo(cx-cw/2,b); c.lineTo(cx-cw/2,b-chh*.72); c.lineTo(cx-cw/4,b-chh*.38); c.lineTo(cx,b-chh); c.lineTo(cx+cw/4,b-chh*.38); c.lineTo(cx+cw/2,b-chh*.72); c.lineTo(cx+cw/2,b); c.closePath(); c.fill(); c.stroke();
     c.fillStyle='#ff4f6a'; c.beginPath(); c.arc(cx,b-chh*.42,w*.03,0,TAU); c.fill(); c.fillStyle='#5cd3ff'; for(const s of [-1,1]){ c.beginPath(); c.arc(cx+s*cw*.3,b-chh*.25,w*.022,0,TAU); c.fill(); }
     c.fillStyle='#fff'; for(const p of [[-cw/2,b-chh*.72],[0,b-chh],[cw/2,b-chh*.72]]){ c.beginPath(); c.arc(cx+p[0],p[1],w*.02,0,TAU); c.fill(); } }
+  else if(a==='witch'){ // a crooked black witch hat with an orange band and a gold buckle
+    c.save(); c.translate(cx+w*.02,top+h*.09); c.rotate(-.1); c.fillStyle='#2a1838'; c.beginPath(); c.moveTo(-w*.2,0); c.quadraticCurveTo(-w*.1,-h*.32,w*.02,-h*.5); c.quadraticCurveTo(w*.1,-h*.56,w*.24,-h*.48); c.quadraticCurveTo(w*.08,-h*.42,w*.06,-h*.3); c.quadraticCurveTo(w*.12,-h*.14,w*.2,0); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle='#ff8a1f'; c.beginPath(); c.moveTo(-w*.19,-h*.02); c.lineTo(w*.19,-h*.02); c.lineTo(w*.165,-h*.1); c.lineTo(-w*.165,-h*.1); c.closePath(); c.fill(); c.stroke();
+    c.fillStyle='#ffd43f'; c.fillRect(-w*.035,-h*.105,w*.07,h*.09); c.fillStyle='#2a1838'; c.fillRect(-w*.015,-h*.085,w*.03,h*.05);
+    c.fillStyle='#1d1028'; c.beginPath(); c.ellipse(0,0,w*.34,h*.065,0,0,TAU); c.fill(); c.stroke(); c.restore(); }
+  else if(a==='pumpkin'){ // a little jack-o'-lantern worn as a crown
+    const pw=w*.46, ph=h*.38, py=top-h*.09; c.save(); c.fillStyle='#4a8a2a'; c.beginPath(); c.moveTo(cx-w*.02,py-ph*.42); c.quadraticCurveTo(cx-w*.03,py-ph*.75,cx+w*.06,py-ph*.82); c.lineTo(cx+w*.05,py-ph*.7); c.quadraticCurveTo(cx+w*.02,py-ph*.6,cx+w*.03,py-ph*.42); c.closePath(); c.fill(); c.stroke();
+    for(const [ox,rw] of [[-.3,.42],[.3,.42],[0,.5]]){ const g=c.createRadialGradient(cx+ox*pw-pw*.08,py-ph*.15,pw*.04,cx+ox*pw,py,pw*.55); g.addColorStop(0,'#ffc15c'); g.addColorStop(1,'#e2650c'); c.fillStyle=g; c.beginPath(); c.ellipse(cx+ox*pw,py,pw*rw,ph*.5,0,0,TAU); c.fill(); c.stroke(); }
+    c.fillStyle='#ffe066'; c.save(); c.shadowColor='#ffb020'; c.shadowBlur=w*.04; for(const s of [-1,1]){ c.beginPath(); c.moveTo(cx+s*pw*.12,py-ph*.12); c.lineTo(cx+s*pw*.26,py-ph*.12); c.lineTo(cx+s*pw*.19,py-ph*.26); c.closePath(); c.fill(); }
+    c.beginPath(); c.moveTo(cx-pw*.24,py+ph*.08); c.lineTo(cx-pw*.12,py+ph*.18); c.lineTo(cx-pw*.04,py+ph*.1); c.lineTo(cx+pw*.04,py+ph*.18); c.lineTo(cx+pw*.12,py+ph*.1); c.lineTo(cx+pw*.24,py+ph*.08); c.lineTo(cx+pw*.12,py+ph*.25); c.lineTo(cx-pw*.12,py+ph*.25); c.closePath(); c.fill(); c.restore(); c.restore(); }
   else if(a==='glasses'){ c.strokeStyle='#4a3418'; c.lineWidth=lw*.9; c.fillStyle='rgba(255,255,255,.22)'; for(const s of [-1,1]){ c.beginPath(); c.arc(cx+s*ex,ey,w*.115,0,TAU); c.fill(); c.stroke(); } c.beginPath(); c.moveTo(cx-ex+w*.115,ey); c.quadraticCurveTo(cx,ey-h*.04,cx+ex-w*.115,ey); c.stroke(); }
   else if(a==='beard'){ c.fillStyle='#fbfbf2'; c.strokeStyle='#c9c9bb'; c.lineWidth=lw*.6; const my=by-h*.3;
     [[-.17,0,.1],[.17,0,.1],[0,.03,.13],[-.09,.13,.1],[.09,.13,.1],[0,.22,.09]].forEach(p=>{ c.beginPath(); c.arc(cx+p[0]*w,my+p[1]*h,p[2]*w,0,TAU); c.fill(); });
@@ -1663,7 +1800,7 @@ const ST={cv:null,c:null,w:0,h:0,dpr:1,gy:0,sy:1,vy:0,tapT:0,blink:0,nextBlink:3
   yawnT:12,yawning:0,zzz:[],zzzT:0,startle:0,asleep:false,noteT:0,flash:0,flashCol:'#ffffff',nova:null,conjFx:[],trans:null,comets:[],pp:{},streakN:0,streakLast:0,streakShown:1,chamber:false,tia:{x:0,y:0,face:1,s:0,stream:0,cd:5,ang:0},rocks2:[]};
 const CYCLE=720; // seconds in one meadow day
 let dayFix=null;
-function dayTime(){ return dayFix!=null?dayFix:((Date.now()/1000)%CYCLE)/CYCLE; }
+function dayTime(){ return dayFix!=null?dayFix:((nowT()/1000)%CYCLE)/CYCLE; }
 function hexMix(a,b,t){ const A=hexRgb(a),B=hexRgb(b); return 'rgb('+A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')+')'; }
 // sky colours through the day: dawn, day, dusk, night
 const DAYK=[
@@ -1741,7 +1878,7 @@ function stageResize(){
 }
 function kingGeomSky(){ const s=Math.min(ST.w*.29,ST.h*.36); return {cx:ST.w/2,by:ST.h*.64,w:s*1.3,h:s}; }
 function kingGeom(){ if(S.realm==='sky') return kingGeomSky(); const s=Math.min(ST.w*.36,ST.h*.42); return {cx:ST.w/2,by:ST.gy+ST.h*.025,w:s*1.3,h:s}; }
-function kingSkin(){ if(S.realm==='sky') return {color:'#7d8cff',pat:'galaxy',acc:['starcrown','ring'],ringCol:'#bff3ff'}; const sk=SKINS[S.settings.skin]||SKINS[0]; return {color:sk.c,rainbow:sk.rainbow,acc:['crown']}; }
+function kingSkin(){ const hat=S.cos&&S.cos.hat&&COS[S.cos.hat]?COS[S.cos.hat].acc:null; if(S.realm==='sky') return {color:'#7d8cff',pat:'galaxy',acc:[hat||'starcrown','ring'],ringCol:'#bff3ff'}; const sk=SKINS[S.settings.skin]||SKINS[0]; return {color:sk.c,rainbow:sk.rainbow,glow:sk.glow,acc:[hat||'crown']}; }
 function kingColor(){ return S.realm==='sky'?'#bff3ff':(SKINS[S.settings.skin]?SKINS[S.settings.skin].c:'#8CF25C'); }
 const eco=()=>S.settings.eco;
 function addDrops(x,y,n,col){ if(!S.settings.particles) return; n=eco()?Math.ceil(n*.4):n; const sky=S.realm==='sky'&&S.world!=='hollow'; for(let i=0;i<n;i++) ST.parts.push({x,y,vx:rand(-170,170),vy:rand(-420,-140),r:rand(3,7.5),col,life:0,max:rand(.6,1.1),star:sky&&i%2===0,glow:sky}); if(ST.parts.length>240) ST.parts.splice(0,ST.parts.length-240); }
@@ -1809,7 +1946,7 @@ function drawNestDragons(c,w,h,t,dt,lr,bx,by){
   return eyes;
 }
 function drawHollow(c,w,h,t,dt){
-  const Hh=S.hollow, now=Date.now(), cool=now<Hh.coolUntil, z=zone(), gold=!cool&&Hh.heat>=z[0]&&Hh.heat<=z[1], hk=cool?.12:Hh.heat/100;
+  const Hh=S.hollow, now=nowT(), cool=now<Hh.coolUntil, z=zone(), gold=!cool&&Hh.heat>=z[0]&&Hh.heat<=z[1], hk=cool?.12:Hh.heat/100;
   c.fillStyle=ST.hBg; c.fillRect(-20,-20,w+40,h+40); c.fillStyle='#120a20'; c.fill(ST.hWall);
   for(const cr of ST.crys){ const pu=.5+.5*Math.sin(t*1.5+cr.ph), g=c.createRadialGradient(cr.x,cr.y,0,cr.x,cr.y,cr.s*3); g.addColorStop(0,cr.col+'66'); g.addColorStop(1,cr.col+'00'); c.globalAlpha=.5+.5*pu; c.fillStyle=g; c.fillRect(cr.x-cr.s*3,cr.y-cr.s*3,cr.s*6,cr.s*6); c.globalAlpha=1;
     c.fillStyle=cr.col; c.strokeStyle='#0a0614'; c.lineWidth=2; for(const o of [[-.5,.2,.7],[0,0,1],[.45,.25,.6]]){ c.beginPath(); c.moveTo(cr.x+o[0]*cr.s-cr.s*.25*o[2],cr.y+cr.s*.6); c.lineTo(cr.x+o[0]*cr.s,cr.y-cr.s*1.2*o[2]+o[1]*cr.s); c.lineTo(cr.x+o[0]*cr.s+cr.s*.25*o[2],cr.y+cr.s*.6); c.closePath(); c.fill(); c.stroke(); } }
@@ -2064,15 +2201,15 @@ function drawStreakFlames(c,k,t,tier,a){ if(a<=0) return; const col=STREAK_COL[t
     const g=c.createLinearGradient(fx,fy,fx,fy-hh); g.addColorStop(0,col[1]); g.addColorStop(.35,col[0]); g.addColorStop(1,col[0]+'00'); c.fillStyle=g; c.globalAlpha=.9*a;
     const sw=Math.sin(t*7+i)*ww*.6; c.beginPath(); c.moveTo(fx-ww,fy); c.quadraticCurveTo(fx-ww*.8,fy-hh*.5,fx+sw,fy-hh); c.quadraticCurveTo(fx+ww*.8,fy-hh*.5,fx+ww,fy); c.closePath(); c.fill(); }
   c.restore();
-  const lx=k.cx+k.w*.56, ly=k.by-k.h*.98, pop=1+Math.max(0,.4-(Date.now()-ST.streakLast)/1000)*.25;
+  const lx=k.cx+k.w*.56, ly=k.by-k.h*.98, pop=1+Math.max(0,.4-(nowT()-ST.streakLast)/1000)*.25;
   c.save(); c.globalAlpha=a; c.translate(lx,ly); c.scale(pop,pop); c.rotate(.12); c.textAlign='center'; c.font=Math.round(18+tier*3)+'px "Lilita One",sans-serif'; c.lineJoin='round'; c.lineWidth=5; c.strokeStyle=INK; c.strokeText('×'+tier,0,0); c.fillStyle=col[0]; c.fillText('×'+tier,0,0); c.restore(); }
 /* the King: breathing, blinking, and a bit of personality */
 function drawKing(c,k,t,dt,rush){
   let rem=Math.min(dt,.1); while(rem>0){ const s=Math.min(rem,1/120); ST.vy+=(-260*(ST.sy-1)-16*ST.vy)*s; ST.sy+=ST.vy*s; rem-=s; } ST.sy=clamp(ST.sy,.62,1.3);
-  const idle=(Date.now()-lastTapAt)/1000, night=S.realm==='meadow'?dayPal(dayTime()).n:0;
+  const idle=(nowT()-lastTapAt)/1000, night=S.realm==='meadow'?dayPal(dayTime()).n:0;
   const wasAsleep=ST.asleep; ST.asleep=!rush&&!B&&idle>AWAKE_SEC; const drowsy=!rush&&!B&&idle>25&&!ST.asleep;
   if(ST.asleep&&!wasAsleep&&S.taps>=15&&!S.tut.sleep&&S.world==='meadow'){ S.tut.sleep=1; say('The '+RL().king+' fell asleep! Tap him to wake him up. While he is awake, all goo is <b>×'+AWAKE_MULT+'</b>.',8000); }
-  const tier=streakTier(); if(tier===1) ST.streakShown=1; if(tier>=2) drawStreakFlames(c,k,t,tier,clamp(1-((Date.now()-ST.streakLast)/1000-1.2)/.8,0,1));
+  const tier=streakTier(); if(tier===1) ST.streakShown=1; if(tier>=2) drawStreakFlames(c,k,t,tier,clamp(1-((nowT()-ST.streakLast)/1000-1.2)/.8,0,1));
   const br=1+Math.sin(t*(ST.asleep?1.2:2.4))*(ST.asleep?.035:.022), sy=ST.sy*br, sx=1+(1-sy)*.9;
   ST.tapT=Math.max(0,ST.tapT-dt); ST.startle=Math.max(0,ST.startle-dt); ST.nextBlink-=dt; if(ST.nextBlink<=0){ ST.blink=.13; ST.nextBlink=rand(2,5); } ST.blink=Math.max(0,ST.blink-dt);
   if(drowsy){ ST.yawnT-=dt; if(ST.yawnT<=0){ ST.yawnT=rand(9,15); ST.yawning=1.6; if(S.world==='meadow') sfx('yawn'); } } else ST.yawnT=Math.max(ST.yawnT,4);
@@ -2080,9 +2217,9 @@ function drawKing(c,k,t,dt,rush){
   if(ST.asleep){ ST.zzzT-=dt; if(ST.zzzT<=0){ ST.zzzT=1.5; ST.zzz.push({x:k.cx+k.w*.3,y:k.by-k.h*.95,life:0}); } }
   // eyes follow golden slimes, dart around when a boss is coming, otherwise follow the pointer
   const nervous=S.level>=BOSS_LV&&!B&&S.bossNext>=0&&S.bossNext<4&&S.world==='meadow';
-  if(goldenOn&&ui.golden&&!ui.golden.hidden){ const gr=ui.golden.getBoundingClientRect(), sr=ST.cv.getBoundingClientRect(); setLook(gr.left+gr.width/2-sr.left,gr.top+gr.height/2-sr.top,k); ST.lookUntil=Date.now()+300; }
-  else if(nervous){ ST.lookT.x=Math.sin(t*7)*.9; ST.lookT.y=.1; ST.lookUntil=Date.now()+200; }
-  else if(Date.now()>ST.lookUntil&&!ST.hover){ ST.lookT.x=0; ST.lookT.y=0; }
+  if(goldenOn&&ui.golden&&!ui.golden.hidden){ const gr=ui.golden.getBoundingClientRect(), sr=ST.cv.getBoundingClientRect(); setLook(gr.left+gr.width/2-sr.left,gr.top+gr.height/2-sr.top,k); ST.lookUntil=nowT()+300; }
+  else if(nervous){ ST.lookT.x=Math.sin(t*7)*.9; ST.lookT.y=.1; ST.lookUntil=nowT()+200; }
+  else if(nowT()>ST.lookUntil&&!ST.hover){ ST.lookT.x=0; ST.lookT.y=0; }
   ST.look.x+=(ST.lookT.x-ST.look.x)*Math.min(1,dt*10); ST.look.y+=(ST.lookT.y-ST.look.y)*Math.min(1,dt*10);
   let mouth='smile', lid=0, blink=ST.blink>0;
   if(ST.asleep){ mouth='sleep'; blink=true; } else if(ST.startle>0){ mouth='open'; } else if(ST.yawning>0){ mouth='yawn'; lid=.65; } else if(ST.tapT>0) mouth='open'; else if(rush) mouth='grin'; else if(drowsy) lid=.42; else if(night>.8&&idle>15) lid=.3;
@@ -2129,7 +2266,7 @@ function drawMeadow(c,w,h,t,dt){
   drawSunMoon(c,w,h,t,dt0);
   drawClouds(c,w,h,dt,P);
   c.fillStyle=P.far; c.fill(ST.mtn); c.fillStyle='rgba(255,255,255,'+(.85-.55*n)+')'; c.fill(ST.snow);
-  c.fillStyle=P.hill; c.fill(ST.hill1); c.strokeStyle='rgba(255,255,255,'+(.14-.09*n)+')'; c.lineWidth=2; c.stroke(ST.hill1Top); drawCastle(c,P,t); c.fillStyle=P.hill; c.fill(ST.trees); c.fillStyle='rgba(18,10,48,.22)'; c.fill(ST.trees);
+  c.fillStyle=P.hill; c.fill(ST.hill1); c.strokeStyle='rgba(255,255,255,'+(.14-.09*n)+')'; c.lineWidth=2; c.stroke(ST.hill1Top); drawCastle(c,P,t); if(hauntedOn()) drawTombs(c,w,h,n); c.fillStyle=P.hill; c.fill(ST.trees); c.fillStyle='rgba(18,10,48,.22)'; c.fill(ST.trees);
   c.fillStyle='rgba(255,255,255,'+(.12-.08*n)+')'; for(const tt of ST.treeTops){ c.beginPath(); c.arc(tt[0]-tt[2]*.15,tt[1]-tt[2]*.1,tt[2]*.22,0,TAU); c.fill(); }
   c.fillStyle=P.near; c.fill(ST.hill2); c.strokeStyle='rgba(255,255,255,'+(.18-.1*n)+')'; c.stroke(ST.hill2Top);
   const gg=c.createLinearGradient(0,ST.gy-h*.06,0,h); gg.addColorStop(0,P.g1); gg.addColorStop(1,P.g2); c.fillStyle=gg; c.fill(ST.ground);
@@ -2138,7 +2275,7 @@ function drawMeadow(c,w,h,t,dt){
   for(const b of ST.blades){ const sw=Math.sin(t*1.8+b.ph+b.x*.02)*b.s*.25; c.moveTo(b.x-b.s*.25,b.y); c.quadraticCurveTo(b.x-b.s*.2+sw*.4,b.y-b.s*.6,b.x-b.s*.35+sw,b.y-b.s); c.moveTo(b.x+b.s*.15,b.y); c.quadraticCurveTo(b.x+b.s*.2+sw*.4,b.y-b.s*.5,b.x+b.s*.3+sw,b.y-b.s*.85); } c.stroke();
   for(const f of ST.flowers){ const sw=Math.sin(t*1.6+f.ph)*f.s*.5; c.strokeStyle='rgba(20,80,50,.6)'; c.lineWidth=1.4; c.beginPath(); c.moveTo(f.x,f.y); c.quadraticCurveTo(f.x+sw*.3,f.y-f.s*2,f.x+sw,f.y-f.s*3.4); c.stroke();
     const fx=f.x+sw, fy=f.y-f.s*3.4; c.fillStyle=f.c; for(let i=0;i<5;i++){ const a=i*TAU/5+f.ph; c.beginPath(); c.arc(fx+Math.cos(a)*f.s*.7,fy+Math.sin(a)*f.s*.7,f.s*.62,0,TAU); c.fill(); } c.fillStyle='#ffd43f'; c.beginPath(); c.arc(fx,fy,f.s*.48,0,TAU); c.fill(); }
-  drawCrack(c,w,h,t);
+  drawCrack(c,w,h,t); if(hauntedOn()) drawHaunted(c,w,h,t,n);
   if(!eco()){ c.strokeStyle='rgba(255,255,255,'+(.3-.15*n)+')'; c.lineWidth=1.5; for(const b of ST.bubbles){ b.y-=b.sp*dt; if(b.y<-12){ b.y=h+10; b.x=Math.random()*w; } const bx=b.x+Math.sin(t*1.3+b.ph)*8; c.beginPath(); c.arc(bx,b.y,b.r,0,TAU); c.stroke(); } }
   if(n>.35){ c.save(); for(const f of ST.flies){ const fx=f.x+Math.sin(t*f.sp+f.ph)*26, fy=f.y+Math.cos(t*f.sp*1.3+f.ph)*14, a=(n-.35)/.65*(.45+.55*Math.abs(Math.sin(t*2+f.ph)));
     const g=c.createRadialGradient(fx,fy,0,fx,fy,9); g.addColorStop(0,'rgba(234,255,154,'+a+')'); g.addColorStop(1,'rgba(234,255,154,0)'); c.fillStyle=g; c.fillRect(fx-9,fy-9,18,18); c.fillStyle='rgba(255,255,220,'+a+')'; c.fillRect(fx-1,fy-1,2,2); } c.restore(); }
@@ -2148,6 +2285,7 @@ function drawMeadow(c,w,h,t,dt){
     const gy=ST.gy+h*.02+hp.dep*h*.13, j=Math.abs(Math.sin(hp.ph)), sz=hp.sz*(.75+hp.dep*.4), yo=-j*sz*.7, sq=j<.15?.85:1;
     c.fillStyle='rgba(10,4,25,.25)'; c.beginPath(); c.ellipse(hp.x,gy,sz*.32*(1-j*.4),sz*.06,0,0,TAU); c.fill();
     const cv=SPCAN[hp.L]; if(cv) c.drawImage(cv,hp.x-sz/2/sq*.9,gy-sz*.906*sq+yo,sz/sq*.9,sz*sq); }
+  drawPumpkins(c,t,dt);
   // the King (or a miniboss in his place) with the Dragon Patrol circling him
   const k=kingGeom(), rush=rushActive(), pats=patrolList();
   drawPatrol(c,k,t,dt,pats,true);
@@ -2221,6 +2359,7 @@ function drawSky(c,w,h,t,dt){
   // hovering star jellies around the island
   for(const hp of ST.hop){ hp.x+=hp.vx*dt*.5; const lim=I.w*.48; if(hp.x<I.cx-lim){hp.x=I.cx-lim;hp.vx=Math.abs(hp.vx);} if(hp.x>I.cx+lim){hp.x=I.cx+lim;hp.vx=-Math.abs(hp.vx);} hp.ph+=dt*2;
     const sz=hp.sz*(.7+hp.dep*.3), y=I.y-h*.01-sz*.5-Math.abs(Math.sin(hp.ph))*sz*.25; const cv=SPCAN[hp.L]; if(cv){ c.globalAlpha=.9; c.drawImage(cv,hp.x-sz/2,y-sz*.6,sz,sz); c.globalAlpha=1; } }
+  drawPumpkins(c,t,dt);
   const pats=patrolList();
   drawOrrery(c,k,t,false); drawPatrol(c,k,t,dt,pats,true);
   if(rush){ c.save(); c.translate(k.cx,k.by-k.h*.5); c.rotate(t*.5); const R=Math.max(w,h); for(let i=0;i<16;i++){ c.fillStyle=i%2?'rgba(255,255,255,.13)':'rgba(127,232,255,.14)'; c.beginPath(); c.moveTo(0,0); c.arc(0,0,R,i*TAU/16,(i+.5)*TAU/16); c.closePath(); c.fill(); } c.restore(); }
@@ -2261,9 +2400,9 @@ function drawStage(t,dt){
 }
 
 /* ================= actions ================= */
-let lastTapAt=Date.now(), flyN=0, lastMergeAt=0, combo=0;
+let lastTapAt=nowT(), flyN=0, lastMergeAt=0, combo=0;
 function tapKing(x,y){
-  const now=Date.now(); if(ST.asleep){ ST.startle=.6; ST.zzz.length=0; addFloat(x,y-40,'!','#fff',34); if(!kingAwake()) addFloat(x,y-70,'Awake! ×'+AWAKE_MULT,'#d4ffad',22); } lastTapAt=now; bumpStreak(x,y);
+  const now=nowT(); if(ST.asleep){ ST.startle=.6; ST.zzz.length=0; addFloat(x,y-40,'!','#fff',34); if(!kingAwake()) addFloat(x,y-70,'Awake! ×'+AWAKE_MULT,'#d4ffad',22); } lastTapAt=now; bumpStreak(x,y); goalAdd('tap');
   let v=tapValue(); const crit=Math.random()<M.crit; if(crit){ v*=10; S.crits++; }
   earn(v); S.taps++; gainXP(.1);
   ST.vy-=crit?6.5:4; ST.tapT=.15;
@@ -2275,9 +2414,9 @@ function tapKing(x,y){
   if(S.taps>=15) ui.tapHint.hidden=true;
 }
 // steady tapping builds a streak: ×2 → ×3 → ×4 → ×5 taps; it fizzles after 2 seconds without a tap
-function bumpStreak(x,y){ const now=Date.now(); if(now-ST.streakLast>2000) ST.streakN=0; ST.streakN++; ST.streakLast=now;
+function bumpStreak(x,y){ const now=nowT(); if(now-ST.streakLast>2000) ST.streakN=0; ST.streakN++; ST.streakLast=now;
   const k=streakTier(); if(k>ST.streakShown){ ST.streakShown=k; sfx('streak',k); if(ST.w){ const kg=kingGeom(); addFloat(kg.cx,kg.by-kg.h*1.05,'STREAK ×'+k+'!',['','','#ffd43f','#ff9a3c','#ff6fb5','#bff3ff'][k],24+k*2); addSparks(kg.cx,kg.by-kg.h*.3,6+k*3,['','','#ffd43f','#ff9a3c','#ff6fb5','#bff3ff'][k]); }
-    if(k===2&&!S.tut.streak){ S.tut.streak=1; say('A <b>tap streak</b>! Keep tapping steadily and your taps grow up to <b>×5</b>. Stop for 2 seconds and it fizzles out.',7000); } } }
+    goalAdd('streak',k); if(k===2&&!S.tut.streak){ S.tut.streak=1; intro('streak',()=>say('A <b>tap streak</b>! Keep tapping steadily and your taps grow up to <b>×5</b>. Stop for 2 seconds and it fizzles out.',7000),1); } } }
 // little drops of goo fly from the stage up into the counter
 function flyGoo(x,y,n,cls){ if(eco()||RM||!S.settings.particles||!ui.gooIcon) return; const ir=ui.gooIcon.getBoundingClientRect(); if(!ir.width) return;
   const sr=ST.cv.getBoundingClientRect(), ar=ui.app.getBoundingClientRect(), x0=sr.left-ar.left+x, y0=sr.top-ar.top+y, x1=ir.left-ar.left+ir.width/2, y1=ir.top-ar.top+ir.height/2;
@@ -2287,21 +2426,22 @@ function flyGoo(x,y,n,cls){ if(eco()||RM||!S.settings.particles||!ui.gooIcon) re
     const a=d.animate([{transform:'translate(0,0) rotate(-45deg) scale(.5)',opacity:.5},{transform:'translate('+mx+'px,'+my+'px) rotate(-45deg) scale(1.1)',opacity:1,offset:.4},{transform:'translate('+(x1-x0)+'px,'+(y1-y0)+'px) rotate(-45deg) scale(.55)',opacity:1}],{duration:rand(560,760),delay:i*70,easing:'cubic-bezier(.5,0,.9,.6)',fill:'both'});
     let fin=false; const done=()=>{ if(fin) return; fin=true; d.remove(); flyN--; pulseIcon(); }; a.onfinish=done; a.oncancel=done; setTimeout(done,1500); } }
 let pulseAt=0;
-function pulseIcon(){ const now=Date.now(); if(now-pulseAt<120) return; pulseAt=now; const g=ui.gooIcon; g.classList.remove('pulse'); void g.offsetWidth; g.classList.add('pulse'); }
-function startRush(){ const dur=15*M.rushDur, sky=S.realm==='sky'; S.rushUntil=Date.now()+dur*1000; S.rush=100; S.rushes++; gainXP(30);
+function pulseIcon(){ const now=nowT(); if(now-pulseAt<120) return; pulseAt=now; const g=ui.gooIcon; g.classList.remove('pulse'); void g.offsetWidth; g.classList.add('pulse'); }
+function startRush(){ const dur=15*M.rushDur, sky=S.realm==='sky'; goalAdd('rush'); S.rushUntil=nowT()+dur*1000; S.rush=100; S.rushes++; gainXP(30);
   if(sky){ sfx('nova'); ST.nova={t:0}; ST.flash=.55; ST.flashCol='#e6fbff'; } else sfx('rush');
   ST.shake=Math.max(ST.shake,9); toast('<span class="ti">'+(sky?'💥':'🌈')+'</span><span><b>'+RL().rushName.toUpperCase()+'!</b> Everything ×'+M.rushPow+' for '+Math.round(dur)+'s</span>','rush'); }
-function addBuff(k,name,m,sec){ S.buffs=S.buffs.filter(b=>b.k!==k); S.buffs.push({k,name,m,until:Date.now()+sec*1000}); }
+function addBuff(k,name,m,sec){ S.buffs=S.buffs.filter(b=>b.k!==k); S.buffs.push({k,name,m,until:nowT()+sec*1000}); }
 function emptyCells(){ const r=[], n=penSize(); for(let i=0;i<n;i++) if(!S.board[i]) r.push(i); return r; }
 const hatching={}; const popSet=new Set();
-function spawnEgg(level,free,delay){ const e=emptyCells(); if(!e.length) return false; const i=e[0]; S.board[i]=level; hatching[i]=Date.now()+600+(delay||0); renderBoard(); if(S.world!=='hollow'&&(!free||tab==='pen')) sfx('egg'); discover(level); return true; }
+function spawnEgg(level,free,delay){ const e=emptyCells(); if(!e.length) return false; const i=e[0]; S.board[i]=level; hatching[i]=nowT()+600+(delay||0); renderBoard(); if(S.world!=='hollow'&&(!free||tab==='pen')) sfx('egg'); discover(level); return true; }
 function buyEgg(){ if(!emptyCells().length){ toast('<span class="ti">🏡</span><span>The '+RL().pen.toLowerCase()+' is full. Merge '+RL().slimes+' to make room!</span>'); nope(ui.eggBtn); return; }
-  if(S.freeEggs>0){ S.freeEggs--; spawnEgg(effEgg(),false,0); uiTick(); return; }
-  const cost=eggCost(); if(S.goo<cost){ nope(ui.eggBtn); return; } S.goo-=cost; S.eggsBought++; spawnEgg(effEgg(),false,0); uiTick(); }
-function mergeCells(from,to,auto){ if(!auto) lastTapAt=Date.now(); const L=S.board[to]; S.board[to]=L+1; S.board[from]=0; hatching[to]=0; hatching[from]=0; S.merges++; gainXP((L+1)*(auto?.5:1)); popSet.add(to); renderBoard(); if(S.world!=='hollow') sfx('merge',L+1); discover(L+1);
+  if(S.bonusEggs>0){ S.bonusEggs--; spawnEgg(Math.min(MAXL-1,effEgg()+2),false,0); goalAdd('hatch'); uiTick(); return; }
+  if(S.freeEggs>0){ S.freeEggs--; spawnEgg(effEgg(),false,0); goalAdd('hatch'); uiTick(); return; }
+  const cost=eggCost(); if(S.goo<cost){ nope(ui.eggBtn); return; } S.goo-=cost; S.eggsBought++; spawnEgg(effEgg(),false,0); goalAdd('hatch'); uiTick(); }
+function mergeCells(from,to,auto){ if(!auto){ lastTapAt=nowT(); goalAdd('merge'); } const L=S.board[to]; S.board[to]=L+1; S.board[from]=0; hatching[to]=0; hatching[from]=0; S.merges++; gainXP((L+1)*(auto?.5:1)); popSet.add(to); renderBoard(); if(S.world!=='hollow') sfx('merge',L+1); discover(L+1);
   const cell=ui.board.children[to]; if(cell){ const r=document.createElement('span'); r.className='ring'; cell.appendChild(r); setTimeout(()=>r.remove(),600); }
   // among the stars, quick merges in a row build a combo
-  if(S.realm==='sky'&&!auto){ const now=Date.now(); combo=now-lastMergeAt<2500?combo+1:1; lastMergeAt=now;
+  if(S.realm==='sky'&&!auto){ const now=nowT(); combo=now-lastMergeAt<2500?combo+1:1; lastMergeAt=now;
     if(combo>=2){ const g=G.base*1.5*combo+5; earn(g); sfx('coin',combo); if(cell){ const cr=cell.getBoundingClientRect(), ar=ui.app.getBoundingClientRect(); popText(cr.left-ar.left+cr.width/2,cr.top-ar.top,'Combo ×'+combo+' · +'+fmt(g)); } } } }
 function discover(L){
   const prev=S.runBest; S.runBest=Math.max(prev,L);
@@ -2311,7 +2451,7 @@ function discover(L){
   const sky=S.realm==='sky', cur=sky?S.skyMax:S.maxSpecies;
   if(L>cur){ if(sky) S.skyMax=L; else S.maxSpecies=L; recalc(); if(L>1){ gainXP(50*L); toast('<img src="'+SPIMG[L]+'" alt=""><span><b>New '+RL().slime+': '+SPECIES[L-1].n+'!</b><br>Lv.'+L+' · +3% goo forever</span>','disc'); if(S.world!=='hollow') sfx('discover'); } } }
 function nope(el){ sfx('no'); if(!el) return; el.classList.remove('nope'); void el.offsetWidth; el.classList.add('nope'); }
-function checkAch(){ let got=false; for(const a of ACH){ if(S.ach[a.id]) continue; let ok=false; try{ ok=a.test(); }catch(e){} if(ok){ S.ach[a.id]=Date.now(); got=true; toast('<span class="ti">'+a.ico+'</span><span><b>Trophy: '+a.name+'</b><br>'+a.desc+' +1% goo</span>','ach'); sfx('ach'); gainXP(100); } } if(got){ recalc(); if(tab==='col') renderCol(); } }
+function checkAch(){ let got=false; for(const a of ACH){ if(S.ach[a.id]) continue; let ok=false; try{ ok=a.test(); }catch(e){} if(ok){ S.ach[a.id]=nowT(); got=true; S.gems=(S.gems||0)+1; toast('<span class="ti">'+a.ico+'</span><span><b>Trophy: '+a.name+'</b><br>'+a.desc+' +1% goo · +1 💎</span>','ach'); sfx('ach'); gainXP(100); } } if(got){ recalc(); if(tab==='col') renderCol(); } }
 
 /* golden slimes, and shooting stars in the sky */
 let goldenNext=rand(40,70), goldenOn=false, goldenTimer=null;
@@ -2325,7 +2465,7 @@ function hideGolden(){ if(!goldenOn) return; goldenOn=false; clearTimeout(golden
 function clickGolden(e){
   if(!goldenOn) return; e.preventDefault(); audioUnlock();
   const gr=ui.golden.getBoundingClientRect(), ar=ui.app.getBoundingClientRect(), px=gr.left-ar.left+gr.width/2, py=gr.top-ar.top, sky=S.realm==='sky';
-  goldenOn=false; ui.golden.hidden=true; ui.golden.className=''; clearTimeout(goldenTimer); goldenNext=rand(70,160)/M.goldFreq; S.goldens++; gainXP(40);
+  goldenOn=false; ui.golden.hidden=true; ui.golden.className=''; clearTimeout(goldenTimer); goalAdd('golden'); goldenNext=rand(70,160)/M.goldFreq; S.goldens++; gainXP(40);
   const roll=Math.random(), empty=emptyCells().length; let msg;
   if(roll<.42||(roll>=.87&&empty===0)){ const gain=(Math.min(S.goo*.15,G.base*900)+G.base*30+13)*M.lucky; earn(gain); msg=(sky?'Lucky starlight':'Lucky goo')+'! +'+fmt(gain); }
   else if(roll<.72){ const d=77*M.goldDur; addBuff('frenzy','Goo Frenzy ×7',7,d); msg='Goo Frenzy! ×7 goo for '+Math.round(d)+'s'; }
@@ -2340,18 +2480,19 @@ function toast(html,cls){ const d=document.createElement('div'); d.className='to
 function gainXP(n,quiet){ if(!(n>0)||S.level>=100) return; if(!quiet) n*=M.xp||1; S.xp+=n; let up=false;
   while(S.level<100&&S.xp>=xpNeed(S.level)){ S.xp-=xpNeed(S.level); S.level++; up=true; if(!quiet) onLevelUp(S.level); }
   if(up){ recalc(); levelSync(); } }
-function levelSync(){ if(S.level>=BOSS_LV&&S.bossNext<0) S.bossNext=30; }
+function levelSync(){ if(S.level>=BOSS_LV&&S.bossNext<0&&unlocked('boss')) S.bossNext=30; }
 function onLevelUp(L){
   sfx('levelup'); const ch=CHRON.find(c=>c.lv===L), sky=S.realm==='sky';
-  toast('<span class="ti">⭐</span><span><b>Level '+L+'!</b><br>'+(ch&&ch.un?'Unlocked: '+ch.un:'+1% goo')+'</span>','gold');
+  const gem=L%5===0?5:0; if(gem) S.gems=(S.gems||0)+gem;
+  toast('<span class="ti">⭐</span><span><b>Level '+L+'!</b><br>'+(ch&&ch.un?'Unlocked: '+ch.un:'+1% goo')+(gem?' · +'+gem+' 💎':'')+'</span>','gold');
   if(S.world==='meadow'&&ST.w){ const k=kingGeom(); addSparks(k.cx,k.by-k.h*.7,18,'#FFD23F'); }
   if(L===BOSS_LV) say(sky?'Something is circling the island… <b>Cosmic invaders</b> are coming!':'Something is sneaking around the meadow… <b>Minibosses</b> are coming!',9000);
   else if(L===HOLLOW_LV){ setTimeout(()=>coach([{before:()=>{ if(S.world!=='meadow') leaveHollow(); },rect:()=>stageRect(ST.portal),text:'The crack '+(sky?'on the island':'in the meadow')+' has broken open into a <b>portal</b>! Tap it to enter <b>the Hollow</b>.'}]),900); }
   else if(L===STARFALL_LV&&!sky) setTimeout(()=>say(S.ascensions>=STARFALL_ASC?'The stars are calling! <b>Starfall</b> is ready in the Ascend tab.':'The stars whisper the King\'s name… After <b>'+STARFALL_ASC+' ascensions</b> he can answer them with <b>Starfall</b>.',9000),600);
-  else if(L===2&&!S.tut.lvl){ S.tut.lvl=1; setTimeout(()=>coach([{el:'#lvlBtn',text:'You levelled up! Every level gives <b>+1% goo</b>. Tap your level any time to open <b>the Chronicle</b> and see what is coming.'}]),500); }
+  else if(L===2&&!S.tut.lvl){ S.tut.lvl=1; intro('lvl',()=>coach([{el:'#lvlBtn',text:'You levelled up! Every level gives <b>+1% goo</b>. Tap your level any time to open <b>the Chronicle</b> and see what is coming.'}]),1); }
   else if(L===30) say('Level 30! A new pen upgrade appeared: <b>Twin Yolks</b> lets the Hatchery lay two eggs at once.',8000);
   else if(ascTotal()>0&&L===ascReq()) say('You are strong enough to ascend again! Check the <b>Ascend</b> tab.',6000);
-  else say('Level '+L+'! Every level adds +1% goo.',5000);
+  else if(S.playTime>900) say('Level '+L+'! Every level adds +1% goo.',5000);
 }
 function openChronicle(){
   const need=xpNeed(S.level), Hh=S.hollow; let marked=false;
@@ -2370,12 +2511,12 @@ function spawnBoss(force){
   const T=force!=null?BOSSES[force%BOSSES.length]:(!S.bossKills&&!S.bossEscapes)?BOSSES[0]:BOSSES[Math.floor(Math.random()*BOSSES.length)], sky=S.realm==='sky';
   const hp=Math.max(10,tapBase()*(45+4*Math.min(S.bossKills,20))*T.hp*(S.hollow.sh.hunter?.75:1));
   B={k:T.k,n:sky?T.sn:T.n,tip:sky?T.stip:T.tip,sky,max:hp,hp,time:30,phase:'in',anim:0,hitT:0,shield:0,shieldUsed:false,hideT:0,hideCd:rand(2.5,4),spores:[],sporeCd:2,x:ST.w/2,y:ST.h/2,rx:1,ry:1};
-  sfx('bossIn'); ST.shake=10; ui.tapHint.hidden=true; ui.mBubble.hidden=true; lastTapAt=Date.now();
+  sfx('bossIn'); ST.shake=10; ui.tapHint.hidden=true; ui.mBubble.hidden=true; lastTapAt=nowT();
   toast('<span class="ti">'+(sky?'🛸':'⚠️')+'</span><span><b>'+B.n+' appeared!</b><br>'+B.tip+'</span>','rush');
   if(!S.tut.boss){ S.tut.boss=1; setTimeout(()=>coach([{el:'#stage',text:'<b>A '+(sky?'cosmic invader':'miniboss')+'!</b> Tap it as fast as you can before the timer runs out. They drop goo, free eggs and <b>Artifacts</b>!'}]),900); }
 }
 function bossLogic(dt){
-  if(!B){ if(S.level>=BOSS_LV&&S.world==='meadow'&&S.bossNext>=0){ S.bossNext-=dt; if(S.bossNext<=0){ S.bossNext=rand(600,900); spawnBoss(); } } return; }
+  if(!B){ if(S.level>=BOSS_LV&&S.world==='meadow'&&S.bossNext>=0&&(S.bossNext>3||(ui.modal.hidden&&ui.sheet.hidden&&!coachQ&&!CINE))){ S.bossNext-=dt; if(S.bossNext<=0){ S.bossNext=rand(600,900); spawnBoss(); } } return; }
   const b=B; b.anim+=dt; b.hitT=Math.max(0,b.hitT-dt);
   if(b.phase==='in'&&b.anim>=1.2){ b.phase='fight'; b.anim=0; }
   else if(b.phase==='fight'){
@@ -2387,7 +2528,7 @@ function bossLogic(dt){
   else if((b.phase==='out'&&b.anim>=.9)||(b.phase==='dead'&&b.anim>=.8)) B=null;
 }
 function bossTap(x,y){
-  const b=B; lastTapAt=Date.now(); S.taps++; gainXP(.1); bumpStreak(x,y);
+  const b=B; lastTapAt=nowT(); S.taps++; gainXP(.1); bumpStreak(x,y); goalAdd('tap');
   if(b.k==='shroom') for(let i=0;i<b.spores.length;i++){ const s=b.spores[i]; if(Math.hypot(x-s.x,y-s.y)<s.r+14){ b.spores.splice(i,1); addSparks(x,y,8,b.sky?'#fff3a8':'#b8ff7a'); bossHit(b.max*.08,false,x,y,'SPORE!'); return; } }
   const dx=(x-b.x)/b.rx, dy=(y-b.y)/b.ry; if(dx*dx+dy*dy>1.5) return;
   if(!rushActive()){ S.rush+=1.25*M.rushFill; if(S.rush>=100) startRush(); }
@@ -2405,7 +2546,7 @@ function bossHit(v,crit,x,y,label){
 }
 function rollArtifact(){ let r=Math.random()*100; for(let i=0;i<6;i++){ r-=ART_W[i]; if(r<0) return i; } return 0; }
 function bossDefeat(){
-  const b=B; b.hp=0; b.phase='dead'; b.anim=0; S.bossKills++;
+  const b=B; b.hp=0; b.phase='dead'; b.anim=0; S.bossKills++; goalAdd('boss');
   const goo=G.base*rand(600,1800)+tapBase()*60; earn(goo);
   const eggs=1+Math.floor(Math.random()*10); S.freeEggs=Math.min(60,S.freeEggs+eggs);
   const got=[]; for(let i=0;i<(S.hollow.sh.hunter?2:1);i++) got.push(rollArtifact());
@@ -2454,7 +2595,7 @@ let mentorTimer=0, mentorNext=40;
 function say(html,ms){ if(!S.settings.mentor||!ui.mBubble) return; ui.mBubble.innerHTML=html; ui.mBubble.hidden=false; clearTimeout(mentorTimer); mentorTimer=setTimeout(()=>{ ui.mBubble.hidden=true; },ms||7500); }
 function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
 function tipText(){
-  if(S.world==='hollow'){ const Hh=S.hollow, now=Date.now();
+  if(S.world==='hollow'){ const Hh=S.hollow, now=nowT();
     if(!Hh.dragons.length) return 'Tap to stoke the brazier for embers, then hatch your first dragon in the <b>Nest</b>.';
     if(Hh.exps.some(e=>e.end<=now)) return 'A dragon is back from the Deep! Collect its treasure in <b>Expeditions</b>.';
     if(Hh.dragons.some(d=>d.born&&d.st<3&&Hh.embers>=D_GROW[d.st])) return 'You have enough embers to grow a dragon.';
@@ -2468,7 +2609,8 @@ function tipText(){
     if(S.board.some(v=>v)&&S.orr.rings.some((ring,r)=>ringOpen(r)&&ring.some(v=>!v))) return 'An Orrery ring has an empty slot. Put a star jelly there in the <b>Orrery</b> tab!';
     if(CONST.some(k=>k.stars.some((_,i)=>cstAvail(k,i))&&S.stardust>=cstCost(cstCount(k)))) return 'You have Stardust for a new star. Light it in <b>Constellations</b> (Ascend tab).'; }
   for(let i=0;i<FACT.length;i++) if(facUnlocked(i)&&S.fac[i]>=facCap()) return 'Your '+FACT[i].plural+' hit the cap of '+facCap()+'. Merge a bigger '+R.slime+' to raise it!';
-  if(upgQueue().slice(0,3).some(u=>S.goo>=u.cost)) return 'You can afford an upgrade. Check the ⚡ tab!';
+  if(researchOpen()&&upgQueue().slice(0,3).some(u=>S.goo>=u.cost)) return 'You can afford new <b>Research</b>. Check the 🔬 tab!';
+  if(penUpsOpen()&&PENUPS.some(p=>(!p.show||p.show())&&p.lvl()<p.max&&S.goo>=p.cost())) return 'A pen upgrade is ready! Tap <b>🏡 Upgrades</b> under the '+R.pen+'.';
   if(FACT.some((_,i)=>{ const u=UPMAP['f'+i+'_'+tierOf(i)]; return u&&u.unlock()&&S.goo>=u.cost; })) return 'A ★ upgrade is ready on one of your '+(S.realm==='sky'?'celestial bodies':'factories')+'. It doubles its output!';
   if(S.arts.slice(0,5).some(n=>n>=3)) return 'You can fuse Artifacts in the <b>'+tabName('col')+'</b> tab.';
   if(S.level>=HOLLOW_LV&&!S.hollow.visited) return 'Tap the glowing <b>portal</b> to visit the Hollow.';
@@ -2517,7 +2659,7 @@ function earnEmbers(e){ S.hollow.embers+=e; S.hollow.embersAll+=e; }
 function fmtE(n){ n=Math.floor(n); return n<1e6?n.toLocaleString('en-US'):fmt(n); }
 function esc(s){ return String(s).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch])); }
 function hollowTap(x,y){
-  const Hh=S.hollow, now=Date.now(); lastTapAt=now;
+  const Hh=S.hollow, now=nowT(); lastTapAt=now;
   if(now<Hh.coolUntil){ addFloat(x,y-10,'Too hot!','#ffb08a',18); sfx('no'); return; }
   Hh.heat+=8; if(Hh.heat>=100){ overheat(); return; }
   const z=zone(), b=1+hup('bellows'); let e, gold=false;
@@ -2527,7 +2669,7 @@ function hollowTap(x,y){
   if(S.settings.particles) for(let i=0;i<(gold?6:3);i++) ST.parts.push({x:bz.x+rand(-bz.w*.2,bz.w*.2),y:bz.y,vx:rand(-60,60),vy:rand(-220,-120),r:rand(2,4),col:gold?'#ffe066':'#ff9a3c',life:0,max:rand(.5,.9),g:200,glow:true});
   sfx('stoke',gold);
 }
-function overheat(){ const Hh=S.hollow; Hh.heat=0; Hh.coolUntil=Date.now()+3000; ST.shake=10; sfx('overheat');
+function overheat(){ const Hh=S.hollow; Hh.heat=0; Hh.coolUntil=nowT()+3000; ST.shake=10; sfx('overheat');
   const bz=ST.brazier||{x:ST.w/2,y:ST.h*.6,w:100}; addFloat(bz.x,bz.y-bz.w*.4,'FLARE-UP!','#ff6a3c',28);
   if(S.settings.particles) for(let i=0;i<26;i++) ST.parts.push({x:bz.x,y:bz.y,vx:rand(-260,260),vy:rand(-360,-80),r:rand(3,7),col:i%2?'#ff5a1a':'#ffd23f',life:0,max:rand(.5,1),g:400,glow:true});
   if(!S.tut.heat){ S.tut.heat=1; say('Too hot! Let the flame cool down, then tap in a calmer rhythm.',6000); } }
@@ -2535,7 +2677,7 @@ function rollElem(){ let r=Math.random()*ELEM.reduce((a,e)=>a+e.w,0); for(let i=
 function pickName(){ const used=new Set(S.hollow.dragons.map(d=>d.name)); const free=DNAMES.filter(n=>!used.has(n)); return free.length?pick(free):pick(DNAMES)+' '+(S.hollow.nextId); }
 function buyDragonEgg(){ const Hh=S.hollow; if(Hh.dragons.length>=nestCap()){ toast('<span class="ti">🧺</span><span>The nest is full. Upgrade <b>Cozy Nest</b> for more space.</span>'); nope(ui.dEggBtn); return; }
   const c=dEggCost(); if(Hh.embers<c){ nope(ui.dEggBtn); return; } Hh.embers-=c; Hh.eggsBought++;
-  Hh.dragons.push({id:Hh.nextId++,name:pickName(),el:rollElem(),st:0,born:false,hatchAt:Date.now()+15000,job:'home'}); sfx('egg'); renderNest(true); uiTick(); }
+  Hh.dragons.push({id:Hh.nextId++,name:pickName(),el:rollElem(),st:0,born:false,hatchAt:nowT()+15000,job:'home'}); sfx('egg'); renderNest(true); uiTick(); }
 function onHatch(d){ d.born=true; sfx('dragonHatch'); gainXP(25); toast('<img src="'+dragonImg(d.el,0)+'" alt=""><span><b>'+esc(d.name)+' hatched!</b><br>A '+ELEM[d.el].n+' hatchling</span>','disc'); if(tab==='nest') renderNest(true); }
 function growDragon(id,btn){ const Hh=S.hollow, d=Hh.dragons.find(x=>x.id===id); if(!d||!d.born||d.st>=3) return; const c=D_GROW[d.st]; if(Hh.embers<c){ nope(btn); return; }
   Hh.embers-=c; d.st++; sfx('grow'); gainXP(40*d.st); toast('<img src="'+dragonImg(d.el,d.st)+'" alt=""><span><b>'+esc(d.name)+' grew into a '+STAGES[d.st]+'!</b><br>'+(d.st===3?'A mighty Elder':'+'+D_RATE[d.st]+' embers/min')+'</span>','disc'); renderNest(true);
@@ -2561,9 +2703,9 @@ function expDur(i){ return EXPS[i].s*(1-.1*hup('wings')); }
 function expPreview(d,di){ return {sc:D_SCALE[d.st]*EXPS[di].f*(1+.15*hup('sense')), em:D_RATE[d.st]*EXPS[di].s/60*.8*(1+.25*hup('diet'))}; }
 function sendExp(){ const Hh=S.hollow, d=Hh.dragons.find(x=>x.id===ui.expSel), di=ui.expDur||0; if(!d||!d.born||d.job!=='home'){ toast('Pick a dragon that is at home first.'); return; }
   if(Hh.exps.length>=expCap()){ toast('<span class="ti">🗺️</span><span>All expedition slots are busy. Buy <b>Expedition Maps</b> for more.</span>'); return; }
-  const now=Date.now(); Hh.exps.push({id:d.id,di,start:now,end:now+expDur(di)*1000}); d.job='exp'; ui.expSel=null; sfx('expSend'); gainXP(5);
+  const now=nowT(); Hh.exps.push({id:d.id,di,start:now,end:now+expDur(di)*1000}); d.job='exp'; goalAdd('exp'); ui.expSel=null; sfx('expSend'); gainXP(5);
   toast('<img src="'+dragonImg(d.el,d.st)+'" alt=""><span><b>'+esc(d.name)+' flew into the Deep</b><br>Back in '+fmtTime(expDur(di))+'</span>'); renderExp(true); }
-function collectExp(i){ const Hh=S.hollow, e=Hh.exps[i]; if(!e||Date.now()<e.end) return; const d=Hh.dragons.find(x=>x.id===e.id);
+function collectExp(i){ const Hh=S.hollow, e=Hh.exps[i]; if(!e||nowT()<e.end) return; const d=Hh.dragons.find(x=>x.id===e.id);
   Hh.exps.splice(i,1); if(!d){ renderExp(true); return; } d.job='home';
   const pv=expPreview(d,e.di); let sc=pv.sc*rand(.7,1.3); sc=Math.floor(sc)+(Math.random()<sc%1?1:0); const em=Math.round(pv.em*rand(.8,1.2));
   let relic=null; const rc=[0,0,.1,.3][e.di]*(d.st>=1?1:.5); if(Hh.relics.length<RELICS.length&&Math.random()<rc){ relic=Hh.relics.length; Hh.relics.push(relic); sc+=2; }
@@ -2582,14 +2724,14 @@ function catchWisp(){ const em=Math.max(15,Math.round(nestRate()*3)); earnEmbers
   if(S.hollow.exps.length&&Math.random()<.35){ S.hollow.exps.forEach(e=>e.end-=900000); msg+=' · expeditions 15 min faster'; }
   addSparks(W.x,W.y,14,'#bff6ff'); addFloat(W.x,W.y-10,'+'+fmtE(em),'#bff6ff',24); toast('<span class="ti">✨</span><span><b>Shadow wisp caught!</b><br>'+msg+'</span>','disc'); sfx('wisp'); gainXP(20); W=null; }
 function hollowLogic(dt){
-  const Hh=S.hollow; if(S.level<HOLLOW_LV&&!Hh.dragons.length) return; const now=Date.now();
+  const Hh=S.hollow; if(S.level<HOLLOW_LV&&!Hh.dragons.length) return; const now=nowT();
   if(Hh.heat>0) Hh.heat=Math.max(0,Hh.heat-heatDecay()*dt);
   const z=zone(); if(now>=Hh.coolUntil&&Hh.heat>=z[0]&&Hh.heat<=z[1]) earnEmbers((.4+.2*hup('bellows'))*dt);
   const r=nestRate(); if(r) earnEmbers(r/60*dt);
   for(const d of Hh.dragons) if(!d.born&&now>=d.hatchAt) onHatch(d);
   for(const d of Hh.dragons) if(d.born&&d.job==='patrol'){ const p=PAT[d.id]||(PAT[d.id]={f:0,cd:rand(.5,2)}); p.cd-=dt; if(p.cd<=0){ p.cd=D_BLAST[d.st]; patrolBlast(d); } }
 }
-function timeWarp(sec){ computeG(); const gain=G.base*sec; earn(gain); sfx('warp'); ST.shake=8; ST.banner={txt:'TIME WARP!',col:'#9be7ff',life:0,max:1.6}; return 'Time Warp! +'+fmt(gain)+' goo'; }
+function timeWarp(sec){ const gain=gooFor(sec); earn(gain,true); sfx('warp'); ST.shake=8; ST.banner={txt:'TIME WARP!',col:'#9be7ff',life:0,max:1.6}; return 'Time Warp! +'+fmtRough(gain)+' goo'; }
 function buyShop(k,btn){ const Hh=S.hollow, c=SHOP_CONS.find(x=>x.k===k);
   if(c){ if(Hh.scales<c.cost){ nope(btn); return; } if(k==='bait'&&S.level<BOSS_LV){ toast('Minibosses unlock at Lv 10.'); return; }
     Hh.scales-=c.cost; const msg=c.use(); sfx('buy'); gainXP(10); toast('<span class="ti">'+c.ico+'</span><span><b>'+msg+'</b></span>','gold'); renderShop(true); return; }
@@ -2608,11 +2750,11 @@ function renderNest(force){ const Hh=S.hollow;
         '<span class="ds">'+(d.job==='exp'?'Exploring the Deep':d.job==='patrol'?'On Dragon Patrol with the King':'+'+fmtE(D_RATE[d.st]*nestMult())+' embers/min')+'</span>'+
         '<div class="row2">'+(d.st<3?'<button class="btn grow" data-act="grow" title="Grow into a '+STAGES[d.st+1]+'">Grow '+fmtE(D_GROW[d.st])+'🔥</button>':'')+(d.st>=1&&d.job!=='exp'?'<button class="btn patrol '+(d.job==='patrol'?'patrol-back" data-act="pat" title="Bring '+esc(d.name)+' home">Recall':'patrol-go" data-act="pat" title="Send '+esc(d.name)+' to guard the King">Patrol')+'</button>':'')+'</div></div>'; }).join('')
       :'<p class="hint" style="grid-column:1/-1">No dragons yet. Tap the brazier for embers, then hatch your first egg.</p>'; }
-  const now=Date.now();
+  const now=nowT();
   for(const el of ui.dGrid.querySelectorAll('[data-egg]')){ const d=Hh.dragons.find(x=>x.id==el.dataset.egg); if(d) el.textContent='Hatching in '+Math.max(0,Math.ceil((d.hatchAt-now)/1000))+'s'; }
   for(const b of ui.dGrid.querySelectorAll('.grow')){ const d=Hh.dragons.find(x=>x.id==b.closest('.dcard').dataset.id); if(d&&d.st<3) b.classList.toggle('off',Hh.embers<D_GROW[d.st]); }
 }
-function renderExp(force){ const Hh=S.hollow, now=Date.now(), home=homeDragons();
+function renderExp(force){ const Hh=S.hollow, now=nowT(), home=homeDragons();
   if(ui.expSel&&!home.some(d=>d.id===ui.expSel)) ui.expSel=null; if(!ui.expSel&&home.length) ui.expSel=home.slice().sort((a,b)=>b.st-a.st)[0].id;
   const key=Hh.exps.map(e=>e.id+':'+e.end+':'+(e.end<=now?1:0)).join('|')+'#'+home.map(d=>d.id+':'+d.st).join(',')+'#'+expCap()+'#'+ui.expSel+'#'+(ui.expDur||0);
   if(force||key!==ui.expKey){ ui.expKey=key; let h='';
@@ -2643,7 +2785,7 @@ function renderShop(force){ const Hh=S.hollow, key=Hh.scales+'|'+JSON.stringify(
 const TIA_EMBERS=20000, HOARD_CAP=32, HOARD_SEC=900;
 function tiaReady(){ const Hh=S.hollow; return !Hh.tia&&Hh.hearts>=3&&Hh.embers>=TIA_EMBERS; }
 // her hoard of scales grows while she is home (also while you are away): one scale every 15 minutes
-function tiaHoard(){ const T=S.hollow.tia; if(!T) return 0; const now=Date.now(); if(T.at==='home') T.hoard=Math.min(HOARD_CAP,(T.hoard||0)+Math.max(0,now-(T.hoardT||now))/(HOARD_SEC*1000)); T.hoardT=now; return Math.floor(T.hoard||0); }
+function tiaHoard(){ const T=S.hollow.tia; if(!T) return 0; const now=nowT(); if(T.at==='home') T.hoard=Math.min(HOARD_CAP,(T.hoard||0)+Math.max(0,now-(T.hoardT||now))/(HOARD_SEC*1000)); T.hoardT=now; return Math.floor(T.hoard||0); }
 function heartFound(){ const n=Math.min(3,S.hollow.hearts); sfx('heartbeat');
   openModal('<div class="mcenter"><img src="'+HEART_IMG+'" alt="" style="width:120px;height:120px"><h2 class="mh">A Dragon Heart!</h2><p>Your dragon brought it back from the Deep. It is warm, and it still beats.</p><div class="hearts">'+[0,1,2].map(i=>'<img src="'+(i<n?HEART_IMG:HEARTE_IMG)+'" alt="">').join('')+'</div><p>'+(n>=3?'<b>All three hearts!</b> Bring '+fmtE(TIA_EMBERS)+' embers to the chamber behind the sealed door.':'The sealed door in the Hollow has three empty sockets. You have <b>'+n+' of 3</b>.')+'</p></div>',
     ()=>{ if(!S.tut.heart&&S.world==='hollow'&&!ST.chamber&&ST.door){ S.tut.heart=1; setTimeout(()=>coach([{who:'spirit',rect:()=>stageRect(ST.door),text:'That heart belongs in this door. Deep below the Hollow, something enormous is sleeping. Tap the door to go inside.'}]),300); } }); }
@@ -2674,7 +2816,7 @@ function openAltar(){ const Hh=S.hollow, h=Math.min(3,Hh.hearts), ok=tiaReady();
   $('#tiaWake').onclick=()=>{ if(!tiaReady()){ nope($('#tiaWake')); return; } closeModal(); startAwakening(); }; }
 function startAwakening(){ const Hh=S.hollow; if(Hh.tia) return; Hh.hearts=Math.max(0,Hh.hearts-3); Hh.embers=Math.max(0,Hh.embers-TIA_EMBERS); Hh.waking=true; saveLocal(); cloudSave();
   if(S.world!=='hollow') setWorld('hollow'); ST.chamber=true; ui.heat.hidden=true; playTiaCine(); }
-function finishAwakening(){ const Hh=S.hollow; Hh.waking=false; if(!Hh.tia) Hh.tia={at:'home',hoard:0,hoardT:Date.now()}; ST.chamber=false; ui.heat.hidden=S.world!=='hollow'; ST.tia.vis=0; ST.parts.length=0;
+function finishAwakening(){ const Hh=S.hollow; Hh.waking=false; if(!Hh.tia) Hh.tia={at:'home',hoard:0,hoardT:nowT()}; ST.chamber=false; ui.heat.hidden=S.world!=='hollow'; ST.tia.vis=0; ST.parts.length=0;
   recalc(); computeG(); gainXP(2500); saveLocal(); cloudSave();
   toast('<span class="ti">🐉</span><span><b>Tiamatra has awakened!</b><br>The Mother of All Dragons fights for you now</span>','gold');
   setTimeout(()=>coach([{who:'spirit',el:'#stage',text:'She is awake. After a thousand years. <b>Tiamatra</b> remembers who freed her, little King, and she will fight for you.'},
@@ -2688,7 +2830,7 @@ function tiaPopup(x,y){ closeTiaPop(); const T=S.hollow.tia; if(!T) return; cons
 function closeTiaPop(){ const d=document.getElementById('tiaPop'); if(d) d.remove(); clearTimeout(ui.tiaPopT); }
 function tiaSend(to){ const T=S.hollow.tia; if(!T||T.at===to) return; tiaHoard(); const P=ST.tia;
   if(P.px!=null&&P.where) P.leaving={x:P.px,y:P.py,s:P.ps,face:P.pf||1,t:0,where:P.where};
-  T.at=to; T.hoardT=Date.now(); P.vis=0; P.stream=0; P.cd=3; recalc(); computeG(); sfx('roar',.6); sfx('portal');
+  T.at=to; T.hoardT=nowT(); P.vis=0; P.stream=0; P.cd=3; recalc(); computeG(); sfx('roar',.6); sfx('portal');
   toast(to==='king'?'<span class="ti">🐉</span><span><b>Tiamatra flies to the '+RL().king+'!</b><br>All goo ×1.5, plus dragon fire</span>':'<span class="ti">🐉</span><span><b>Tiamatra flies home.</b><br>Dragons make ×2 embers, and her hoard grows</span>','gold'); uiTick(); }
 // her fire: every few seconds a long stream at the King (or a miniboss), ticking out goo
 function tiaLogic(dt){ const T=S.hollow.tia, P=ST.tia; if(!T) return; P.hoardAcc=(P.hoardAcc||0)+dt; if(P.hoardAcc>1){ P.hoardAcc=0; tiaHoard(); }
@@ -2789,7 +2931,7 @@ function tiaCineFrame(t){ const C=TCINE, c=C.c, W=C.W, H=C.H, dt=Math.min(.05,Ma
 const ORR={on:{}}, GRAND_CD=480;
 function angDist(a,b){ return Math.abs(((a-b)%TAU+TAU*1.5)%TAU-Math.PI); }
 function orrTol(){ return .075*(1+.2*orrUp('wide')); }
-function grandLeft(){ return Math.max(0,GRAND_CD-(Date.now()-(S.orr.grandAt||0))/1000); }
+function grandLeft(){ return Math.max(0,GRAND_CD-(nowT()-(S.orr.grandAt||0))/1000); }
 function orrLogic(dt){
   if(S.realm!=='sky') return; S.orr.t+=dt*(1+.1*orrUp('gears'));
   if(S.world!=='meadow') return;
@@ -2801,11 +2943,11 @@ function orrLogic(dt){
   for(let a=0;a<P.length;a++) for(let b=0;b<P.length;b++){ if(P[b].r!==P[a].r+1||angDist(A[a],A[b])>=tol) continue;
     for(let c=0;c<P.length;c++){ if(P[c].r!==P[a].r+2) continue; if(angDist(A[b],A[c])<tol&&angDist(A[a],A[c])<tol){ grandAlign([P[a],P[b],P[c]],A[b]); return; } } }
 }
-function conjunction(pp,ang){ const L=pp.reduce((a,p)=>a+p.L,0); computeG(); const v=G.base*(2+.15*L)*M.conj+1; earn(v); S.conj++; gainXP(2);
+function conjunction(pp,ang){ goalAdd('conj'); const L=pp.reduce((a,p)=>a+p.L,0); computeG(); const v=G.base*(2+.15*L)*M.conj+1; earn(v); S.conj++; gainXP(2);
   ST.conjFx.push({ang,life:0,max:1.1,grand:false,pts:pp.map(p=>ST.pp[p.r+':'+p.k]).filter(Boolean)});
   if(ST.w&&S.world==='meadow'){ const k=kingGeom(), g=orrGeom(k), r=pp[pp.length-1].r; addFloat(g.cx+Math.cos(ang)*g.rx[r],g.cy+Math.sin(ang)*g.rx[r]*g.tilt-14,'✦ +'+fmt(v),'#bff3ff',20); }
   sfx('conj',L); }
-function grandAlign(pp,ang){ S.orr.grandAt=Date.now(); S.grands++; computeG(); const dust=M.grandDust||1, v=G.base*60*M.conj; earn(v); S.stardust+=dust; S.stardustAll+=dust; recalc(); addBuff('star','Starlight ×3',3,30); gainXP(150);
+function grandAlign(pp,ang){ S.orr.grandAt=nowT(); S.grands++; computeG(); const dust=M.grandDust||1, v=G.base*60*M.conj; earn(v); S.stardust+=dust; S.stardustAll+=dust; recalc(); addBuff('star','Starlight ×3',3,30); gainXP(150);
   ST.conjFx.push({ang,life:0,max:2.2,grand:true,pts:pp.map(p=>ST.pp[p.r+':'+p.k]).filter(Boolean)}); ST.banner={txt:'GRAND ALIGNMENT!',col:'#ffd43f',life:0,max:2.4}; ST.flash=.5; ST.flashCol='#fff6c8'; ST.shake=10; sfx('grand');
   toast('<span class="ti">🪐</span><span><b>Grand Alignment!</b><br>+'+fmt(v)+' goo · +'+dust+' ✨ Stardust · ×3 goo for 30s</span>','gold'); }
 function forceConj(grand){ const P=planets(); if(P.length<2) return false; const t=S.orr.t;
@@ -2832,7 +2974,7 @@ function buildOrrUps(){ ui.orrUps.innerHTML=ORR_UPS.map(p=>'<div class="pu card"
   ui.ou.forEach(x=>x.b.onclick=()=>{ const p=x.p, l=orrUp(p.k); if(l>=p.max||(p.need&&!orrUp(p.need))) return; const c=p.cost(l); if(S.goo<c){ nope(x.b); return; } S.goo-=c; S.orr.ups[p.k]=l+1; sfx('buy'); gainXP(20); recalc(); computeG(); renderOrr(true); uiTick(); }); }
 function renderOrrUps(){ if(!ui.ou) return; ui.ou.forEach(x=>{ const p=x.p, l=orrUp(p.k), mx=l>=p.max, lock=p.need&&!orrUp(p.need); x.row.hidden=!!lock; x.lv.textContent=l&&p.max>1?' Lv.'+l:''; x.d.textContent=mx?(p.max>1?'Maxed out!':'Owned. '+p.desc(l)):p.desc(l);
   if(mx){ x.b.textContent=p.max>1?'MAX':'Owned'; x.b.classList.add('off'); } else { const c=p.cost(l); x.b.textContent=fmt(c); x.b.classList.toggle('off',S.goo<c); } }); }
-function openSlot(r,k){ const L=S.orr.rings[r][k], n=penSize(), now=Date.now(), items=[];
+function openSlot(r,k){ const L=S.orr.rings[r][k], n=penSize(), now=nowT(), items=[];
   for(let i=0;i<n;i++){ const v=S.board[i]; if(v&&!(hatching[i]>now)) items.push({i,L:v}); } items.sort((a,b)=>b.L-a.L);
   let h='<h2 class="mh">'+RING_NAME[r]+(L?' · Lv.'+L+' '+SPECIES[L-1].n:'')+'</h2>';
   if(L) h+='<p>This planet makes <b>'+fmt(slimeProd(L)*1.25*M.pen*M.all*G.mult,true)+' goo/s</b>. Pick a star jelly from the Nebula to swap it in, or one of the <b>same level</b> to merge them right here.</p><div class="btnrow"><button class="btn ghost" id="slotBack">Send back to the Nebula</button></div>';
@@ -2847,7 +2989,7 @@ function openSlot(r,k){ const L=S.orr.rings[r][k], n=penSize(), now=Date.now(), 
 }
 function afterOrr(){ computeG(); renderBoard(); renderOrr(true); uiTick(); }
 // fill every open Orrery slot with the biggest star jellies you have; weaker planets go back to the Nebula
-function equipBest(){ const now=Date.now(), items=[];
+function equipBest(){ const now=nowT(), items=[];
   for(let i=0;i<penSize();i++){ const L=S.board[i]; if(L&&!(hatching[i]>now)) items.push({L,b:i}); }
   S.orr.rings.forEach((ring,r)=>{ if(ringOpen(r)) ring.forEach((L,k)=>{ if(L) items.push({L,r,k}); }); });
   const slots=[]; S.orr.rings.forEach((ring,r)=>{ if(ringOpen(r)) ring.forEach((_,k)=>slots.push({r,k})); });
@@ -2958,7 +3100,7 @@ function drawCine(t){ const C=CINE, c=C.c, W=C.W, H=C.H; c.setTransform(C.dpr,0,
   if(t>7.1){ c.fillStyle='rgba(3,5,26,'+clamp((t-7.1)/.7,0,1)+')'; c.fillRect(0,0,W,H); }
 }
 function doStarfall(){ const d=starfallDust();
-  const keep=['earnedAll','taps','crits','merges','pets','goldens','rushes','offline','ach','maxSpecies','skyMax','settings','playTime','created','bestGps','level','xp','tenPow','tut','freeEggs','arts','bossNext','bossKills','bossEscapes','hollow','ascensions','skyAsc','starfalls','stardust','stardustAll','cst','conj','grands','seenTabs'];
+  const keep=['earnedAll','taps','crits','merges','pets','goldens','rushes','offline','ach','maxSpecies','skyMax','settings','playTime','created','bestGps','level','xp','tenPow','tut','freeEggs','arts','bossNext','bossKills','bossEscapes','hollow','ascensions','skyAsc','starfalls','stardust','stardustAll','cst','conj','grands','seenTabs','gems','items','bpNew','cos','login','goals','wheel','season'];
   const k={}; keep.forEach(x=>k[x]=S[x]); k.starfalls=(S.starfalls||0)+1; k.stardust=(S.stardust||0)+d; k.stardustAll=(S.stardustAll||0)+d;
   S=Object.assign(fresh(),k); S.realm='sky'; S.world='meadow'; if(S.hollow.sh.merger) S.amLvl=Math.max(S.amLvl,3);
   B=null; for(const x in hatching) delete hatching[x]; ORR.on={}; ui.starfallDust=d;
@@ -2971,6 +3113,299 @@ function skyWelcome(){ if(S.tut.sky) return; S.tut.sky=1; const d=ui.starfallDus
     {el:'#dustChip',text:'You brought <b>'+d+' ✨ Stardust</b>. Each one boosts all goo by 25%, forever. Spend it on <b>Constellations</b> in the Ascend tab for even more.'},
     {el:'#rush',text:'Tap fast to charge a <b>Supernova</b>. And watch the sky for <b>shooting stars</b>!'}]); }
 
+
+/* ================= introductions: one new thing at a time ================= */
+// new features and tips wait their turn, with breathing room between them (most of all in the first 15 minutes)
+const INTRO={q:[],last:-999};
+// cond (optional): the intro waits until it is true, so things are explained in the right order
+function intro(key,fn,pri,cond){ if(S.tut['i_'+key]||INTRO.q.some(x=>x.key===key)) return; INTRO.q.push({key,fn,pri:pri||0,cond}); INTRO.q.sort((a,b)=>b.pri-a.pri); }
+function introTick(){ if(!INTRO.q.length||coachQ||!ui.modal.hidden||!ui.sheet.hidden||!ui.cine.hidden||ST.trans) return;
+  const top=INTRO.q.find(x=>!x.cond||x.cond()); if(!top) return; const gap=S.playTime<900?32:10; if(top.pri<9&&S.playTime-INTRO.last<gap) return;
+  INTRO.q.splice(INTRO.q.indexOf(top),1); S.tut['i_'+top.key]=1; INTRO.last=S.playTime; try{ top.fn(); }catch(e){ console.error(e); } }
+const PEN_INTRO_GOO=400, RESEARCH_DELAY=75, WHEEL_LV=6, GOALS_LV=8, LOGIN_LV=4, MERGEALL_LV=20;
+function researchOpen(){ return S.realm==='sky'||ascTotal()>0||S.starfalls>0||(S.tut.mile&&S.playTime-(S.tut.mileT||0)>=RESEARCH_DELAY)||(S.earnedAll>=8000&&S.playTime>=420); }
+function mileShown(){ return !!S.tut.mile||ascTotal()>0||S.realm==='sky'; }
+function penUpsOpen(){ return !!S.tut.penups||ascTotal()>0||S.realm==='sky'; }
+// bigger features open one at a time: each waits its turn in the intro queue, then shows its own tip right away
+function unlocked(k){ return !!S.tut['u_'+k]; }
+function unlockTick(){ const L=S.level, U=(k,cond,pri,then)=>{ if(!S.tut['u_'+k]&&cond) intro('u_'+k,()=>{ S.tut['u_'+k]=1; if(then) then(); if(k==='login'&&loginPending()&&!AWAY.timer) AWAY.timer=setTimeout(showWelcomeBack,350); uiTick(); },pri); };
+  // each also waits for some play time, so the first ten minutes stay about the pen, the King and factories
+  const pt=S.playTime, vet=ascTotal()>0||S.realm==='sky';
+  U('col',L>=LOGIN_LV&&(pt>=240||vet),2); U('login',unlocked('col')&&(pt>=330||vet),2); U('wheel',L>=WHEEL_LV&&(pt>=420||vet),2); U('goals',L>=GOALS_LV&&(pt>=540||vet),2);
+  if(S.tut.new32===1) intro('new32',()=>{ S.tut.new32=2; if(tab!=='pen') setTab('pen'); uiTick(); coach([
+    {el:'#board',text:'<b>New in 3.2:</b> tap a '+RL().slime+', then a matching one, to merge them. Hold and drag still works, and the '+RL().pen+' now scrolls like the rest of the page.'},
+    {el:'#penUpBtn',text:'Pen upgrades moved here. <b>🏡 Upgrades</b> opens them as a panel, with a badge when one is ready.'},
+    {el:()=>ui.tabMap.upg||ui.tabs,text:'Upgrades are now called <b>Research</b>. Tap <b>?</b> inside to see every category and how far you are.'}].filter(s=>(s.el!=='#penUpBtn'||penUpsOpen())&&(s.text.indexOf('Research')<0||researchOpen()))); },8,()=>S.world!=='hollow');
+  U('ev',unlocked('goals')&&!!season()&&(pt>=600||vet),2); U('boss',L>=BOSS_LV&&researchOpen()&&(pt>=720||vet),2,levelSync); U('asc',(L>=12||S.earnedRealm>=1e7)&&(pt>=780||vet),2); }
+
+/* ================= trusted time, time away, Welcome back ================= */
+const AWAY={sec:0,timer:0,offlineToast:false};
+async function verifyClock(){
+  if(TIME.checking) return TIME.trust!=='none';
+  if(!/^https?:$/.test(location.protocol)){ if(TIME.trust==='none') setTrusted(0,'device'); return true; }
+  TIME.checking=true; TIME.lastTry=performance.now();
+  try{ const t0=performance.now(), r=await fetch(location.pathname,{method:'HEAD',cache:'no-store'}), t1=performance.now(), d=r.headers.get('Date');
+    if(!d) throw new Error('no date'); const ms=new Date(d).getTime()+(t1-t0)/2+500;
+    if(!isFinite(ms)) throw new Error('bad date'); TIME.fails=0; TIME.checking=false; setTrusted(ms-Date.now(),'server'); return true; }
+  catch(e){ TIME.fails++; TIME.checking=false;
+    // places that cannot ask the server (like the claude.ai preview) fall back to the phone's clock after a few tries
+    if(navigator.onLine!==false&&TIME.fails>=3&&TIME.trust==='none') setTrusted(0,'device');
+    else if(TIME.trust==='none'&&!AWAY.offlineToast&&S.taps>0){ AWAY.offlineToast=true; toast('<span class="ti">📡</span><span>You are offline. Time away is added when you are back online.</span>'); }
+    return TIME.trust!=='none'; } }
+// the game clock moves to the trusted time; the loop then pays out the time that passed (creditCheck)
+function setTrusted(off,kind){ if(kind==='server'&&TIME.trust==='server'&&Math.abs(off-TIME.off)<90000){ anchorTime(); return; } // small differences are network noise
+  TIME.off=off; TIME.trust=kind; anchorTime(); if(TIME.fresh){ TIME.fresh=false; TIME.simT=nowT(); } }
+// between server checks the game clock follows the phone's internal timer; a changed clock setting shows up as a jump
+function clockTick(){ const p=performance.now(); if(!TIME.anchorP){ anchorTime(); return; } const drift=Date.now()-(TIME.anchorD+(p-TIME.anchorP));
+  if(Math.abs(drift)>3000&&!(TIME.trust==='device'&&drift>0)){ TIME.off-=drift; if(TIME.trust==='server') verifyClock(); }
+  anchorTime(); if(TIME.trust==='none'&&!TIME.checking&&p-(TIME.lastTry||0)>(navigator.onLine===false?20000:5000)) verifyClock(); }
+// every frame: game time the loop did not play through (the app was closed, asleep or in the background) is paid out
+function creditCheck(dt){ TIME.simT+=dt*1000; const lag=nowT()-TIME.simT; if(lag>5000){ TIME.simT=nowT(); if(!TIME.fresh) creditAway(lag/1000); } else if(lag<-2000) TIME.simT=nowT(); }
+// time that passed while the game was closed or asleep: short gaps are paid quietly, longer ones get the Welcome back screen
+function creditAway(sec){ if(!(sec>0)) return; if(sec<120){ computeG(); earn(G.base*sec,true); earnEmbers(nestRate()/60*sec); return; } AWAY.sec+=sec; clearTimeout(AWAY.timer); AWAY.timer=setTimeout(showWelcomeBack,350); }
+function localDay(ms){ const d=new Date(ms); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
+function dayDiff(a,b){ return Math.round((Date.parse(b+'T12:00:00')-Date.parse(a+'T12:00:00'))/864e5); }
+function weekKey(ms){ const d=new Date(ms); d.setDate(d.getDate()-(d.getDay()+6)%7); return localDay(d.getTime()); }
+function today(){ return TIME.trust==='none'?null:localDay(nowT()); }
+function roundSig(n,d){ if(!(n>0)) return 0; const p=Math.pow(10,Math.floor(Math.log10(n))-d+1); return Math.round(n/p)*p; }
+// rough, readable amounts: 230,400 → "230K", 8,550,232 → "8.5M"
+function fmtRough(n){ if(!(n>=1000)) return String(Math.max(0,Math.round(n||0)));
+  if(S.settings.fmt==='sci'){ const e=Math.floor(Math.log10(n)); return (Math.floor(n/Math.pow(10,e)*10+1e-6)/10).toFixed(1)+'e'+e; } const p=Math.pow(10,Math.floor(Math.log10(n))-1); n=Math.floor(n/p*(1+1e-9))*p; return fmt(n).replace(/\.0+([A-Za-z]+)$/,'$1').replace(/(\.\d*[1-9])0+([A-Za-z]+)$/,'$1$2'); }
+function gooFor(sec){ computeG(); return Math.max(G.base,2)*sec; }
+function durTxt(sec){ return sec>=3600?(sec/3600)+(sec===3600?' hour':' hours'):Math.round(sec/60)+' min'; }
+const LOGIN=[[{k:'goo',s:1800}],[{k:'item',id:'eggcrate'}],[{k:'goo',s:3600},{k:'gems',n:5}],[{k:'item',id:'frenzy',n:2}],[{k:'goo',s:7200}],[{k:'item',id:'boost2'}],[{k:'gems',n:15},{k:'item',id:'warp8h'}]];
+function loginPending(){ const d=today(); if(!d||!unlocked('login')||S.login.last===d) return null; const streak=S.login.last&&dayDiff(S.login.last,d)===1?S.login.day%7+1:1; return {d,day:streak}; }
+const WB_LINES=['The King missed you. He said your name in his sleep. Twice.','I kept the goo flowing while you were gone. Mostly.','Welcome back! Nothing happened. Except all this goo.','The slimes held a meeting while you were away. They voted for more eggs.','I counted every drop of goo for you. It took a while.'];
+function showWelcomeBack(){ AWAY.timer=0;
+  if(!ui.modal.hidden||!ui.cine.hidden||!ui.sheet.hidden||coachQ||ST.trans){ AWAY.timer=setTimeout(showWelcomeBack,800); return; }
+  const sec=AWAY.sec, lp=loginPending(); if(sec<120&&!lp) return; AWAY.sec=0;
+  const cap=S.perks.night?86400:28800, eff=S.perks.night?1:.5, t=Math.min(sec,cap); computeG();
+  const gain=sec>=120?G.base*t*eff:0, em=sec>=120?nestRate()/60*t*eff:0, Hh=S.hollow, nowv=nowT();
+  const eggs=sec>=120&&S.hatchLvl>0&&S.world!=='hollow'?Math.min(emptyCells().length,Math.floor(t/hatchInt())):0;
+  const expDone=Hh.exps.filter(e=>e.end<=nowv).length, hoard=Hh.tia&&tiaHome()?tiaHoard():0;
+  const line=sec<120?'A new day, a new reward! Come back every day to fill the calendar.':expDone?'Your dragons are back from the Deep, and they brought treasure!':eggs>3?'The Hatchery kept laying eggs while you were away. I counted every single one!':sec>6*3600?'You were gone so long the King started talking to the clouds.':pick(WB_LINES);
+  const rows=[]; if(gain>=1) rows.push(['💧','Goo while you were away',gain,'goo']); if(em>=1) rows.push(['🔥','Embers from your dragons',em,'']); if(eggs) rows.push(['🥚','Eggs from the Hatchery',eggs,'']);
+  if(expDone) rows.push(['🧭','Expeditions back from the Deep',expDone,'']); if(hoard) rows.push(['💰','Scales in Tiamatra\'s hoard',hoard,'']);
+  let cal=''; if(lp){ cal='<h3 class="sec" style="margin:10px 0 4px;font-size:16px">Daily reward · day '+lp.day+' of 7</h3><div class="cal">'+LOGIN.map((r,i)=>'<div class="'+(i+1<lp.day?'done':i+1===lp.day?'today':'')+'"><span>Day '+(i+1)+'</span><i>'+rewIco(r[0])+'</i><small>'+r.map(rewTiny).join(' +<br>')+'</small></div>').join('')+'</div>'; }
+  openModal('<div class="wb"><canvas id="wbKing" width="320" height="240"></canvas><h2 class="mh" style="margin-top:0">'+(sec<120?'Daily reward!':'Welcome back!')+'</h2>'+(sec>=120?'<p>You were away for <b>'+fmtTime(sec)+'</b>'+(sec>cap?' (counted up to '+(cap/3600)+' h)':'')+'.</p>':'')+
+    '<div class="wb-say"><img src="'+mentorImg()+'" alt=""><span>'+line+'</span></div><div class="wb-rows">'+rows.map((r,i)=>'<div class="wb-row'+(r[3]==='goo'?' goo':'')+'" style="animation-delay:'+(.25+i*.15)+'s"><span class="i">'+r[0]+'</span><span>'+r[1]+'</span><b data-to="'+r[2]+'">+'+(r[2]<1e6?Math.floor(r[2]).toLocaleString('en-US'):fmt(r[2]))+'</b></div>').join('')+'</div>'+cal+
+    '<button class="btn gold" id="colBtn" style="font-size:20px;padding:10px 30px">Collect</button></div>',()=>give());
+  let given=false; const give=()=>{ if(given) return; given=true; if(gain>=1){ earn(gain,true); S.offline++; } if(em>=1) earnEmbers(em); for(let i=0;i<eggs;i++) spawnEgg(effEgg(),true,i*90);
+    if(lp){ S.login.last=lp.d; S.login.day=lp.day; LOGIN[lp.day-1].forEach(r=>grantReward(r)); } };
+  $('#colBtn').onclick=()=>{ audioUnlock(); give(); sfx('goldGet'); const b=$('#colBtn').getBoundingClientRect(), sr=ST.cv.getBoundingClientRect(); closeModal(); if(gain>=1) flyGoo(b.left-sr.left+b.width/2,Math.min(ST.h-20,b.top-sr.top),8); uiTick(); };
+  // the counters roll up, and the King wakes up
+  const t0=performance.now(), cv=$('#wbKing'), c=cv&&cv.getContext('2d');
+  const anim=now=>{ if(!cv||!cv.isConnected) return; const q=(now-t0)/1000;
+    for(const el of document.querySelectorAll('.wb-row b[data-to]')){ const to=+el.dataset.to, k=clamp((q-.4)/1.4,0,1), e=1-Math.pow(1-k,3); el.textContent='+'+(to<1e6?Math.floor(to*e).toLocaleString('en-US'):fmt(to*e)); }
+    c.clearRect(0,0,320,240); const awake=q>1.1, jump=awake?Math.max(0,Math.sin(Math.min(1,(q-1.1)/.45)*Math.PI))*26:0, sk=kingSkin();
+    c.fillStyle='rgba(10,4,25,.25)'; c.beginPath(); c.ellipse(160,222,74,12,0,0,TAU); c.fill();
+    drawSlime(c,160,218-jump,170,128,Object.assign(sk,{t:q,blink:!awake,mouth:awake?(q<1.6?'open':'grin'):'sleep',lid:q>.7&&!awake?.5:0,noShadow:true}));
+    if(!awake){ c.font='24px "Lilita One",sans-serif'; c.fillStyle='#e6ecff'; for(let i=0;i<3;i++){ const z=(q*.9+i/3)%1; c.globalAlpha=1-z; c.fillText('z',220+z*30,90-z*60); } c.globalAlpha=1; }
+    else if(q<2.2){ c.fillStyle='#ffd43f'; for(let i=0;i<6;i++){ const a=i*TAU/6+q*2, r=90+(q-1.1)*40; star4(c,160+Math.cos(a)*r,130+Math.sin(a)*r*.6,7); } }
+    if(q<3) requestAnimationFrame(anim); };
+  requestAnimationFrame(anim); sfx('levelup'); }
+
+/* ================= rewards, items, Gems, cosmetics ================= */
+const ITEMS={
+ warp30:{ico:'⏳',n:'Time Warp · 30 min',sn:'Warp',d:()=>'30 minutes of goo, right now: about <b>'+fmtRough(gooFor(1800))+'</b>.',use:()=>timeWarp(1800)},
+ warp2h:{ico:'⌛',n:'Time Warp · 2 hours',sn:'2h Warp',d:()=>'2 hours of goo, right now: about <b>'+fmtRough(gooFor(7200))+'</b>.',use:()=>timeWarp(7200)},
+ warp8h:{ico:'🕰️',n:'Time Warp · 8 hours',sn:'8h Warp',d:()=>'8 hours of goo, right now: about <b>'+fmtRough(gooFor(28800))+'</b>.',use:()=>timeWarp(28800)},
+ boost2:{ico:'🧪',n:'Double Goo',sn:'×2 Goo',d:'×2 goo for 1 hour.',use:()=>{ addBuff('boost2','Double Goo ×2',2,3600); return 'Double Goo! ×2 goo for 1 hour'; }},
+ frenzy:{ico:'🌟',n:'Frenzy Flask',sn:'Frenzy',d:'×7 goo for 2 minutes.',use:()=>{ addBuff('frenzy','Goo Frenzy ×7',7,120); return 'Goo Frenzy! ×7 goo for 2 minutes'; }},
+ eggcrate:{ico:'📦',n:'Egg Crate',sn:'Eggs',d:'10 eggs that hatch 2 levels higher.',use:()=>{ S.bonusEggs=(S.bonusEggs||0)+10; return '10 bonus eggs are waiting in the '+RL().pen; }},
+ bell:{ico:'🔔',n:'Golden Bell',d:'A golden slime (or shooting star) appears right away.',use:()=>{ if(S.world!=='meadow') return {fail:'Use it in the King\'s world.'}; if(goldenOn) return {fail:'One is already here!'}; spawnGolden(); return 'Something shiny appeared!'; }},
+ bait:{ico:'🎣',n:'Boss Bait',d:'A miniboss appears right away (Lv 10+).',use:()=>{ if(S.level<BOSS_LV) return {fail:'Minibosses come at Lv 10.'}; if(S.world!=='meadow') return {fail:'Use it in the King\'s world.'}; if(B) return {fail:'A miniboss is already here!'}; spawnBoss(); return 'A miniboss smells the bait…'; }},
+ compass:{ico:'🧭',n:'Swift Compass',d:'Every running expedition finishes now.',use:()=>{ const ex=S.hollow.exps.filter(e=>e.end>nowT()); if(!ex.length) return {fail:'No expeditions are running.'}; ex.forEach(e=>{ e.end=nowT(); }); return ex.length+' expedition'+(ex.length>1?'s':'')+' came back!'; }},
+ chest:{ico:'🎁',n:'Artifact Chest',d:'3 random Artifacts.',use:()=>{ const g=[rollArtifact(),rollArtifact(),rollArtifact()]; g.forEach(t=>S.arts[t]++); recalc(); if(g.includes(5)) mythicAnnounce(); return 'Artifacts: '+g.map(t=>RARITY[t].n).join(', '); }},
+ rchest:{ico:'💝',n:'Royal Chest',d:'3 Artifacts, each Rare or better.',use:()=>{ const g=[0,1,2].map(()=>Math.max(2,rollArtifact())); g.forEach(t=>S.arts[t]++); recalc(); if(g.includes(5)) mythicAnnounce(); return 'Artifacts: '+g.map(t=>RARITY[t].n).join(', '); }}
+};
+const COS={witch:{k:'hat',n:'Witch Hat',acc:'witch'},pumpkin:{k:'hat',n:'Pumpkin Crown',acc:'pumpkin'},horns:{k:'hat',n:'Devil Horns',acc:'horns'},sk_pumpkin:{k:'skin',n:'Pumpkin King'},sk_ghost:{k:'skin',n:'Ghost King'},haunted:{k:'theme',n:'Haunted Meadow'}};
+function rewIco(r){ return r.k==='goo'?'💧':r.k==='gems'?'💎':r.k==='candy'?'🍬':r.k==='item'?ITEMS[r.id].ico:r.k==='cos'?(COS[r.id].k==='hat'?'🎩':COS[r.id].k==='skin'?'👑':'🏚️'):'🎁'; }
+// the tiny labels in the 7-day calendar
+function rewTiny(r){ return r.k==='goo'?fmtRough(gooFor(r.s)):r.k==='gems'?r.n+'💎':r.k==='item'?(r.n>1?r.n+'× ':'')+(ITEMS[r.id].sn||ITEMS[r.id].n):rewShort(r); }
+function rewShort(r){ return r.k==='goo'?fmtRough(gooFor(r.s))+' goo':r.k==='gems'?r.n+' 💎':r.k==='candy'?r.n+' 🍬':r.k==='item'?(r.n>1?r.n+'× ':'')+ITEMS[r.id].n:r.k==='cos'?COS[r.id].n:''; }
+function grantReward(r,quiet){ let msg='';
+  if(r.k==='goo'){ const v=gooFor(r.s); earn(v,true); msg='+'+fmtRough(v)+' goo'; if(ST.w&&S.world!=='hollow'){ const k=kingGeom(); addFloat(k.cx,k.by-k.h*1.1,'+'+fmtRough(v),'#98f25a',28); flyGoo(k.cx,k.by-k.h*.5,6); } }
+  else if(r.k==='gems'){ S.gems=(S.gems||0)+r.n; msg='+'+r.n+' 💎 Gems'; }
+  else if(r.k==='candy'){ addCandy(r.n); msg='+'+r.n+' 🍬'; }
+  else if(r.k==='item'){ giveItem(r.id,r.n||1); msg=(r.n>1?r.n+'× ':'')+ITEMS[r.id].n; }
+  else if(r.k==='cos'){ S.cos.owned[r.id]=1; msg=COS[r.id].n+' (Wardrobe)'; S.bpNew=(S.bpNew||0)+1; }
+  if(!quiet) toast('<span class="ti">'+rewIco(r)+'</span><span><b>'+msg+'</b></span>','gold'); return msg; }
+function giveItem(id,n){ S.items[id]=(S.items[id]||0)+(n||1); S.bpNew=(S.bpNew||0)+(n||1); if(!S.tut.bag){ S.tut.bag=1; intro('bag',()=>say('You got an item! Items wait in your <b>🎒 Backpack</b> until you want to use them.',7000),3); } }
+function useItem(id,btn){ const n=S.items[id]||0, it=ITEMS[id]; if(!n||!it) return; const r=it.use();
+  if(!r||r.fail){ nope(btn); toast('<span class="ti">'+it.ico+'</span><span>'+((r&&r.fail)||'You can\'t use that right now.')+'</span>'); return; }
+  S.items[id]=n-1; if(!S.items[id]) delete S.items[id]; sfx('buy'); toast('<span class="ti">'+it.ico+'</span><span><b>'+r+'</b></span>','gold'); computeG(); openBackpack(); }
+function openBackpack(tabId){ tabId=tabId||ui.bpTab||'items'; ui.bpTab=tabId; S.bpNew=0;
+  const ids=Object.keys(S.items).filter(k=>ITEMS[k]&&S.items[k]>0);
+  const items=ids.length?'<div class="bp-grid">'+ids.map(k=>'<div class="bp-item"><span class="ico">'+ITEMS[k].ico+'<i>'+S.items[k]+'</i></span><b>'+ITEMS[k].n+'</b><span>'+(typeof ITEMS[k].d==='function'?ITEMS[k].d():ITEMS[k].d)+'</span><button class="btn" data-use="'+k+'">Use</button></div>').join('')+'</div>':'<p class="hint">Your backpack is empty. Items come from the Daily Wheel, goals, the daily reward and the Royal Road.</p>';
+  const hatBtn=(id,label,acc)=>{ const own=!id||S.cos.owned[id]; return '<button data-hat="'+(id||'')+'" aria-pressed="'+((S.cos.hat||'')===(id||''))+'" '+(own?'':'disabled')+'><canvas width="120" height="120" data-acc="'+acc+'"></canvas>'+label+(own?'':' 🔒')+'</button>'; };
+  const skinBtn=i=>{ const k=SKINS[i], ok=skinOk(i); return '<button data-skin="'+i+'" aria-pressed="'+(S.settings.skin===i)+'" '+(ok?'':'disabled')+'><canvas width="120" height="120" data-skin-c="'+i+'"></canvas>'+k.n+(ok?'':' 🔒')+'</button>'; };
+  const ward='<h3 class="sec" style="font-size:16px">Hats</h3><div class="ward">'+hatBtn(null,'Crown','crown')+hatBtn('witch','Witch Hat','witch')+hatBtn('pumpkin','Pumpkin','pumpkin')+hatBtn('horns','Horns','horns')+'</div>'+
+    '<h3 class="sec" style="font-size:16px">Colors</h3><div class="ward">'+SKINS.map((_,i)=>skinBtn(i)).join('')+'</div>'+
+    '<h3 class="sec" style="font-size:16px">Meadow</h3><div class="ward"><button data-theme="normal" aria-pressed="'+(!hauntedOn())+'">🌳<br>Normal</button><button data-theme="haunted" aria-pressed="'+hauntedOn()+'" '+(S.cos.owned.haunted||season()?'':'disabled')+'>🏚️<br>Haunted'+(S.cos.owned.haunted||season()?'':' 🔒')+'</button></div>'+
+    (season()&&!S.cos.owned.haunted?'<p class="note">The meadow is haunted for free during the '+season().name+'. Unlock Haunted Meadow on the Royal Road to keep it afterwards.</p>':'')+
+    (S.realm==='sky'?'<p class="note">Among the stars the King wears his star crown, unless you pick a hat here.</p>':'')+'<p class="note">Locked looks come from the Royal Road and trophies.</p>';
+  openModal('<h2 class="mh">🎒 Backpack <span class="gems" style="font-size:15px">· '+(S.gems||0)+' 💎</span></h2><div class="seg mtabs" id="bpTabs"><button data-t="items" aria-pressed="'+(tabId==='items')+'">Items</button><button data-t="ward" aria-pressed="'+(tabId==='ward')+'">Wardrobe</button></div>'+(tabId==='items'?items:ward));
+  $('#bpTabs').onclick=e=>{ const b=e.target.closest('[data-t]'); if(b){ sfx('click'); openBackpack(b.dataset.t); } };
+  ui.modalBody.onclick=e=>{ const u=e.target.closest('[data-use]'), h=e.target.closest('[data-hat]'), s=e.target.closest('[data-skin]'), th=e.target.closest('[data-theme]');
+    if(u){ useItem(u.dataset.use,u); } else if(h&&!h.disabled){ S.cos.hat=h.dataset.hat||null; sfx('click'); drawLogo(); openBackpack('ward'); } else if(s&&!s.disabled){ S.settings.skin=+s.dataset.skin; sfx('click'); drawLogo(); openBackpack('ward'); } else if(th&&!th.disabled){ S.cos.theme=th.dataset.theme==='haunted'?(S.cos.owned.haunted?'haunted':null):'normal'; sfx('click'); openBackpack('ward'); } };
+  for(const cv of ui.modalBody.querySelectorAll('canvas[data-acc]')){ const c=cv.getContext('2d'), sk=SKINS[S.settings.skin]||SKINS[0]; drawSlime(c,60,116,102,74,{color:sk.c,rainbow:sk.rainbow,acc:[cv.dataset.acc],noShadow:true}); }
+  for(const cv of ui.modalBody.querySelectorAll('canvas[data-skin-c]')){ const c=cv.getContext('2d'), sk=SKINS[+cv.dataset.skinC]; drawSlime(c,60,116,102,74,{color:sk.c,rainbow:sk.rainbow,glow:sk.glow,acc:[S.cos.hat?COS[S.cos.hat].acc:'crown'],noShadow:true}); } }
+
+/* ================= daily and weekly goals ================= */
+const GOALDEF={
+ tap:{t:(n)=>'Tap the '+RL().king+' '+n.toLocaleString('en-US')+' times',d:[150,500,1500],w:[2500,6000,15000]},
+ merge:{t:(n)=>'Merge '+RL().slimes+' '+n+' times',d:[25,80,200],w:[400,1000,2500]},
+ hatch:{t:(n)=>'Hatch '+n+' eggs',d:[20,60,150],w:[300,800,2000]},
+ fac:{t:(n)=>'Buy '+n+' '+(S.realm==='sky'?'celestial bodies':'factories'),d:[15,50,150],w:[200,500,1200],ok:()=>TABDEF[2].show()},
+ earn:{t:(n)=>'Earn '+fmtRough(n)+' goo',s:[600,2400,6000],ws:[21600,54000,108000]},
+ golden:{t:(n)=>'Catch '+n+' '+RL().golden+(n>1?'s':''),d:[1,3,6],w:[10,20,35],ok:()=>S.goldens>0},
+ boss:{t:(n)=>'Defeat '+n+' miniboss'+(n>1?'es':''),d:[1,2,4],w:[6,12,20],ok:()=>unlocked('boss')},
+ rush:{t:(n)=>'Trigger '+n+' '+RL().rushName+(n>1?(S.realm==='sky'?'s':'es'):''),d:[2,5,10],w:[20,40,70]},
+ streak:{t:(n)=>'Reach a ×'+n+' tap streak',d:[3,4,5],max:true},
+ exp:{t:(n)=>'Send '+n+' expedition'+(n>1?'s':''),d:[1,3,5],w:[8,15,25],ok:()=>S.level>=HOLLOW_LV&&S.hollow.dragons.some(d=>d.born)},
+ conj:{t:(n)=>'See '+n+' Conjunctions',d:[10,30,80],w:[150,400,900],ok:()=>S.realm==='sky'&&planets().length>=2},
+ pumpkin:{t:(n)=>'Collect '+n+' pumpkin'+(n>1?'s':''),d:[2,5,10],w:[15,30,50],ok:()=>!!season()},
+ dailies:{t:(n)=>'Finish all daily goals on '+n+' days',w:[3,5,7],week:true}};
+const DIFF=[{n:'EASY',c:'#98f25a'},{n:'MEDIUM',c:'#ffd43f'},{n:'HARD',c:'#ff7b8a'}];
+function seeded(str){ let h=2166136261; for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619); } return mulberry32(h>>>0); }
+function makeGoals(key,weekly){ const r=seeded(key+(S.created||0)), pool=Object.keys(GOALDEF).filter(k=>{ const g=GOALDEF[k]; return (weekly?(g.w||g.ws):(g.d||g.s))&&!(g.week&&!weekly)&&(!g.ok||g.ok()); });
+  const pick3=[]; if(weekly){ pick3.push('dailies'); } while(pick3.length<3&&pool.length){ const k=pool.splice(Math.floor(r()*pool.length),1)[0]; if(!pick3.includes(k)) pick3.push(k); }
+  return pick3.map((k,i)=>{ const g=GOALDEF[k]; let n; if(k==='earn') n=Math.max(500,roundSig(gooFor((weekly?g.ws:g.s)[i]),2)); else n=(weekly?g.w:g.d)[i]; return {k,diff:i,n,p:0,c:0}; }); }
+function goalRewards(diff,weekly){ const cand=!!season();
+  if(weekly) return [[{k:'gems',n:15},{k:'item',id:'warp2h'}],[{k:'gems',n:20},{k:'item',id:'chest'}],[{k:'gems',n:25},{k:'item',id:'warp8h'}]][diff].concat(cand?[{k:'candy',n:[80,100,120][diff]}]:[]);
+  return [[{k:'goo',s:900}],[{k:'item',id:['frenzy','bell','eggcrate'][(S.goals.day||'').length%3]}],[{k:'goo',s:3600},{k:'gems',n:2}]][diff].concat(cand?[{k:'candy',n:[10,20,35][diff]}]:[]); }
+function goalsOpen(){ return unlocked('goals'); }
+function rollGoals(){ const d=today(); if(!d||!goalsOpen()) return; const G2=S.goals;
+  if(G2.day!==d){ G2.day=d; G2.list=makeGoals(d,false); G2.bonus=0; }
+  const wk=weekKey(nowT()); if(G2.week!==wk){ G2.week=wk; G2.wlist=makeGoals('w'+wk,true); } }
+function goalAdd(k,v){ const G2=S.goals; if(!G2||!G2.day) return; v=v==null?1:v;
+  for(const L of [G2.list,G2.wlist]) for(const g of L||[]) if(g.k===k&&g.p<g.n){ g.p=GOALDEF[k].max?Math.max(g.p,v):Math.min(g.n,g.p+v); if(g.p>=g.n&&!g.c){ toast('<span class="ti">🎯</span><span><b>Goal complete!</b><br>'+GOALDEF[k].t(g.n)+'</span>','gold'); sfx('ach'); } }
+  if(G2.list&&G2.list.length&&G2.list.every(g=>g.p>=g.n)&&G2.full!==G2.day){ G2.full=G2.day; goalAdd('dailies'); } }
+function goalsClaimable(){ const G2=S.goals; let n=0; for(const L of [G2.list,G2.wlist]) for(const g of L||[]) if(g.p>=g.n&&!g.c) n++; if(G2.list&&G2.list.length&&G2.list.every(g=>g.c)&&!G2.bonus) n++; return n; }
+function openGoals(){ rollGoals(); const G2=S.goals, now=new Date(nowT()), mid=new Date(now); mid.setHours(24,0,0,0); const left=(mid-now)/1000;
+  const card=(g,i,weekly)=>{ const D=DIFF[g.diff], rw=goalRewards(g.diff,weekly), pct=clamp(g.p/g.n,0,1), done=g.p>=g.n;
+    return '<div class="goal'+(done?' done':'')+(g.c?' claimed':'')+'"><div><span class="diff" style="background:'+D.c+'">'+D.n+'</span><b>'+GOALDEF[g.k].t(g.n)+'</b><div class="gr">'+(g.k==='earn'?fmtRough(g.p)+' / '+fmtRough(g.n):g.p.toLocaleString('en-US')+' / '+g.n.toLocaleString('en-US'))+' · '+rw.map(rewShort).join(' + ')+'</div></div>'+
+      (g.c?'<span style="color:var(--goo);font:16px var(--f-display)">✓</span>':done?'<button class="btn gold" data-claim="'+(weekly?'w':'d')+i+'">Claim</button>':'<span></span>')+'<div class="bar"><i style="width:'+(pct*100)+'%"></i></div></div>'; };
+  const allDone=G2.list.length&&G2.list.every(g=>g.c);
+  openModal('<h2 class="mh">🎯 Goals</h2><h3 class="sec" style="font-size:16px">Today · new goals in '+fmtTime(left)+'</h3>'+G2.list.map((g,i)=>card(g,i,false)).join('')+
+    '<div class="goal'+(allDone?' done':'')+(G2.bonus?' claimed':'')+'"><div><b>Finish all three</b><div class="gr">Bonus: 3 💎'+(season()?' + 15 🍬':'')+'</div></div>'+(G2.bonus?'<span style="color:var(--goo);font:16px var(--f-display)">✓</span>':allDone?'<button class="btn gold" data-claim="bonus">Claim</button>':'<span></span>')+'</div>'+
+    '<h3 class="sec" style="font-size:16px">This week</h3>'+G2.wlist.map((g,i)=>card(g,i,true)).join('')+'<p class="note">Goals grow with your kingdom. Daily goals reset at midnight, weekly goals on Monday.</p>');
+  ui.modalBody.onclick=e=>{ const b=e.target.closest('[data-claim]'); if(!b) return; const v=b.dataset.claim;
+    if(v==='bonus'){ if(!G2.bonus&&G2.list.every(g=>g.c)){ G2.bonus=1; grantReward({k:'gems',n:3}); if(season()) grantReward({k:'candy',n:15}); sfx('goldGet'); } openGoals(); return; }
+    const weekly=v[0]==='w', g=(weekly?G2.wlist:G2.list)[+v.slice(1)]; if(!g||g.c||g.p<g.n) return; g.c=1; goalRewards(g.diff,weekly).forEach(r=>grantReward(r)); sfx('goldGet'); openGoals(); uiTick(); }; }
+
+/* ================= Daily Wheel ================= */
+function wheelSegs(){ const ev=!!season(); return [{k:'goo',s:900,w:20,c:'#98f25a',l:'15 min'},{k:'item',id:'frenzy',w:13,c:'#ffd43f',l:'Frenzy'},{k:'goo',s:3600,w:15,c:'#5cd3ff',l:'1 hour'},ev?{k:'candy',n:20,w:12,c:'#ff9a3c',l:'20 🍬'}:{k:'item',id:'bell',w:12,c:'#ff9a3c',l:'Bell'},{k:'goo',s:10800,w:9,c:'#b37bff',l:'3 hours'},{k:'item',id:'eggcrate',w:12,c:'#ff6fb5',l:'Eggs'},{k:'gems',n:3,w:8,c:'#7fe8ff',l:'3 💎'},{k:'goo',s:43200,w:3,c:'#ffd700',l:'12h!'}]; }
+function wheelFree(){ const d=today(); return !!d&&unlocked('wheel')&&S.wheel.last!==d; }
+function drawWheel(c,sz,rot,segs,hi){ const tot=segs.reduce((a,s)=>a+s.w,0), R=sz/2-6; c.clearRect(0,0,sz,sz); c.save(); c.translate(sz/2,sz/2); c.rotate(rot); let a=-Math.PI/2;
+  for(let i=0;i<segs.length;i++){ const sg=segs[i], da=sg.w/tot*TAU; c.fillStyle=sg.c; c.beginPath(); c.moveTo(0,0); c.arc(0,0,R,a,a+da); c.closePath(); c.fill(); c.strokeStyle='#070514'; c.lineWidth=3; c.stroke();
+    if(i===hi){ c.fillStyle='rgba(255,255,255,.35)'; c.fill(); }
+    c.save(); c.rotate(a+da/2); c.textAlign='right'; c.fillStyle='#070514'; c.font=Math.round(sz*.05)+'px "Lilita One",sans-serif'; c.fillText(sg.l,R-10,5); c.font=Math.round(sz*.07)+'px sans-serif'; c.fillText(rewIco(sg),R*.52,8); c.restore(); a+=da; }
+  c.restore(); c.fillStyle='#ffd43f'; c.strokeStyle='#070514'; c.lineWidth=4; c.beginPath(); c.arc(sz/2,sz/2,sz*.09,0,TAU); c.fill(); c.stroke(); c.fillStyle='#070514'; c.font=Math.round(sz*.06)+'px "Lilita One",sans-serif'; c.textAlign='center'; c.fillText('SPIN',sz/2,sz/2+sz*.022); }
+function openWheel(){ const segs=wheelSegs().map(s=>s.k==='goo'?Object.assign(s,{l:fmtRough(gooFor(s.s))+(s.s===43200?'!':'')}):s), free=wheelFree(), now=new Date(nowT()), mid=new Date(now); mid.setHours(24,0,0,0);
+  openModal('<h2 class="mh">🎡 Daily Wheel</h2><p>One free spin every day. Goo prizes are 15 minutes to 12 hours of your goo, so they grow with your kingdom.</p><div class="wheel-wrap"><div class="wheel-ptr"></div><canvas id="wheelCv" width="600" height="600"></canvas></div><p id="wheelRes" class="hint" style="min-height:20px"></p>'+
+    '<div class="btnrow" style="justify-content:center"><button class="btn gold'+(free?'':' off')+'" id="wheelGo" style="font-size:20px;padding:10px 26px">'+(free?'Spin!':'Next spin in '+fmtTime((mid-now)/1000))+'</button></div>');
+  const cv=$('#wheelCv'), c=cv.getContext('2d'); drawWheel(c,600,0,segs,-1);
+  $('#wheelGo').onclick=()=>{ if(!wheelFree()||ui.spinning){ nope($('#wheelGo')); return; } ui.spinning=true; S.wheel.last=today(); saveLocal(); $('#wheelGo').classList.add('off'); audioUnlock();
+    const tot=segs.reduce((a,s)=>a+s.w,0); let r=Math.random()*tot, win=0; for(let i=0;i<segs.length;i++){ r-=segs[i].w; if(r<0){ win=i; break; } }
+    let acc=0; for(let i=0;i<win;i++) acc+=segs[i].w; const mida=(acc+segs[win].w*(.2+Math.random()*.6))/tot*TAU, target=TAU*6-mida, t0=performance.now(), dur=4600; let lastSeg=-1;
+    const step=now=>{ if(!cv.isConnected){ ui.spinning=false; grantReward(segs[win]); return; } const q=clamp((now-t0)/dur,0,1), e=1-Math.pow(1-q,4), rot=target*e; drawWheel(c,600,rot,segs,q>=1?win:-1);
+      const pa=((-rot%TAU)+TAU)%TAU; let a2=0, seg=0; for(let i=0;i<segs.length;i++){ a2+=segs[i].w/tot*TAU; if(pa<a2){ seg=i; break; } } if(seg!==lastSeg){ lastSeg=seg; sfx('coin',seg); }
+      if(q<1) requestAnimationFrame(step); else { ui.spinning=false; const msg=grantReward(segs[win],true); $('#wheelGo').textContent='See you tomorrow!'; $('#wheelRes').innerHTML='<b style="color:var(--gold);font:22px var(--f-display)">'+(segs[win].s===43200?'JACKPOT! ':'')+msg+'</b>'; sfx(segs[win].s===43200?'mythic':'goldGet'); if(ST.w) ST.shake=8; uiTick(); } };
+    requestAnimationFrame(step); }; }
+
+/* ================= seasons and the Royal Road ================= */
+const SEASONS=[{id:'2026-10',name:'Spooky Season',ico:'🎃',cur:'Candy',ci:'🍬',start:'2026-10-10',end:'2026-11-02',special:{'2026-10-31':'Halloween night: pumpkins give double Candy!'}}];
+function season(){ const d=today()||localDay(Date.now()); return SEASONS.find(s=>d>=s.start&&d<=s.end)||null; }
+function seasonState(){ const se=season(); if(!se) return null; if(S.season.id!==se.id) S.season={id:se.id,pts:0,prem:false,got:{}}; return S.season; }
+const RR_PTS=60, RR_PRICE=120, RR_TIER_GEMS=20;
+const RR=[{k:'item',id:'warp30'},{k:'item',id:'boost2'},{k:'item',id:'eggcrate'},{k:'gems',n:15},{k:'item',id:'frenzy',n:2},{k:'cos',id:'witch'},{k:'item',id:'bell',n:2},{k:'item',id:'warp2h',n:2},{k:'gems',n:10},{k:'item',id:'chest',n:2},
+  {k:'item',id:'boost2'},{k:'cos',id:'sk_pumpkin'},{k:'item',id:'warp2h'},{k:'item',id:'eggcrate',n:3},{k:'cos',id:'pumpkin'},{k:'gems',n:25},{k:'item',id:'compass'},{k:'item',id:'warp8h'},{k:'item',id:'bait',n:2},{k:'cos',id:'haunted'},
+  {k:'item',id:'chest'},{k:'item',id:'boost2',n:3},{k:'gems',n:15},{k:'cos',id:'sk_ghost'},{k:'item',id:'frenzy',n:3},{k:'item',id:'warp8h',n:2},{k:'item',id:'eggcrate',n:2},{k:'item',id:'rchest',n:2},{k:'gems',n:20},{k:'cos',id:'horns'}];
+const rrPrem=i=>i%2===1; // every other reward (tiers 2, 4, 6…) is premium
+function addCandy(n){ const st=seasonState(); if(!st) return; const before=Math.floor(st.pts/RR_PTS); st.pts+=n; const after=Math.min(RR.length,Math.floor(st.pts/RR_PTS)); if(after>before) toast('<span class="ti">🎃</span><span><b>Royal Road tier '+after+'!</b><br>A new reward is waiting</span>','gold'); }
+function rrClaimable(){ const st=seasonState(); if(!st) return 0; const reached=Math.min(RR.length,Math.floor(st.pts/RR_PTS)); let n=0; for(let i=0;i<reached;i++) if(!st.got[i]&&(!rrPrem(i)||st.prem)) n++; return n; }
+function rrClaim(i){ const st=seasonState(); if(!st||st.got[i]) return false; if(i>=Math.floor(st.pts/RR_PTS)) return false; if(rrPrem(i)&&!st.prem) return false; st.got[i]=1; grantReward(RR[i]); return true; }
+function openEvent(tabId){ const se=season(), st=seasonState(); if(!se||!st){ toast('No event is running right now.'); return; } tabId=tabId||ui.evTab||'road'; ui.evTab=tabId;
+  const left=dayDiff(today()||localDay(Date.now()),se.end)+1, reached=Math.min(RR.length,Math.floor(st.pts/RR_PTS)), into=st.pts-reached*RR_PTS;
+  const head='<div class="rr-head"><span class="big">'+se.ico+'</span><div><b>'+se.name+'</b><span>'+left+' day'+(left===1?'':'s')+' left · Royal Road</span></div></div><div class="seg mtabs" id="evTabs"><button data-t="road" aria-pressed="'+(tabId==='road')+'">Royal Road</button><button data-t="info" aria-pressed="'+(tabId==='info')+'">Event</button></div>';
+  let body='';
+  if(tabId==='road'){ body='<div class="rr-prog"><span>'+(reached>=RR.length?'Road complete!':'Tier '+(reached+1))+'</span><div class="bar"><i style="width:'+(reached>=RR.length?100:into/RR_PTS*100)+'%"></i></div><span>'+(reached>=RR.length?'':into+'/'+RR_PTS+' '+se.ci)+'</span></div>'+
+    '<div class="btnrow" style="margin:0 0 10px">'+(st.prem?'<span class="note" style="margin:0">⭐ Premium unlocked</span>':'<button class="btn gold" id="rrPrem">Unlock Premium · '+RR_PRICE+' 💎</button>')+'<button class="btn" id="rrAll">Claim all</button>'+(reached<RR.length?'<button class="btn ghost" id="rrTier">+1 tier · '+RR_TIER_GEMS+' 💎</button>':'')+'</div><p class="note" style="margin-top:0">You have <span class="gems">'+(S.gems||0)+' 💎</span>. Free rewards are on every other tier; Premium unlocks the rest, and they are the better ones.</p>'+
+    RR.map((r,i)=>{ const prem=rrPrem(i), got=st.got[i], can=i<reached&&!got&&(!prem||st.prem); return '<div class="rr-row'+(i<reached?' reached':'')+'"><span class="t">'+(i+1)+'</span><div class="rr-cell'+(prem?' prem':'')+(got?' got':'')+(prem&&!st.prem?' lock':'')+'"><span class="ico">'+rewIco(r)+'</span><b>'+rewShort(r)+'</b><small>'+(prem?'PREMIUM':'FREE')+'</small>'+(can?'<button class="btn gold" data-rr="'+i+'">Claim</button>':'')+'</div></div>'; }).join(''); }
+  else { const days=[]; for(let d=se.start;d<=se.end;){ days.push(d); const n=new Date(Date.parse(d+'T12:00:00')+864e5); d=localDay(n.getTime()); }
+    const td=today()||localDay(Date.now()), MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    body='<div class="evcal">'+days.map(d=>'<div class="'+(d<td?'past':'')+(d===td?' today':'')+(se.special[d]?' special':'')+'"><small>'+MON[+d.slice(5,7)-1]+'</small>'+(+d.slice(8))+(se.special[d]?'<small>🎃</small>':'')+'</div>').join('')+'</div>'+
+      '<h3 class="sec" style="font-size:16px">How to earn '+se.ci+' '+se.cur+'</h3><ul class="howto"><li><span>🎯</span>Daily and weekly goals</li><li><span>🎃</span>Pumpkins that pop up in the meadow (tap them!)</li><li><span>🎡</span>The Daily Wheel</li></ul>'+
+      Object.keys(se.special).map(d=>'<p class="note">⭐ '+se.special[d]+'</p>').join('')+'<p class="note">The meadow is haunted while the event lasts: jack-o\'-lanterns, bats at night, and the odd tombstone. Claim your rewards before the season ends.</p>'; }
+  openModal(head+body);
+  $('#evTabs').onclick=e=>{ const b=e.target.closest('[data-t]'); if(b){ sfx('click'); openEvent(b.dataset.t); } };
+  const pb=$('#rrPrem'); if(pb) pb.onclick=()=>{ if((S.gems||0)<RR_PRICE){ nope(pb); toast('<span class="ti">💎</span><span>You need '+RR_PRICE+' Gems. Earn them from weekly goals, levels, trophies and the daily reward.</span>'); return; }
+    if(!pb.dataset.sure){ pb.dataset.sure=1; pb.textContent='Tap again to spend '+RR_PRICE+' 💎'; setTimeout(()=>{ if(pb.isConnected){ delete pb.dataset.sure; pb.textContent='Unlock Premium · '+RR_PRICE+' 💎'; } },4000); return; } S.gems-=RR_PRICE; st.prem=true; sfx('mythic'); toast('<span class="ti">⭐</span><span><b>Premium unlocked!</b><br>Every reward on the Royal Road is yours to claim</span>','gold'); openEvent('road'); };
+  const ab=$('#rrAll'); if(ab) ab.onclick=()=>{ let n=0; for(let i=0;i<RR.length;i++) if(rrClaim(i)) n++; if(!n) nope(ab); else sfx('goldGet'); openEvent('road'); };
+  const tb=$('#rrTier'); if(tb) tb.onclick=()=>{ if((S.gems||0)<RR_TIER_GEMS){ nope(tb); return; } S.gems-=RR_TIER_GEMS; st.pts=(Math.floor(st.pts/RR_PTS)+1)*RR_PTS; sfx('buy'); openEvent('road'); };
+  ui.modalBody.onclick=e=>{ const b=e.target.closest('[data-rr]'); if(b&&rrClaim(+b.dataset.rr)){ sfx('goldGet'); openEvent('road'); } }; }
+// during the Spooky Season the meadow is haunted unless the player picks Normal; owning the theme keeps it afterwards
+function hauntedOn(){ const t=S.cos.theme; return t==='haunted'||(t!=='normal'&&!!season()&&season().id==='2026-10'); }
+// pumpkins pop up in the King's world during the event; tap them for Candy
+const PK={next:45,list:[]};
+function pumpkinLogic(dt){ if(!season()||!unlocked('ev')||S.world!=='meadow'||B){ return; } for(let i=PK.list.length-1;i>=0;i--){ PK.list[i].life-=dt; if(PK.list[i].life<=0) PK.list.splice(i,1); }
+  PK.next-=dt; if(PK.next<=0&&PK.list.length<2&&ST.w){ PK.next=rand(150,260); const k=kingGeom(); let x; do{ x=rand(ST.w*.08,ST.w*.92); } while(Math.abs(x-k.cx)<k.w*.65); PK.list.push({x,life:35,t:0,ph:Math.random()*6}); } }
+function pumpkinY(x){ if(S.realm==='sky'&&ST.island) return ST.island.y-ST.h*.06; const w=ST.w,h=ST.h,u=x/w; return (1-u)*(1-u)*(ST.gy+h*.03)+2*(1-u)*u*(ST.gy-h*.06)+u*u*(ST.gy+h*.03)+h*.02; }
+function drawJack(c,x,y,r,lit,t){ c.save(); if(lit){ const g=c.createRadialGradient(x,y,0,x,y,r*3); g.addColorStop(0,'rgba(255,170,40,'+(.35+.1*Math.sin(t*6))+')'); g.addColorStop(1,'rgba(255,170,40,0)'); c.fillStyle=g; c.fillRect(x-r*3,y-r*3,r*6,r*6); }
+  c.fillStyle='#3a7a26'; c.strokeStyle=INK; c.lineWidth=Math.max(1.5,r*.12); c.beginPath(); c.moveTo(x-r*.08,y-r*.8); c.quadraticCurveTo(x,y-r*1.25,x+r*.3,y-r*1.2); c.lineTo(x+r*.12,y-r*.8); c.closePath(); c.fill(); c.stroke();
+  for(const [ox,rw] of [[-.38,.55],[.38,.55],[0,.62]]){ const g=c.createRadialGradient(x+ox*r-r*.15,y-r*.25,r*.05,x+ox*r,y,r*.75); g.addColorStop(0,'#ffc15c'); g.addColorStop(1,'#d85a0a'); c.fillStyle=g; c.beginPath(); c.ellipse(x+ox*r,y,r*rw,r*.78,0,0,TAU); c.fill(); c.stroke(); }
+  c.fillStyle=lit?'#ffe27a':'#3a1a08'; if(lit){ c.shadowColor='#ffb020'; c.shadowBlur=r*.5; } for(const s of [-1,1]){ c.beginPath(); c.moveTo(x+s*r*.14,y-r*.12); c.lineTo(x+s*r*.4,y-r*.12); c.lineTo(x+s*r*.27,y-r*.36); c.closePath(); c.fill(); }
+  c.beginPath(); c.moveTo(x-r*.42,y+r*.12); c.quadraticCurveTo(x,y+r*.55,x+r*.42,y+r*.12); c.lineTo(x+r*.2,y+r*.2); c.lineTo(x+r*.1,y+r*.12); c.lineTo(x,y+r*.22); c.lineTo(x-r*.1,y+r*.12); c.lineTo(x-r*.2,y+r*.2); c.closePath(); c.fill(); c.restore(); }
+function drawPumpkins(c,t,dt){ ST.pk=[]; for(const p of PK.list){ p.t+=dt; const r=Math.max(10,Math.min(ST.w,ST.h)*.045), pop=Math.min(1,p.t*3), fade=Math.min(1,p.life/2), y=pumpkinY(p.x)-r*.6-Math.abs(Math.sin(t*3+p.ph))*r*.35;
+  c.save(); c.globalAlpha=fade; c.translate(p.x,y); c.scale(pop,pop); drawJack(c,0,0,r,true,t); c.restore(); if(Math.random()<dt*3) addSparks(p.x+rand(-r,r),y-r,1,'#ffb35c'); ST.pk.push({p,x:p.x,y,r:r*1.6}); } }
+function collectPumpkin(h){ const i=PK.list.indexOf(h.p); if(i<0) return; PK.list.splice(i,1); const se=season(), dbl=se&&se.special[today()]?2:1, n=Math.round(rand(3,6.99))*dbl; addCandy(n); goalAdd('pumpkin'); sfx('goldGet'); addSparks(h.x,h.y,14,'#ffb35c'); addFloat(h.x,h.y-20,'+'+n+' 🍬','#ffb35c',26); gainXP(15);
+  if(!S.tut.pumpkin){ S.tut.pumpkin=1; say('A Candy pumpkin! Candy moves you along the <b>Royal Road</b> 🎃. More pumpkins pop up while the event lasts.',7000); } }
+function drawTombs(c,w,h,n){ c.fillStyle='rgba(120,116,140,'+(1-.4*n)+')'; c.strokeStyle='rgba(20,10,40,.6)'; c.lineWidth=1.5;
+  for(const fx of [.29,.33,.4]){ const x=w*fx, y=ST.h1y(x)+3, s=Math.max(6,h*.026)*(fx===.33?1.2:1); c.beginPath(); c.moveTo(x-s*.5,y); c.lineTo(x-s*.5,y-s); c.arc(x,y-s,s*.5,Math.PI,TAU); c.lineTo(x+s*.5,y); c.closePath(); c.fill(); c.stroke(); } }
+function drawHaunted(c,w,h,t,n){ // jack-o'-lanterns along the meadow, tombstones by the castle, and bats at night
+  const r=Math.max(8,Math.min(w,h)*.032); for(const fx of [.07,.3,.62,.93]){ const x=w*fx; drawJack(c,x,pumpkinY(x)-r*.5,r,n>.35,t+fx*9); }
+  if(n>.4){ c.fillStyle='rgba(15,8,30,'+((n-.4)/.6)+')'; for(let i=0;i<4;i++){ const bx=((t*(18+i*6)+i*w*.3)%(w+80))-40, by=h*(.15+i*.06)+Math.sin(t*2+i)*h*.03, f=Math.sin(t*16+i*2), s=Math.max(5,h*.02);
+    c.beginPath(); c.moveTo(bx,by); c.quadraticCurveTo(bx-s*1.2,by-s*(.8+f*.7),bx-s*2.2,by-s*.1*f); c.quadraticCurveTo(bx-s*1.2,by+s*.2,bx,by+s*.35); c.quadraticCurveTo(bx+s*1.2,by+s*.2,bx+s*2.2,by-s*.1*f); c.quadraticCurveTo(bx+s*1.2,by-s*(.8+f*.7),bx,by); c.fill(); } } }
+
+/* ================= Merge all ================= */
+const MA_CD=[60,45,30,20];
+function mergeAllOnce(){ if(!S.maLvl) return; const now=nowT(); if(now<(S.maNext||0)){ nope(ui.mergeAllBtn); return; } const by={}, n=penSize();
+  for(let i=0;i<n;i++){ const L=S.board[i]; if(!L||L>=MAXL||hatching[i]>now) continue; (by[L]=by[L]||[]).push(i); }
+  let m=0; for(const L of Object.keys(by).map(Number).sort((a,b)=>a-b)){ const cells=by[L]; for(let j=0;j+1<cells.length;j+=2){ mergeCells(cells[j],cells[j+1]); m++; } }
+  if(!m){ nope(ui.mergeAllBtn); toast('<span class="ti">⚡</span><span>No matching pairs to merge right now.</span>'); return; }
+  S.maNext=now+MA_CD[S.maLvl-1]*1000; computeG(); sfx('rush'); uiTick(); }
+
+/* ================= the Pen upgrades panel ================= */
+function openSheet(){ if(!ui.sheet.hidden) return; modalFlip=nowT(); ui.sheet.hidden=false; S.tut.sheetSeen=1; sfx('click'); uiTick(); }
+function closeSheet(){ if(ui.sheet.hidden) return; modalFlip=nowT(); ui.sheet.hidden=true; }
+function setupSheet(){ ui.sheet.addEventListener('pointerdown',e=>{ if(e.target===ui.sheet){ blockGhost(e.clientX,e.clientY); closeSheet(); } }); $('#sheetX').onclick=closeSheet;
+  const head=ui.sheet.querySelector('.sheet-head'), grab=$('#sheetGrab'), card=ui.sheet.querySelector('.sheet-card'); let sy=null;
+  for(const el of [head,grab]){ el.addEventListener('pointerdown',e=>{ if(e.target.closest('button')) return; sy=e.clientY; try{ el.setPointerCapture(e.pointerId); }catch(er){} });
+    el.addEventListener('pointermove',e=>{ if(sy==null) return; const dy=Math.max(0,e.clientY-sy); card.style.transform='translateY('+dy+'px)'; });
+    const end=e=>{ if(sy==null) return; const dy=e.clientY-sy; sy=null; card.style.transform=''; if(dy>70) closeSheet(); }; el.addEventListener('pointerup',end); el.addEventListener('pointercancel',end); } }
+
+/* ================= Research guide ================= */
+const RCAT={tap:{n:'Taps',c:'#ffd43f',ico:'👆',d:'Make every tap stronger, or let taps earn a share of your goo/s.'},pen:{n:'Pen',c:'#98f25a',ico:'🐣',d:'Slimes in the pen make more goo.'},goo:{n:'All goo',c:'#5cd3ff',ico:'🔬',d:'Boost everything you earn.'},rush:{n:'Wobble',c:'#ff6fb5',ico:'🌈',d:'Fill the Wobble meter faster, and make the Rush longer and stronger.'},gold:{n:'Golden',c:'#ffb347',ico:'🌟',d:'More golden slimes, longer effects, bigger payouts.'},tro:{n:'Trophies',c:'#b8a6ff',ico:'🏆',d:'Every trophy you own boosts goo even more.'},syn:{n:'Synergy',c:'#7ff0c8',ico:'🤝',d:'Your pen and your factories boost each other.'},crit:{n:'Critical',c:'#ff7b8a',ico:'💥',d:'More 10× critical taps.'}};
+function upgCat(u){ const e=u.e; return e.tap||e.tapPct?'tap':e.pen?'pen':e.global?'goo':e.rushFill||e.rushDur||e.rushPow?'rush':e.goldFreq||e.goldDur||e.lucky?'gold':e.polish?'tro':e.penPals||e.feeding?'syn':e.crit?'crit':'goo'; }
+function openResearchGuide(){ const list=UPGRADES.filter(u=>!u.tier), owned=list.filter(u=>S.ups[u.id]).length, tiers=UPGRADES.filter(u=>u.tier), tOwned=tiers.filter(u=>S.ups[u.id]).length;
+  openModal('<h2 class="mh">🔬 How Research works</h2><p>Research makes your whole kingdom stronger, forever (until you ascend). New projects unlock as you earn goo. You always see the next three, cheapest first.</p><div class="asc-row"><span>Researched</span><b>'+owned+' / '+list.length+'</b></div>'+
+    Object.keys(RCAT).map(k=>{ const C=RCAT[k], all=list.filter(u=>upgCat(u)===k), got=all.filter(u=>S.ups[u.id]).length; return all.length?'<div class="rg-row"><span class="ico">'+C.ico+'</span><b style="color:'+C.c+'">'+C.n+'</b><em>'+got+' / '+all.length+'</em><span class="d">'+C.d+'</span><div class="bar"><i style="width:'+(got/all.length*100)+'%"></i></div></div>':''; }).join('')+
+    '<h3 class="sec" style="font-size:16px">★ '+(S.realm==='sky'?'Celestial':'Factory')+' upgrades</h3><p>Each '+(S.realm==='sky'?'celestial body':'factory')+' also has 7 ★ upgrades on its own row in the '+tabName('fac')+' tab. Each one doubles that '+(S.realm==='sky'?'body':'factory')+'. You own <b>'+tOwned+' / '+tiers.length+'</b>.</p>'); }
+
+/* ================= the dock: event, goals, wheel, backpack ================= */
+function dockList(){ const L=[]; const se=season();
+  if(se&&unlocked('ev')) L.push({id:'ev',ico:se.ico,cls:'event',lbl:se.name,badge:rrClaimable(),fn:()=>openEvent()});
+  if(goalsOpen()) L.push({id:'goals',ico:'🎯',lbl:'Goals',badge:goalsClaimable(),fn:openGoals});
+  if(unlocked('wheel')) L.push({id:'wheel',ico:'🎡',lbl:'Daily Wheel',badge:wheelFree()?'!':0,fn:openWheel});
+  if(S.tut.bag||Object.keys(S.items).length) L.push({id:'bag',ico:'🎒',lbl:'Backpack',badge:S.bpNew||0,fn:()=>openBackpack()});
+  return L; }
+function updateDock(){ const L=dockList(), key=L.map(x=>x.id).join(); if(key!==ui.dockKey){ ui.dockKey=key; ui.dock.innerHTML=L.map(x=>'<button class="dockbtn'+(x.cls?' '+x.cls:'')+'" data-d="'+x.id+'" aria-label="'+x.lbl+'">'+x.ico+'<span class="badge" hidden></span></button>').join('');
+    for(const x of L){ const was=ui.dockSeen||(ui.dockSeen={}); if(!was[x.id]&&ui.started&&!S.tut['dk_'+x.id]){ S.tut['dk_'+x.id]=1; const txt={ev:'The <b>'+(season()||{}).name+'</b> has begun! Tap 🎃 to see the Royal Road: earn Candy and claim rewards.',goals:'<b>Goals</b> unlocked! Three new daily goals every day, and bigger weekly ones. Tap 🎯.',wheel:'The <b>Daily Wheel</b> is here! One free spin every day. Tap 🎡.',bag:''}[x.id]; if(txt) intro('dk_'+x.id,()=>coach([{el:()=>ui.dock.querySelector('[data-d="'+x.id+'"]'),text:txt}]),9); } was[x.id]=1; } }
+  // short screens: the dock wraps into a second column instead of running past the Wobble bar
+  const rows=Math.max(1,Math.floor((ui.stage.clientHeight-76-34+8)/50)); if(rows!==ui.dockRows){ ui.dockRows=rows; ui.dock.style.gridTemplateRows='repeat('+rows+',42px)'; }
+  for(const x of L){ const b=ui.dock.querySelector('[data-d="'+x.id+'"] .badge'); if(!b) continue; b.hidden=!x.badge; if(x.badge&&b.textContent!==String(x.badge)) b.textContent=x.badge; } }
 /* ================= UI ================= */
 const ui={newTabs:[]};
 // tabs appear one by one as the game opens up; [meadow, sky] icons and labels
@@ -2978,9 +3413,9 @@ const TABDEF=[
  {id:'pen',ico:['🐣','🌌'],l:['Pen','Nebula'],show:()=>true},
  {id:'orr',ico:['','🪐'],l:['','Orrery'],show:()=>S.realm==='sky'},
  {id:'fac',ico:['🏭','☀️'],l:['Factories','Cosmos'],show:()=>S.realm==='sky'||(S.earnedAll>=100&&S.merges>=1)||S.fac.some(c=>c>0)},
- {id:'upg',ico:['⚡','⚡'],l:['Upgrades','Upgrades'],show:()=>S.realm==='sky'||ascTotal()>0||(S.fac.some(c=>c>0)&&UPGRADES.some(u=>!u.tier&&(S.ups[u.id]||u.unlock())))},
- {id:'asc',ico:['👑','🌙'],l:['Ascend','Ascend'],show:()=>S.realm==='sky'||ascTotal()>0||S.level>=12||S.earnedRealm>=1e7},
- {id:'col',ico:['💎','💎'],l:['Collection','Vault'],show:()=>S.realm==='sky'||ascTotal()>0||S.level>=3||Object.keys(S.ach).length>0}
+ {id:'upg',ico:['🔬','🔬'],l:['Research','Research'],show:()=>researchOpen()},
+ {id:'asc',ico:['👑','🌙'],l:['Ascend','Ascend'],show:()=>S.realm==='sky'||ascTotal()>0||unlocked('asc')},
+ {id:'col',ico:['💎','💎'],l:['Collection','Vault'],show:()=>S.realm==='sky'||ascTotal()>0||unlocked('col')}
 ];
 const HTABS=[['nest','🥚','Nest'],['exp','🧭','Expeditions'],['hup','🔥','Upgrades'],['shop','🐉','Scale Shop']];
 const ALLVIEWS=['pen','orr','fac','upg','asc','col','nest','exp','hup','shop'];
@@ -2995,13 +3430,16 @@ function buildUI(){
    'scaleChip','scaleAmt','lvlBtn','lvlTxt','lvlBar','bossBar','bossName','bossTime','bossHp','heat','heatFill','heatZone','heatMark','mentor','mentorImg','fuseSec','fuseBonus','fuseGrid','fuseAll','fuseLocked',
    'dEggBtn','dEggCost','nestRate','nestCount','patrolCount','elemTxt','dGrid','expList','expPick','hupList','shopScales','shopCons','shopPerm','coach','coachHole','coachCard','coachImg','coachText','coachBtn','announce',
    'gooIcon','brandTxt','logo','dustChip','dustAmt','rushLabel','eggLabel','penLabel','penUpTitle','orrCanvas','orrLegend','ringList','orrUps','facTitle','capNote','upgQueue','upgMore','jellyName','ascText','ascReq',
-   'orrBest','starfallBox','sfText','sfReq','sfGain','sfBtn','cstSec','cstDust','cstWrap','cstCanvas','cstInfo','perkTitle','spTitle','spHint','cine','cineCanvas','cineTitle','cineSub','cineSkip'].forEach(id=>ui[id]=document.getElementById(id));
+   'orrBest','starfallBox','sfText','sfReq','sfGain','sfBtn','cstSec','cstDust','cstWrap','cstCanvas','cstInfo','perkTitle','spTitle','spHint','cine','cineCanvas','cineTitle','cineSub','cineSkip','penUpBtn','mergeAllBtn','mergeAllTxt','sheet','dock','upgHelp','facHint','upgCount'].forEach(id=>ui[id]=document.getElementById(id));
   ui.rush=$('#rush'); ui.mBubble=$('#mentorBubble');
   $('#eggImg').src=eggImg(); $('#ascImg').src=JELLY_IMG; ui.golden.src=GOLD_IMG; $('#dEggImg').src=DEGG_IMG; ui.mentorImg.src=mentorImg();
   buildTabs(true);
   ui.lvlBtn.onclick=()=>{ sfx('click'); openChronicle(); };
   ui.mentorImg.onclick=()=>{ audioUnlock(); sfx('click'); const was=S.settings.mentor; S.settings.mentor=true; say(tipText(),4000); S.settings.mentor=was; };
   ui.coachBtn.onclick=nextCoach;
+  ui.penUpBtn.onclick=()=>{ audioUnlock(); openSheet(); }; ui.mergeAllBtn.onclick=()=>{ audioUnlock(); mergeAllOnce(); }; ui.upgHelp.onclick=()=>{ sfx('click'); openResearchGuide(); };
+  ui.dock.onclick=e=>{ const b=e.target.closest('[data-d]'); if(!b) return; const x=dockList().find(v=>v.id===b.dataset.d); if(x){ audioUnlock(); sfx('click'); x.fn(); } };
+  setupSheet();
   ui.announce.onclick=()=>{ ui.announce.hidden=true; };
   ui.cineSkip.onclick=()=>{ sfx('click'); endCine(); };
   ui.fuseGrid.onclick=e=>{ const b=e.target.closest('[data-f]'); if(!b) return; if(!fuseOne(+b.dataset.f)) nope(b); };
@@ -3033,9 +3471,10 @@ function buildUI(){
       const D=ST.door; if(D&&((x-D.x)/D.rx)**2+((y-D.y)/D.ry)**2<=1){ enterChamber(); return; } if(onTia){ tiaPopup(x,y); return; }
       if(W&&Math.hypot(x-W.x,y-W.y)<36) catchWisp(); else hollowTap(x,y); return; }
     if(onTia){ tiaPopup(x,y); return; }
+    if(ST.pk) for(const h of ST.pk) if(Math.hypot(x-h.x,y-h.y)<h.r){ collectPumpkin(h); return; }
     const P=ST.portal; if(P&&S.level>=HOLLOW_LV&&((x-P.x)/P.rx)**2+((y-P.y)/P.ry)**2<=1){ enterHollow(); return; }
     if(B){ if(B.phase==='fight') bossTap(x,y); return; }
-    setLook(x,y,k); ST.lookUntil=Date.now()+1200;
+    setLook(x,y,k); ST.lookUntil=nowT()+1200;
     const dx=(x-k.cx)/(k.w*.62), dy=(y-(k.by-k.h*.55))/(k.h*.78); if(dx*dx+dy*dy<=1.35) tapKing(x,y); });
   ST.cv.addEventListener('pointermove',e=>{ if(e.pointerType!=='mouse') return; const r=ST.cv.getBoundingClientRect(); ST.hover=true; setLook(e.clientX-r.left,e.clientY-r.top,kingGeom()); });
   ST.cv.addEventListener('pointerleave',()=>{ ST.hover=false; });
@@ -3072,7 +3511,8 @@ const PENUPS=[
  {k:'hatch',ico:'🐣',name:'Hatchery',lvl:()=>S.hatchLvl,max:12,cost:()=>400*Math.pow(5,S.hatchLvl),desc:()=>S.hatchLvl?'Free egg every '+hatchInt().toFixed(1)+'s → '+hatchInt(S.hatchLvl+1).toFixed(1)+'s':'Hatches a free egg every '+hatchInt(1).toFixed(0)+'s',buy:()=>{S.hatchLvl++;}},
  {k:'pen',ico:'🏡',name:'Bigger Pen',sname:'Bigger Nebula',lvl:()=>S.penLvl,max:3,cost:()=>2500*Math.pow(60,S.penLvl),desc:()=>penSize()+' → '+(penSize()+4)+' spaces',buy:()=>{S.penLvl++; renderBoard();}},
  {k:'am',ico:'🤖',name:'Auto-Merger',lvl:()=>S.amLvl,max:6,cost:()=>2e5*Math.pow(25,S.amLvl),desc:()=>S.amLvl?'Merges a pair every '+amInt().toFixed(1)+'s → '+amInt(S.amLvl+1).toFixed(1)+'s':'A robot merges matching '+RL().slimes+' for you',buy:()=>{S.amLvl++;}},
- {k:'twin',ico:'🍳',name:'Twin Yolks',show:()=>S.level>=30,lvl:()=>S.twinLvl,max:5,cost:()=>1e10*Math.pow(50,S.twinLvl),desc:()=>(S.hatchLvl?'':'Works with the Hatchery. ')+'The Hatchery lays two eggs '+S.twinLvl*10+'% → '+(S.twinLvl+1)*10+'% of the time',buy:()=>{S.twinLvl++;}}
+ {k:'twin',ico:'🍳',name:'Twin Yolks',show:()=>S.level>=30,lvl:()=>S.twinLvl,max:5,cost:()=>1e10*Math.pow(50,S.twinLvl),desc:()=>(S.hatchLvl?'':'Works with the Hatchery. ')+'The Hatchery lays two eggs '+S.twinLvl*10+'% → '+(S.twinLvl+1)*10+'% of the time',buy:()=>{S.twinLvl++;}},
+ {k:'ma',ico:'⚡',name:'Merge All',show:()=>S.level>=MERGEALL_LV,lvl:()=>S.maLvl,max:4,cost:()=>1e8*Math.pow(100,S.maLvl),desc:()=>S.maLvl?'One press merges every matching pair once. Cooldown '+MA_CD[S.maLvl-1]+'s'+(S.maLvl<4?' → '+MA_CD[S.maLvl]+'s':''):'A button that merges every matching pair in the '+RL().pen+' once, then rests for a minute',buy:()=>{ S.maLvl++; if(S.maLvl===1) intro('ma',()=>coach([{el:'#mergeAllBtn',text:'<b>Merge all</b> merges every matching pair once. Press again after the cooldown for the next layer.'}]),8); }}
 ];
 function buildPenUps(){
   ui.penUps.innerHTML=PENUPS.map(p=>'<div class="pu card" data-k="'+p.k+'"><span class="pi">'+p.ico+'</span><div><div class="pn">'+(S.realm==='sky'&&p.sname||p.name)+'<em></em></div><div class="pd"></div>'+(p.k==='am'?'<div class="amtoggle" hidden>Robot <button class="sw" role="switch" id="amSw" aria-label="Auto-Merger on or off"></button></div>':'')+'</div><button class="btn"></button></div>').join('');
@@ -3081,7 +3521,7 @@ function buildPenUps(){
   ui.amSw=$('#amSw'); ui.amSw.onclick=()=>{ S.amOn=!S.amOn; sfx('click'); uiTick(); };
 }
 function renderBoard(){
-  const n=penSize(), b=ui.board, now=Date.now();
+  const n=penSize(), b=ui.board, now=nowT();
   if(b.children.length!==n){ b.innerHTML=''; for(let i=0;i<n;i++){ const c=document.createElement('div'); c.className='cell'; c.dataset.i=i; b.appendChild(c); } }
   for(let i=0;i<n;i++){ const c=b.children[i], L=S.board[i], h=hatching[i]>now, key=L+(h?'h':'');
     if(c._k===key&&!popSet.has(i)) continue;
@@ -3093,34 +3533,62 @@ function renderBoard(){
     if(wasEgg||popSet.has(i)){ c.classList.remove('pop'); void c.offsetWidth; c.classList.add('pop'); setTimeout(()=>c.classList.remove('pop'),520); }
   }
   popSet.clear();
+  if(sel&&S.board[sel.i]!==sel.L) clearSel();
 }
 // iOS can swallow "click" on a page that changes this often, so touch taps on buttons fire on pointerup instead.
 // Safari still sends its own click a moment later. If the screen changed in between (a window closed or opened),
 // that late "ghost" click would land on whatever is now under the finger, so it is blocked wherever it lands.
 let ghost=null;
-function blockGhost(x,y){ ghost={x,y,t:Date.now()}; }
+function blockGhost(x,y){ ghost={x,y,t:nowT()}; }
 function setupTouchTaps(){
   let down=null;
   document.addEventListener('pointerdown',e=>{ const b=e.pointerType!=='mouse'&&e.target.closest?e.target.closest('button'):null; down=b?{b,x:e.clientX,y:e.clientY,id:e.pointerId}:null; },true);
   document.addEventListener('pointercancel',()=>{ down=null; },true);
   document.addEventListener('pointerup',e=>{ const d=down; down=null; if(!d||e.pointerId!==d.id||d.b.disabled||!d.b.isConnected) return;
     if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>14) return; blockGhost(e.clientX,e.clientY); d.b.click(); },true);
-  document.addEventListener('click',e=>{ if(!e.isTrusted||!ghost||Date.now()-ghost.t>800) return; if(Math.hypot(e.clientX-ghost.x,e.clientY-ghost.y)>40) return; e.stopImmediatePropagation(); e.preventDefault(); },true);
+  document.addEventListener('click',e=>{ if(!e.isTrusted) return;
+    // right after a window opens or closes, the screen under the finger has changed: ignore the late click completely
+    if(nowT()-modalFlip<450){ e.stopImmediatePropagation(); e.preventDefault(); return; }
+    if(!ghost||nowT()-ghost.t>800) return; if(Math.hypot(e.clientX-ghost.x,e.clientY-ghost.y)>40) return; e.stopImmediatePropagation(); e.preventDefault(); },true);
 }
-let drag=null;
+let drag=null, sel=null;
+// on a phone the pen scrolls like the rest of the page: a slime is picked up after a short hold (or a sideways move),
+// and a quick tap selects it instead. Tap a matching slime to merge, or an empty space to move it there.
+function clearSel(){ if(!sel) return; for(const c of ui.board.children) c.classList.remove('sel','match'); sel=null; }
+function selectCell(i){ clearSel(); const L=S.board[i], c=ui.board.children[i]; if(!L||!c) return; sel={i,L}; c.classList.add('sel');
+  if(L<MAXL) for(const o of ui.board.children) if(o!==c&&S.board[+o.dataset.i]===L&&!(hatching[+o.dataset.i]>nowT())) o.classList.add('match'); }
+function tapCell(i){ const L=S.board[i], now=nowT();
+  if(sel&&S.board[sel.i]!==sel.L) clearSel();
+  if(!sel){ if(L&&!(hatching[i]>now)){ selectCell(i); tapPen(i); } return; }
+  const from=sel.i; if(from===i){ clearSel(); tapPen(i); return; }
+  if(!L){ clearSel(); dropCell(from,i); return; }
+  if(hatching[i]>now) return;
+  if(L===sel.L&&L<MAXL){ clearSel(); if(!S.tut.tapmerge){ S.tut.tapmerge=1; } mergeCells(from,i); computeG(); uiTick(); return; }
+  selectCell(i); tapPen(i); }
 function setupDrag(){
-  const board=ui.board;
-  board.addEventListener('pointerdown',e=>{ const cell=e.target.closest('.cell'); if(!cell) return; const i=+cell.dataset.i, L=S.board[i]; if(!L||hatching[i]>Date.now()) return; e.preventDefault(); audioUnlock(); drag={i,L,x0:e.clientX,y0:e.clientY,moved:false,id:e.pointerId,cell};
+  const board=ui.board, HOLD=170;
+  const arm=d=>{ if(drag!==d||d.armed) return; d.armed=true; clearSel(); d.cell.classList.add('lift'); };
+  const show=(d,e)=>{ d.moved=true; d.cell.classList.remove('lift'); ui.ghost.src=SPIMG[d.L]; ui.ghost.hidden=false; d.cell.classList.add('dragging'); for(const c of ui.board.children) if(c!==d.cell&&S.board[+c.dataset.i]===d.L&&d.L<MAXL) c.classList.add('match'); };
+  const reset=()=>{ ui.ghost.hidden=true; for(const c of ui.board.children) c.classList.remove('match','over','dragging','lift'); if(sel){ const s=sel; sel=null; selectCell(s.i); } };
+  board.addEventListener('pointerdown',e=>{ const cell=e.target.closest('.cell'); if(!cell) return; const i=+cell.dataset.i, L=S.board[i]; e.preventDefault(); audioUnlock();
+    const d={i,L,x0:e.clientX,y0:e.clientY,moved:false,armed:false,id:e.pointerId,cell,touch:e.pointerType!=='mouse',empty:!L||hatching[i]>nowT()}; drag=d;
+    if(d.empty) return;
+    if(!d.touch) d.armed=true; else d.timer=setTimeout(()=>arm(d),HOLD);
     try{ board.setPointerCapture(e.pointerId); }catch(err){} });
-  window.addEventListener('blur',()=>{ if(!drag) return; drag=null; ui.ghost.hidden=true; for(const c of ui.board.children) c.classList.remove('match','over','dragging'); });
-  window.addEventListener('pointermove',e=>{ if(!drag||e.pointerId!==drag.id) return; const dx=e.clientX-drag.x0, dy=e.clientY-drag.y0;
-    if(!drag.moved&&Math.hypot(dx,dy)>7){ drag.moved=true; ui.ghost.src=SPIMG[drag.L]; ui.ghost.hidden=false; drag.cell.classList.add('dragging'); for(const c of ui.board.children) if(c!==drag.cell&&S.board[+c.dataset.i]===drag.L&&drag.L<MAXL) c.classList.add('match'); }
-    if(drag.moved){ const ar=ui.app.getBoundingClientRect(); ui.ghost.style.left=(e.clientX-ar.left)+'px'; ui.ghost.style.top=(e.clientY-ar.top)+'px'; const t=document.elementFromPoint(e.clientX,e.clientY), tc=t&&t.closest('.cell'); if(drag.over&&drag.over!==tc) drag.over.classList.remove('over'); if(tc&&tc!==drag.cell){ tc.classList.add('over'); drag.over=tc; } } });
-  const end=e=>{ if(!drag||e.pointerId!==drag.id) return; const d=drag; drag=null; ui.ghost.hidden=true; for(const c of ui.board.children) c.classList.remove('match','over','dragging');
-    if(!d.moved){ tapPen(d.i); return; }
-    if(e.type==='pointercancel') return;
-    const t=document.elementFromPoint(e.clientX,e.clientY), tc=t&&t.closest('.cell'); if(!tc||!ui.board.contains(tc)) return; dropCell(d.i,+tc.dataset.i); };
+  // once a slime is picked up, the page must not scroll under the finger
+  board.addEventListener('touchmove',e=>{ if(drag&&drag.armed) e.preventDefault(); },{passive:false});
+  window.addEventListener('blur',()=>{ if(!drag) return; clearTimeout(drag.timer); drag=null; reset(); });
+  window.addEventListener('pointermove',e=>{ const d=drag; if(!d||e.pointerId!==d.id||d.empty) return; const dx=e.clientX-d.x0, dy=e.clientY-d.y0, dist=Math.hypot(dx,dy);
+    if(!d.armed){ if(dist>7){ clearTimeout(d.timer); if(Math.abs(dx)>Math.abs(dy)*1.2) arm(d); else { d.scroll=true; return; } } else return; }
+    if(!d.moved&&dist>7) show(d,e);
+    if(d.moved){ const ar=ui.app.getBoundingClientRect(); ui.ghost.style.left=(e.clientX-ar.left)+'px'; ui.ghost.style.top=(e.clientY-ar.top)+'px'; const t=document.elementFromPoint(e.clientX,e.clientY), tc=t&&t.closest('.cell'); if(d.over&&d.over!==tc) d.over.classList.remove('over'); if(tc&&tc!==d.cell){ tc.classList.add('over'); d.over=tc; } } });
+  const end=e=>{ const d=drag; if(!d||e.pointerId!==d.id) return; drag=null; clearTimeout(d.timer); reset();
+    if(e.type==='pointercancel'||d.scroll) return;
+    if(!d.moved){ if(Math.hypot(e.clientX-d.x0,e.clientY-d.y0)<=12) tapCell(d.i); return; }
+    clearSel(); const t=document.elementFromPoint(e.clientX,e.clientY), tc=t&&t.closest('.cell'); if(!tc||!ui.board.contains(tc)) return; dropCell(d.i,+tc.dataset.i); };
   window.addEventListener('pointerup',end); window.addEventListener('pointercancel',end);
+  // tapping anywhere else lets go of the selected slime
+  document.addEventListener('pointerdown',e=>{ if(sel&&!(e.target.closest&&e.target.closest('.board'))) clearSel(); },true);
 }
 function dropCell(i,j){ if(i===j) return; const a=S.board[i], b=S.board[j];
   if(!b){ S.board[j]=a; S.board[i]=0; hatching[j]=0; }
@@ -3130,16 +3598,16 @@ function dropCell(i,j){ if(i===j) return; const a=S.board[i], b=S.board[j];
   sfx('click'); renderBoard(); }
 function twinPop(i){ if(tab!=='pen'||S.world==='hollow') return; setTimeout(()=>{ const c=ui.board.children[i]; if(!c) return; const cr=c.getBoundingClientRect(), ar=ui.app.getBoundingClientRect(); popText(cr.left-ar.left+cr.width/2,cr.top-ar.top,'Twins!'); },250); }
 // the first minutes, one step at a time: hatch an egg, then merge two slimes (factories come at 100 goo)
-function findPair(){ const seen={}, now=Date.now(); for(let i=0;i<penSize();i++){ const L=S.board[i]; if(!L||L>=MAXL||hatching[i]>now) continue; if(seen[L]!=null) return [seen[L],i]; seen[L]=i; } return null; }
+function findPair(){ const seen={}, now=nowT(); for(let i=0;i<penSize();i++){ const L=S.board[i]; if(!L||L>=MAXL||hatching[i]>now) continue; if(seen[L]!=null) return [seen[L],i]; seen[L]=i; } return null; }
 function pairRect(pr){ const a=ui.board.children[pr[0]], b=ui.board.children[pr[1]]; if(!a||!b) return null; const ra=a.getBoundingClientRect(), rb=b.getBoundingClientRect(), l=Math.min(ra.left,rb.left), t=Math.min(ra.top,rb.top); return {left:l,top:t,width:Math.max(ra.right,rb.right)-l,height:Math.max(ra.bottom,rb.bottom)-t}; }
 function introCoach(){ if(coachQ||!ui.modal.hidden||S.realm!=='meadow'||ascTotal()>0||S.world!=='meadow') return;
-  if(!S.tut.egg&&S.goo>=15&&!S.board.some(v=>v)&&!S.merges){ S.tut.egg=1; coach([{el:'#eggBtn',text:'You have 15 goo! <b>Hatch an egg</b> to get your first slime. Slimes in the pen make goo all by themselves.'}]); return; }
-  if(!S.tut.merge&&!S.merges){ const pr=findPair(); if(pr){ S.tut.merge=1; coach([{rect:()=>pairRect(pr),text:'Two matching slimes! <b>Drag one onto the other</b> to merge them into a bigger slime. Each size up makes about three times more goo.',after:()=>dragHint(pr)}]); } } }
+  if(!S.tut.egg&&S.goo>=15&&!S.board.some(v=>v)&&!S.merges){ S.tut.egg=1; intro('egg',()=>coach([{el:'#eggBtn',text:'You have 15 goo! <b>Hatch an egg</b> to get your first slime. Slimes in the pen make goo all by themselves.'}]),9); return; }
+  if(!S.tut.merge&&!S.merges){ const pr=findPair(); if(pr){ S.tut.merge=1; intro('merge',()=>{ const p2=findPair()||pr; coach([{rect:()=>pairRect(p2),text:'Two matching slimes! <b>Tap one, then the other</b> to merge them into a bigger slime. You can also hold one and drag it. Each size up makes about three times more goo.',after:()=>dragHint(p2)}]); },9); } } }
 function dragHint(pr){ const a=ui.board.children[pr[0]], b=ui.board.children[pr[1]], L=S.board[pr[0]]; if(!a||!b||!L||S.board[pr[1]]!==L) return;
   const ar=ui.app.getBoundingClientRect(), ra=a.getBoundingClientRect(), rb=b.getBoundingClientRect(), d=document.createElement('div'); if(!d.animate) return;
-  d.className='hintghost'; d.innerHTML='<img src="'+SPIMG[L]+'" alt=""><span>👆</span>'; d.style.left=(ra.left-ar.left+ra.width/2)+'px'; d.style.top=(ra.top-ar.top+ra.height/2)+'px'; ui.app.appendChild(d);
-  const dx=rb.left-ra.left, dy=rb.top-ra.top, an=d.animate([{transform:'translate(0,0)',opacity:0},{transform:'translate(0,0)',opacity:1,offset:.15},{transform:'translate('+dx+'px,'+dy+'px)',opacity:1,offset:.75},{transform:'translate('+dx+'px,'+dy+'px)',opacity:0}],{duration:1600,iterations:3,easing:'ease-in-out'});
-  an.onfinish=()=>d.remove(); setTimeout(()=>{ if(d.isConnected) d.remove(); },5200); }
+  d.className='hintghost'; d.innerHTML='<span>👆</span>'; d.style.left=(ra.left-ar.left+ra.width/2)+'px'; d.style.top=(ra.top-ar.top+ra.height/2)+'px'; ui.app.appendChild(d);
+  const dx=rb.left-ra.left, dy=rb.top-ra.top, an=d.animate([{transform:'translate(0,0)',opacity:0},{transform:'translate(0,0)',opacity:1,offset:.1},{transform:'translate(0,0) scale(.8)',offset:.2},{transform:'translate(0,0)',offset:.3},{transform:'translate('+dx+'px,'+dy+'px)',offset:.55},{transform:'translate('+dx+'px,'+dy+'px) scale(.8)',offset:.65},{transform:'translate('+dx+'px,'+dy+'px)',opacity:1,offset:.78},{transform:'translate('+dx+'px,'+dy+'px)',opacity:0}],{duration:1800,iterations:3,easing:'ease-in-out'});
+  an.onfinish=()=>d.remove(); setTimeout(()=>{ if(d.isConnected) d.remove(); },5900); }
 function tapPen(i){ const L=S.board[i]; if(!L) return; S.pets++; const c=ui.board.children[i]; if(c){ c.classList.remove('wiggle'); void c.offsetWidth; c.classList.add('wiggle'); }
   ui.penInfo.innerHTML='<b style="color:#fff">Lv.'+L+' '+SPECIES[L-1].n+'</b> makes '+fmt(slimeProd(L)*M.pen*(1+M.feeding*G.totalFac)*M.all*G.mult,true)+' goo/s'+(L<MAXL?' · merge two to get a '+SPECIES[L].n:'');
   sfx('egg'); }
@@ -3154,27 +3622,36 @@ function buildFacList(){ const list=[]; let tease=-1; for(let i=0;i<FACT.length;
   ui.facRows=list.map(i=>{ const r=ui.facList.querySelector('[data-row="'+i+'"]'); return {i,row:r,own:r.querySelector('.fac-own'),stars:r.querySelector('.fac-stars'),sub:r.querySelector('.fac-sub'),bar:r.querySelector('.bar i'),mt:r.querySelector('.fac-mile span:last-child'),btn:r.querySelector('.buy'),bn:r.querySelector('.bn'),bc:r.querySelector('.bc'),bg:r.querySelector('.bg'),star:r.querySelector('.star-btn'),k:{}}; }); }
 function buyFac(i,btn){ audioUnlock(); const R=RL(); if(facRoom(i)<=0){ nope(btn); toast('<span class="ti">🔒</span><span><b>Cap reached!</b> Create a Lv.'+(S.runBest+1)+' '+R.slime+' to own more.</span>'); return; }
   const n=facWant(i); if(n<=0){ nope(btn); return; } const c=facCost(i,n); if(c>S.goo){ nope(btn); return; }
-  S.goo=Math.max(0,S.goo-c); const before=S.fac[i]; S.fac[i]+=n; sfx('buy'); if(!before) gainXP(20);
-  for(const m of MILES) if(before<m&&S.fac[i]>=m){ gainXP(25); toast('<span class="ti">'+FACT[i].ico+'</span><span><b>'+FACT[i].name+' milestone!</b><br>'+m+' owned: output ×2</span>','gold'); }
+  S.goo=Math.max(0,S.goo-c); const before=S.fac[i]; S.fac[i]+=n; goalAdd('fac',n); sfx('buy'); if(!before) gainXP(20);
+  if(!S.tut.mile&&S.fac[i]>=MILES[0]){ S.tut.mile=1; S.tut.mileT=1e9; mileReveal(i); }
+  else for(const m of MILES) if(before<m&&S.fac[i]>=m){ gainXP(25); toast('<span class="ti">'+FACT[i].ico+'</span><span><b>'+FACT[i].name+' milestone!</b><br>'+m+' owned: output ×2</span>','gold'); }
   if(S.fac[i]>=facCap()&&!S.tut.cap){ S.tut.cap=1; setTimeout(()=>coach([{el:'#capNote',text:'You hit the <b>cap</b>! You can own '+facCap()+' of each '+(S.realm==='sky'?'celestial body':'factory')+' right now. To raise it, merge a bigger '+R.slime+' in the '+R.pen+'. Merging is the key to everything!'}]),300); }
   computeG(); syncHoppers(); uiTick(); }
+// the first time a factory reaches 10, the ×2 milestones are revealed with a little show
+function mileReveal(i){ gainXP(25); sfx('levelup'); const f=FACT[i];
+  setTimeout(()=>{ const r=ui.facList.querySelector('[data-row="'+i+'"]'); if(r&&tab==='fac'){ const cr=r.getBoundingClientRect(), ar=ui.app.getBoundingClientRect(); popText(cr.left-ar.left+cr.width/2,cr.top-ar.top+cr.height*.3,'×2 OUTPUT!'); if(r.animate) r.animate([{transform:'scale(1)'},{transform:'scale(1.04)',boxShadow:'0 0 24px rgba(255,212,63,.8)'},{transform:'scale(1)'}],{duration:700,easing:'ease-out'}); } },60);
+  toast('<span class="ti">'+f.ico+'</span><span><b>Milestone! '+f.name+' ×2</b><br>10 owned: double output</span>','gold');
+  intro('mile',()=>{ S.tut.mileT=S.playTime; coach([{el:()=>ui.facList.querySelector('[data-row="'+i+'"] .fac-mile')||ui.facList,text:'You found a <b>milestone</b>! When you own <b>10</b> of a '+(S.realm==='sky'?'celestial body':'factory')+', it makes <b>twice</b> as much goo. It happens again at 25, 50, 100 and beyond. This bar shows how close the next one is.'},{el:()=>ui.buyMode.querySelector('[data-m="next"]')||ui.buyMode,text:'Tip: <b>Next ×2</b> buys exactly enough to reach the next milestone.'}]); },9,()=>!!S.tut.i_tab_fac&&tab==='fac'); }
 function buyStar(i,btn){ const k=tierOf(i), u=UPMAP['f'+i+'_'+k]; if(!u) return;
   if(!u.unlock()){ nope(btn); toast('<span class="ti">★</span><span>Own <b>'+TIERS[k][1]+' '+FACT[i].plural+'</b> to unlock this upgrade.</span>'); return; }
   if(S.goo<u.cost){ nope(btn); return; } S.goo-=u.cost; S.ups[u.id]=true; sfx('buy'); gainXP(10); recalc(); computeG();
   toast('<span class="ti">'+FACT[i].ico+'</span><span><b>'+upgName(u)+'!</b><br>'+FACT[i].plural+' make ×2 goo</span>','gold'); uiTick(); }
 function pctTxt(v){ return v<1e6?Math.round(v).toLocaleString('en-US'):fmt(v); }
 function setTxt(el,v,html){ if(el._v===v) return; el._v=v; if(html) el.innerHTML=v; else el.textContent=v; }
-function updateFac(best){ if(!ui.facRows) return; const m=G.mult||1, cap=facCap(), R=RL();
+function updateFac(best){ if(!ui.facRows) return; const m=G.mult||1, cap=facCap(), R=RL(), ms=mileShown(), ro=researchOpen();
+  // the early game stays simple: milestones appear when the first factory reaches 10, ★ upgrades when Research opens
+  ui.capNote.hidden=!(ms||S.tut.cap); ui.facHint.hidden=!ms; const nb=ui.buyMode.querySelector('[data-m="next"]'); if(nb){ nb.hidden=!ms; if(!ms&&buyMode==='next'){ buyMode=1; for(const x of ui.buyMode.children) x.setAttribute('aria-pressed',x.dataset.m==='1'); } }
   const next=S.runBest<MAXL?Math.max(10,10*(S.runBest+1)+2*S.level):0;
   setTxt(ui.capNote,'<span style="font-size:18px">📦</span><span>Own up to <b>'+cap+'</b> of each.'+(next?' A Lv.'+(S.runBest+1)+' '+R.slime+' raises it to <b>'+next+'</b>.':'')+'</span>',true);
   ui.facRows.forEach(r=>{ const i=r.i, c=S.fac[i], k=tierOf(i), u=UPMAP['f'+i+'_'+k];
     setTxt(r.own,c+'/'+cap); r.own.classList.toggle('full',c>=cap);
+    r.stars.hidden=!ro; r.bar.parentNode.parentNode.hidden=!ms;
     setTxt(r.stars,'★'.repeat(k)+'<i>'+'★'.repeat(TIERS.length-k)+'</i>',true);
     setTxt(r.sub,c?'+'+fmt(facEach(i)*m,true)+'/s each · <b>'+fmt((G.fac[i]||0)*m,true)+'/s</b>':FACT[i].desc,true);
     const nx=MILES.find(v=>v>c), pv=MILES.filter(v=>v<=c).pop()||0; if(nx){ r.bar.style.width=((c-pv)/(nx-pv)*100)+'%'; setTxt(r.mt,c+'/'+nx+' → ×2'); } else { r.bar.style.width='100%'; setTxt(r.mt,'All milestones!'); }
     if(facRoom(i)<=0){ setTxt(r.bn,'Cap reached'); setTxt(r.bc,'🔒'); setTxt(r.bg,'merge to raise'); r.btn.classList.add('off'); }
     else { const n=Math.max(1,facWant(i)), cost=facCost(i,n); setTxt(r.bn,'Buy ×'+n); setTxt(r.bc,fmt(cost)); setTxt(r.bg,'+'+fmt(facGain(i,n),true)+'/s'); r.btn.classList.toggle('off',S.goo<cost||facWant(i)<1); }
-    if(!u||!c) r.star.hidden=true; else { r.star.hidden=false; const ok=u.unlock(); setTxt(r.star,ok?'★ '+TIERS[k][0]+' ×2<br>'+fmt(u.cost):'★ at '+TIERS[k][1]+' owned',true); r.star.classList.toggle('lock',!ok); r.star.classList.toggle('off',ok&&S.goo<u.cost); }
+    if(!u||!c||!ro) r.star.hidden=true; else { r.star.hidden=false; const ok=u.unlock(); setTxt(r.star,ok?'★ '+TIERS[k][0]+' ×2<br>'+fmt(u.cost):'★ at '+TIERS[k][1]+' owned',true); r.star.classList.toggle('lock',!ok); r.star.classList.toggle('off',ok&&S.goo<u.cost); }
     const isBest=!!best&&best.i===i&&best.t!=='upg'; r.row.classList.toggle('best',isBest); r.star.classList.toggle('bestb',isBest&&best.t==='star'); }); }
 // the "best value" tag: the purchase that pays itself back fastest, counting the wait to afford it
 function bestPick(){ if(!G.base) return null; const cand=[];
@@ -3187,10 +3664,10 @@ function bestPick(){ if(!G.base) return null; const cand=[];
 /* upgrades: only the next three special upgrades, like a queue */
 function upgQueue(){ return UPGRADES.filter(u=>!u.tier&&!S.ups[u.id]&&u.unlock()).sort((a,b)=>a.cost-b.cost); }
 function renderUpg(force,best){ const q=upgQueue(), show=q.slice(0,3), key=show.map(u=>u.id).join(',')+S.settings.fmt;
-  if(force||key!==ui.upgKey){ ui.upgKey=key; ui.upgQueue.innerHTML=show.length?show.map(u=>'<button class="upg" data-id="'+u.id+'"><span class="ui">'+u.ico+'</span><span class="un">'+u.name+'</span><span class="ud">'+u.desc+'</span><span class="ug"></span><span class="uc">'+fmt(u.cost)+'</span></button>').join(''):'<p class="hint">No upgrades right now. Earn more goo to unlock the next one.</p>'; }
+  if(force||key!==ui.upgKey){ ui.upgKey=key; ui.upgQueue.innerHTML=show.length?show.map(u=>'<button class="upg" data-id="'+u.id+'"><span class="ui">'+u.ico+'</span><span class="un"><i class="ucat" style="--cc:'+RCAT[upgCat(u)].c+'">'+RCAT[upgCat(u)].n+'</i>'+u.name+'</span><span class="ud">'+u.desc+'</span><span class="ug"></span><span class="uc">'+fmt(u.cost)+'</span></button>').join(''):'<p class="hint">Nothing to research right now. Earn more goo to unlock the next project.</p>'; }
   for(const b of ui.upgQueue.children){ const u=UPMAP[b.dataset.id]; if(!u) continue; const ok=S.goo>=u.cost; b.classList.toggle('can',ok); b.classList.toggle('cant',!ok); b.classList.toggle('best',!!best&&best.t==='upg'&&best.id===u.id); const g=upgGain(u), el=b.querySelector('.ug'); if(el) setTxt(el,g>0?'Adds +'+fmt(g,true)+'/s':u.e.tap?'Each tap +'+fmt(M.tap*M.all*(u.e.tap-1),true)+' goo':u.e.tapPct?'Each tap +'+fmt(u.e.tapPct*G.base,true)+' goo':''); }
   const total=UPGRADES.filter(u=>!u.tier).length, owned=UPGRADES.filter(u=>!u.tier&&S.ups[u.id]).length, more=q.length-show.length;
-  setTxt(ui.upgMore,(more>0?more+' more waiting in the queue · ':'')+owned+' of '+total+' upgrades owned · ★ factory upgrades live on the '+tabName('fac')+' tab'); }
+  setTxt(ui.upgCount,'· '+owned+'/'+total); setTxt(ui.upgMore,(more>0?more+' more waiting in the queue · ':'')+'Tap <b>?</b> to see every Research category · ★ '+(S.realm==='sky'?'celestial':'factory')+' upgrades live on the '+tabName('fac')+' tab',true); }
 function buyUpg(id,btn){ const u=UPMAP[id]; if(!u||S.ups[id]) return; if(S.goo<u.cost){ nope(btn); return; } S.goo-=u.cost; S.ups[id]=true; sfx('buy'); gainXP(10); recalc(); computeG();
   if(btn&&btn.animate) btn.animate([{transform:'scale(1)'},{transform:'scale(1.04)'},{transform:'scale(.9)',opacity:0}],{duration:260,easing:'ease-in'}); setTimeout(()=>{ renderUpg(true); uiTick(); },btn&&btn.animate?240:0); }
 
@@ -3205,7 +3682,7 @@ function askAscend(){ const g=jellyGain(), R=RL(), req=ascReq(), sky=S.realm==='
   $('#ascNo').onclick=closeModal; $('#ascYes').onclick=()=>{ closeModal(); if(RM||!ST.w) doAscend(); else { const k=kingGeom(); sfx('ascend'); startTrans(k.cx,k.by-k.h*.5,sky?'#e6fbff':'#ffd9ec',sky?'rgba(127,232,255,.95)':'rgba(255,111,181,.95)',doAscend); } }; }
 function doAscend(){ const g=jellyGain(); if(g<=0||S.level<ascReq()) return; const sky=S.realm==='sky';
   const keep=['earnedAll','earnedRealm','taps','crits','merges','pets','goldens','rushes','offline','perks','ach','maxSpecies','skyMax','jelly','jellyEarned','settings','playTime','created','bestGps',
-    'level','xp','tenPow','tut','freeEggs','arts','bossNext','bossKills','bossEscapes','hollow','world','realm','ascensions','skyAsc','starfalls','stardust','stardustAll','cst','conj','grands','seenTabs'];
+    'level','xp','tenPow','tut','freeEggs','arts','bossNext','bossKills','bossEscapes','hollow','world','realm','ascensions','skyAsc','starfalls','stardust','stardustAll','cst','conj','grands','seenTabs','gems','items','bpNew','cos','login','goals','wheel','season'];
   const k={}; keep.forEach(x=>k[x]=S[x]); k.jelly+=g; k.jellyEarned+=g; if(sky) k.skyAsc++; else k.ascensions++;
   S=Object.assign(fresh(),k);
   if(S.perks.start){ S.fac[0]=10; S.fac[1]=5; } if(S.perks.merger) S.amLvl=1; if(S.perks.rhatch) S.hatchLvl=Math.max(S.hatchLvl,3); if(S.hollow.sh.merger) S.amLvl=Math.max(S.amLvl,3);
@@ -3241,18 +3718,21 @@ function renderTro(){
   ui.spCount.textContent=cm+'/'+MAXL;
   const n=Object.keys(S.ach).length; ui.trCount.textContent=n+'/'+ACH.length;
   ui.trGrid.innerHTML=ACH.map(a=>{ const ok=!!S.ach[a.id]; return '<div class="tr'+(ok?'':' locked')+'"><span class="ti">'+(ok?a.ico:'🔒')+'</span><div><b>'+a.name+'</b><span>'+a.desc+'</span></div></div>'; }).join('');
-  ui.troAt=Date.now(); }
+  ui.troAt=nowT(); }
 
 /* ui tick */
 const NEWTAB_TIPS={fac:R=>'<b>'+tabName('fac')+'</b> unlocked! '+(S.realm==='sky'?'Celestial bodies':'Factories')+' make goo all by themselves. Merging bigger '+R.slimes+' unlocks new ones and raises how many you can own.',
-  upg:()=>'<b>Upgrades</b> unlocked! The next three always wait here in a queue. Not sure what to buy? Look for the gold <b>BEST VALUE</b> tag.',
+  upg:()=>'<b>Research</b> unlocked! The next three projects always wait here, and ★ upgrades now appear on your '+(S.realm==='sky'?'celestial bodies':'factories')+'. Not sure what to buy? Look for the gold <b>BEST VALUE</b> tag.',
   asc:R=>'The <b>Ascend</b> tab is open. Ascending trades your kingdom for <b>'+R.jelly+'</b>, which boosts everything forever.',
-  col:()=>'Your <b>'+tabName('col')+'</b> keeps your stats, every '+RL().slime+' you have discovered and your trophies.'};
+  col:()=>'Your <b>'+tabName('col')+'</b> keeps your stats, every '+RL().slime+' you have discovered and your trophies. Every trophy also gives you 1 <b>💎 Gem</b>.'};
 function uiTick(){
   const hol=S.world==='hollow', Hh=S.hollow, R=RL();
   if(buildTabs()){ setTab(ui.tabMap[tab]?tab:(hol?'nest':'pen')); return; }
   while(ui.newTabs.length){ const id=ui.newTabs.shift(), t=tabList().find(x=>x.id===id); if(!t) continue; sfx('discover'); toast('<span class="ti">'+t.ico+'</span><span><b>New tab: '+t.l+'!</b></span>','gold');
-    if(NEWTAB_TIPS[id]&&!S.tut['tab_'+id]){ S.tut['tab_'+id]=1; const txt=NEWTAB_TIPS[id](R); if(id==='fac'||id==='upg') setTimeout(()=>coach([{el:()=>ui.tabMap[id],text:txt}]),500); else say(txt,8000); } }
+    if(NEWTAB_TIPS[id]&&!S.tut['tab_'+id]){ S.tut['tab_'+id]=1; const txt=NEWTAB_TIPS[id](R); intro('tab_'+id,()=>{ if(id==='fac'||id==='upg'||unlocked(id)) coach([{el:()=>ui.tabMap[id],text:txt}]); else say(txt,8000); },unlocked(id)?9:id==='fac'?4:id==='upg'?3:1); } }
+  unlockTick(); introTick(); updateDock(); rollGoals();
+  // a new day while the game is open: the daily reward shows up on its own (after the intro queue is quiet)
+  if(!AWAY.timer&&ui.modal.hidden&&!coachQ&&!INTRO.q.length&&performance.now()-(ui.sessT||0)>8000&&S.playTime-INTRO.last>20&&loginPending()) AWAY.timer=setTimeout(showWelcomeBack,350);
   if(hol){ setTxt(ui.gpsAmt,(Math.floor(nestRate()*10)/10).toLocaleString('en-US')); setTxt(ui.gpsUnit,'embers per minute'); }
   else { setTxt(ui.gpsAmt,fmt(G.total,true)); setTxt(ui.gpsUnit,'goo per second'); }
   ui.jellyChip.hidden=!S.jellyEarned; setTxt(ui.jellyAmt,fmt(S.jelly));
@@ -3260,7 +3740,7 @@ function uiTick(){
   ui.dustChip.hidden=!(S.stardustAll>0); setTxt(ui.dustAmt,fmt(S.stardust));
   setTxt(ui.lvlTxt,'Lv '+S.level); ui.lvlBar.style.width=(S.level>=100?100:clamp(S.xp/xpNeed(S.level),0,1)*100)+'%';
   ui.mentor.hidden=!S.settings.mentor||(!!B&&!hol);
-  if(hol){ setBadge('nest',0); setBadge('exp',Hh.exps.filter(e=>e.end<=Date.now()).length); setBadge('shop',SHOP_CONS.some(c=>Hh.scales>=c.cost)?'!':0); setBadge('hup',0);
+  if(hol){ setBadge('nest',0); setBadge('exp',Hh.exps.filter(e=>e.end<=nowT()).length); setBadge('shop',SHOP_CONS.some(c=>Hh.scales>=c.cost)?'!':0); setBadge('hup',0);
     if(tab==='nest'){ const c=dEggCost(), full=Hh.dragons.length>=nestCap(); setTxt(ui.dEggCost,full?'Nest is full':fmtE(c)+' embers'); ui.dEggBtn.classList.toggle('off',Hh.embers<c||full);
       const els=[...new Set(homeDragons().map(d=>d.el))]; setTxt(ui.nestRate,(Math.floor(nestRate()*10)/10).toLocaleString('en-US')); setTxt(ui.nestCount,Hh.dragons.length+'/'+nestCap()); setTxt(ui.patrolCount,patrolList().length+'/'+patrolCap());
       setTxt(ui.elemTxt,els.length?'Elements '+els.map(i=>ELEM[i].ico).join('')+' · +'+Math.round(((1+.2*els.length)*(els.length===4?1.25:1)-1)*100)+'%':''); renderNest(false); }
@@ -3270,47 +3750,47 @@ function uiTick(){
     if(ui.buffHtml){ ui.buffHtml=''; ui.buffs.innerHTML=''; }
     return; }
   // buffs
-  const now=Date.now(); let bh='';
+  const now=nowT(); let bh='';
   if(rushActive()) bh+='<div class="buff rush">'+R.rushName+' ×'+M.rushPow+'<span>'+Math.ceil((S.rushUntil-now)/1000)+'s</span></div>';
   { const rem=AWAKE_SEC-(now-lastTapAt)/1000, nm=S.realm==='sky'?'Star King':'King'; if(rem>0) bh+='<div class="buff awake">'+nm+' awake ×'+AWAKE_MULT+(rem<15?'<span>'+Math.ceil(rem)+'s</span>':'')+'</div>'; else if(S.taps>=15) bh+='<div class="buff sleep">💤 '+nm+' asleep · tap to wake</div>'; }
   if(tiaAtKing()) bh+='<div class="buff tia">Tiamatra ×1.5</div>';
   for(const b of S.buffs) bh+='<div class="buff">'+b.name+'<span>'+fmtTime(Math.ceil((b.until-now)/1000))+'</span></div>';
   if(bh!==ui.buffHtml){ ui.buffHtml=bh; ui.buffs.innerHTML=bh; }
   // badges
-  const best=bestPick(), q=upgQueue().slice(0,3);
-  setBadge('pen',0); setBadge('upg',q.filter(u=>S.goo>=u.cost).length);
-  setBadge('fac',FACT.filter((_,i)=>{ if(!facUnlocked(i)||!S.fac[i]) return false; const u=UPMAP['f'+i+'_'+tierOf(i)]; return u&&u.unlock()&&S.goo>=u.cost; }).length?'★':0);
+  const best=researchOpen()?bestPick():null, q=upgQueue().slice(0,3), penAff=penUpsOpen()&&PENUPS.some(p=>(!p.show||p.show())&&p.lvl()<p.max&&S.goo>=p.cost());
+  setBadge('pen',penAff&&ui.sheet.hidden?'!':0); setBadge('upg',q.filter(u=>S.goo>=u.cost).length);
+  setBadge('fac',researchOpen()&&FACT.filter((_,i)=>{ if(!facUnlocked(i)||!S.fac[i]) return false; const u=UPMAP['f'+i+'_'+tierOf(i)]; return u&&u.unlock()&&S.goo>=u.cost; }).length?'★':0);
   { const it=ascItems(); if(tab==='asc') S.ascSeen=it; setBadge('asc',it.some(x=>!S.ascSeen.includes(x))?'!':0); }
   setBadge('col',S.arts.slice(0,5).filter(n=>n>=3).length);
   if(S.realm==='sky'){ const free=S.orr.rings.reduce((a,ring,r)=>a+(ringOpen(r)?ring.filter(v=>!v).length:0),0); setBadge('orr',free&&S.board.some(v=>v)?free:0); }
-  if(tab==='pen'){ introCoach(); const ec=eggCost(), n=penSize(), full=!emptyCells().length, fr=S.freeEggs>0;
-    setTxt(ui.eggCost,full?R.pen+' is full':fr?'FREE ×'+S.freeEggs:fmt(ec)+' goo'); ui.eggBtn.classList.toggle('off',full||(!fr&&S.goo<ec)); ui.eggBtn.classList.toggle('gold',fr&&!full);
+  // the Pen upgrades panel is introduced once the first upgrade (the Hatchery) is affordable
+  if(!penUpsOpen()&&TABDEF[2].show()&&S.goo>=PEN_INTRO_GOO){ intro('penups',()=>{ S.tut.penups=1; if(tab!=='pen') setTab('pen'); uiTick(); coach([{el:'#penUpBtn',text:'You can afford a <b>Hatchery</b>: it lays free eggs for you! Your pen can learn new tricks here in <b>🏡 Upgrades</b>.'}]); },3); }
+  if(tab==='pen'){ introCoach(); const ec=eggCost(), n=penSize(), full=!emptyCells().length, bo=S.bonusEggs>0, fr=S.freeEggs>0;
+    setTxt(ui.eggCost,full?R.pen+' is full':bo?'BONUS ×'+S.bonusEggs:fr?'FREE ×'+S.freeEggs:fmt(ec)+' goo'); ui.eggBtn.classList.toggle('off',full||(!fr&&!bo&&S.goo<ec)); ui.eggBtn.classList.toggle('gold',(fr||bo)&&!full);
     setTxt(ui.penGps,fmt(G.pen*G.mult,true)); setTxt(ui.penCount,G.slimes+'/'+n); setTxt(ui.eggLvlTxt,'Lv.'+effEgg());
     ui.hatchRow.hidden=!S.hatchLvl; if(S.hatchLvl) setTxt(ui.hatchTxt,'every '+hatchInt().toFixed(1)+'s');
     ui.amRow.hidden=!S.amLvl; if(S.amLvl) setTxt(ui.amTxt,!S.amOn?'switched off':S.amProg>=1?'ready to merge':'every '+amInt().toFixed(1)+'s');
     ui.palRow.hidden=!S.ups.syn1; if(S.ups.syn1) setTxt(ui.palAmt,'+'+fmt((G.pal-1)*100,true)+'%');
-    ui.pu.forEach(x=>{ const p=x.p, l=p.lvl(), mx=l>=p.max; if(x.row) x.row.hidden=!!(p.show&&!p.show()); setTxt(x.lv,l?' Lv.'+l:''); setTxt(x.d,mx?'Maxed out!':p.desc()); if(mx){ setTxt(x.b,'MAX'); x.b.classList.add('off'); } else { const c=p.cost(); setTxt(x.b,fmt(c)); x.b.classList.toggle('off',S.goo<c); } });
+    ui.penUpBtn.hidden=!penUpsOpen(); const pb=ui.penUpBtn.querySelector('.badge'); pb.hidden=!penAff;
+    ui.mergeAllBtn.hidden=!S.maLvl; if(S.maLvl){ const cd=Math.max(0,((S.maNext||0)-now)/1000); setTxt(ui.mergeAllTxt,cd>0?Math.ceil(cd)+'s':'ready'); ui.mergeAllBtn.classList.toggle('off',cd>0); } }
+  if(!ui.sheet.hidden){ ui.pu.forEach(x=>{ const p=x.p, l=p.lvl(), mx=l>=p.max; if(x.row) x.row.hidden=!!(p.show&&!p.show()); setTxt(x.lv,l?' Lv.'+l:''); setTxt(x.d,mx?'Maxed out!':p.desc()); if(mx){ setTxt(x.b,'MAX'); x.b.classList.add('off'); } else { const c=p.cost(); setTxt(x.b,fmt(c)); x.b.classList.toggle('off',S.goo<c); } });
     const at=ui.penUps.querySelector('.amtoggle'); at.hidden=!S.amLvl; ui.amSw.setAttribute('aria-checked',S.amOn); }
-  else if(tab==='fac'){ buildFacList(); updateFac(best);
-    if(!S.tut.star){ const sb=[...ui.facList.querySelectorAll('.star-btn:not([hidden]):not(.off):not(.lock)')][0]; if(sb){ S.tut.star=1; coach([{el:()=>ui.facList.querySelector('.star-btn:not([hidden])'),text:'A <b>★ upgrade</b> is ready! It doubles this '+(S.realm==='sky'?'celestial body':'factory')+'\'s output. New stars unlock as you own more of it.'}]); } } }
+  if(tab==='fac'){ buildFacList(); updateFac(best);
+    if(!S.tut.star&&researchOpen()){ const sb=[...ui.facList.querySelectorAll('.star-btn:not([hidden]):not(.off):not(.lock)')][0]; if(sb){ S.tut.star=1; intro('star',()=>coach([{el:()=>ui.facList.querySelector('.star-btn:not([hidden])'),text:'A <b>★ upgrade</b> is ready! It doubles this '+(S.realm==='sky'?'celestial body':'factory')+'\'s output. New stars unlock as you own more of it.'}]),2); } } }
   else if(tab==='upg') renderUpg(false,best);
   else if(tab==='asc') renderAsc();
   else if(tab==='orr') renderOrr(false);
-  else if(tab==='col'&&(Date.now()-ui.troAt>2000||ui.fuseKey!==S.arts.join())) renderCol();
+  else if(tab==='col'&&(nowT()-ui.troAt>2000||ui.fuseKey!==S.arts.join())) renderCol();
 }
 function setBadge(id,v){ const t=ui.tabMap&&ui.tabMap[id]; if(!t) return; const b=t.querySelector('.badge');
   if(!v&&S.seenTabs[id]===1&&S.world!=='hollow'&&tab!==id){ b.hidden=false; b.classList.add('new'); if(b.textContent!=='NEW') b.textContent='NEW'; return; }
   b.classList.remove('new'); b.hidden=!v; if(v&&b.textContent!==String(v)) b.textContent=v; }
 
 /* modal */
-let modalOnClose=null;
-function openModal(html,onClose){ ui.modalBody.innerHTML=html; ui.modal.hidden=false; modalOnClose=onClose||null; }
-function closeModal(){ if(ui.modal.hidden) return; ui.modal.hidden=true; ui.modalBody.innerHTML=''; const f=modalOnClose; modalOnClose=null; if(f) f(); }
-function showWelcome(){ openModal('<div class="mcenter"><img src="'+SPIMG[1]+'" alt=""><h2 class="mh">Welcome to Slime Empire!</h2></div><ul class="howto"><li><span>👑</span>Tap the King Slime to squeeze out goo.</li><li><span>🐣</span>Hatch eggs in the Pen, then drag matching slimes together to merge them into stronger ones.</li><li><span>🏭</span>Bigger slimes unlock factories. Everything grows exponentially from there.</li><li><span>🌈</span>Tap fast to fill the Wobble meter for a Rush, and catch golden slimes when they appear.</li><li><span>⚙️</span>Music, sound and more live in Settings.</li></ul><div class="mcenter"><button class="btn" id="goBtn" style="font-size:20px;padding:10px 26px">Start squishing</button></div>',()=>audioUnlock()); $('#goBtn').onclick=()=>{ audioUnlock(); sfx('ach'); closeModal(); }; }
-function showOffline(sec){ const cap=S.perks.night?86400:28800, eff=S.perks.night?1:.5, t=Math.min(sec,cap); computeG(); const gain=G.base*t*eff, em=nestRate()/60*t*eff; if(gain<1&&em<1) return;
-  const give=()=>{ if(ui.collected) return; ui.collected=true; earn(gain); earnEmbers(em); S.offline++; };
-  openModal('<div class="mcenter"><img src="'+SPIMG[Math.max(1,Math.min(MAXL,curMax()||1))]+'" alt=""><h2 class="mh">Welcome back!</h2><p>You were away for <b>'+fmtTime(sec)+'</b>. Your '+RL().slimes+' kept working at '+Math.round(eff*100)+'% speed'+(sec>cap?' (up to '+(cap/3600)+' h)':'')+'.</p><div class="big-num">+'+fmt(gain)+' goo</div>'+(em>=1?'<p>Your dragons made <b>+'+fmtE(em)+' embers</b>.</p>':'')+'<button class="btn gold" id="colBtn" style="font-size:20px;padding:10px 26px">Collect</button></div>',give);
-  ui.collected=false; $('#colBtn').onclick=()=>{ audioUnlock(); give(); sfx('goldGet'); closeModal(); uiTick(); }; }
+let modalOnClose=null, modalFlip=0;
+function openModal(html,onClose){ ui.modalBody.innerHTML=html; ui.modal.hidden=false; modalOnClose=onClose||null; modalFlip=nowT(); }
+function closeModal(){ if(ui.modal.hidden) return; modalFlip=nowT(); ui.modal.hidden=true; ui.modalBody.innerHTML=''; const f=modalOnClose; modalOnClose=null; if(f) f(); }
+function showWelcome(){ openModal('<div class="mcenter"><img src="'+SPIMG[1]+'" alt=""><h2 class="mh">Welcome to Slime Empire!</h2></div><ul class="howto"><li><span>👑</span>Tap the King Slime to squeeze out goo.</li><li><span>🐣</span>Hatch eggs in the Pen, then tap two matching slimes to merge them into a stronger one.</li><li><span>✨</span>Your kingdom grows from there. New things open up one at a time as you play.</li></ul><div class="mcenter"><button class="btn" id="goBtn" style="font-size:20px;padding:10px 26px">Start squishing</button></div>',()=>audioUnlock()); $('#goBtn').onclick=()=>{ audioUnlock(); sfx('ach'); closeModal(); }; }
 
 /* settings */
 let devSpeed=1;
@@ -3322,7 +3802,8 @@ function openSettings(){ const s=S.settings, sky=S.realm==='sky';
   '<label class="srow" for="setMusic"><span>Music</span><input id="setMusic" type="range" min="0" max="100" value="'+Math.round(s.music*100)+'"><output id="oMusic">'+Math.round(s.music*100)+'%</output></label>'+
   '<label class="srow" for="setSfx"><span>Sound effects</span><input id="setSfx" type="range" min="0" max="100" value="'+Math.round(s.sfx*100)+'"><output id="oSfx">'+Math.round(s.sfx*100)+'%</output></label>'+
   '<div class="srow"><span>Music track</span><div class="seg" id="setTrack">'+TRACKS.map((t,i)=>t.hidden?'':'<button data-v="'+i+'" aria-pressed="'+(s.track===i)+'">'+t.name+'</button>').join('')+'</div></div>'+
-  '<p class="note">Bosses, the Hollow and the stars play their own music. New instruments join in as you level up. No sound on iPhone? Turn off silent mode and raise the volume.</p></section>'+
+  tg('setSilent','Play sound in silent mode',s.silent)+
+  '<p class="note">Bosses, the Hollow and the stars play their own music. New instruments join in as you level up. On iPhone, "Play sound in silent mode" lets the game be heard with the silent switch on (it may pause music from other apps).</p></section>'+
   '<section class="set"><h3>Display</h3>'+
   '<div class="srow"><span>Numbers</span><div class="seg" id="setFmt">'+[['short','1.5M'],['words','1.5 million'],['sci','1.5e6']].map(f=>'<button data-v="'+f[0]+'" aria-pressed="'+(s.fmt===f[0])+'">'+f[1]+'</button>').join('')+'</div></div>'+
   tg('setParticles','Goo particles',s.particles)+tg('setFloaters','Floating numbers',s.floaters)+tg('setShake','Screen shake',s.shake)+tg('setMentor','Mentor tips',s.mentor)+tg('setEco','Battery saver',s.eco)+
@@ -3333,12 +3814,12 @@ function openSettings(){ const s=S.settings, sky=S.realm==='sky';
   '<div class="btnrow"><button class="btn" id="saveNow">Save now</button><button class="btn ghost" id="expBtn">Export save</button><button class="btn ghost" id="impBtn">Import save</button></div>'+
   '<div id="ioBox" hidden><textarea id="ioText" rows="4" spellcheck="false" aria-label="Save code"></textarea><div class="btnrow"><button class="btn ghost" id="ioCopy">Copy</button><button class="btn" id="ioLoad">Load this save</button></div></div>'+
   '<div class="btnrow"><button class="btn danger" id="resetBtn">Reset everything</button></div></section>'+
-  '<p class="note" id="verTxt">Slime Empire 3.1 · saves automatically every 10 seconds.</p>'+
+  '<p class="note" id="verTxt">Slime Empire 3.2 · saves automatically every 10 seconds.</p>'+
   '<section class="set" id="devBox" hidden><h3>Test tools</h3><p class="note">For testing only. These skip normal progress. Numbers can be typed like 1e15, 2.5M or 40B.</p>'+
   '<div class="devgrid">'+din('dvGoo','Goo','1e15','Add')+din('dvLv','Level','50','Set')+din('dvXp','XP','1000','Add')+din('dvAsc','Ascensions','10','Set')+din('dvJelly',RL().jelly,'500','Add')+din('dvDust','Stardust','25','Add')+din('dvEmb','Embers','5000','Add')+din('dvScl','Scales','50','Add')+'</div>'+
   '<div class="srow"><span>Time speed</span><div class="seg" id="devSpd">'+[1,10,100].map(v=>'<button data-v="'+v+'" aria-pressed="'+(devSpeed===v)+'">×'+v+'</button>').join('')+'</div></div>'+
   '<div class="srow"><span>Meadow time</span><div class="seg" id="devDay">'+[['','Auto'],['.02','Dawn'],['.25','Day'],['.52','Dusk'],['.75','Night']].map(v=>'<button data-v="'+v[0]+'" aria-pressed="'+(String(dayFix==null?'':dayFix)===v[0])+'">'+v[1]+'</button>').join('')+'</div></div>'+
-  '<div class="btnrow">'+[['lv50','Jump to Lv 50'],['sfready','Ready for Starfall'],['sfnow','Starfall now'],['boss','Spawn miniboss'],['gold','Spawn golden / shooting star'],['fillorr','Fill the Orrery'],['conj','Force Conjunction'],['grand','Force Grand Alignment'],['arts','+3 of each Artifact'],['exps','Finish expeditions'],['grow','Grow all dragons'],['heart','+1 Dragon Heart'],['tia','Awaken Tiamatra now'],['tiasleep','Put Tiamatra back to sleep'],['wipe','Full reset']].map(d=>'<button class="btn ghost" data-dev="'+d[0]+'">'+d[1]+'</button>').join('')+'</div></section>');
+  '<div class="btnrow">'+[['lv50','Jump to Lv 50'],['sfready','Ready for Starfall'],['sfnow','Starfall now'],['boss','Spawn miniboss'],['gold','Spawn golden / shooting star'],['fillorr','Fill the Orrery'],['conj','Force Conjunction'],['grand','Force Grand Alignment'],['arts','+3 of each Artifact'],['exps','Finish expeditions'],['grow','Grow all dragons'],['heart','+1 Dragon Heart'],['tia','Awaken Tiamatra now'],['tiasleep','Put Tiamatra back to sleep'],['gems','+100 Gems'],['candy','+120 Candy'],['newday','Start a new day'],['away','Simulate 2 h away'],['pumpkin','Spawn pumpkin'],['items','+1 of every item'],['cos','Unlock all cosmetics'],['research','Open Research now'],['wipe','Full reset']].map(d=>'<button class="btn ghost" data-dev="'+d[0]+'">'+d[1]+'</button>').join('')+'</div></section>');
   let taps=0; $('#verTxt').onclick=()=>{ if(++taps>=7){ $('#devBox').hidden=false; toast('<span class="ti">🛠️</span><span>Test tools unlocked</span>'); } };
   $('#devBox').onclick=e=>{ const b=e.target.closest('[data-dev]'), d=e.target.closest('[data-din]'); if(b){ devAction(b.dataset.dev); sfx('click'); } else if(d){ const inp=$('#'+d.dataset.din), v=parseNum(inp.value); if(!isFinite(v)){ nope(d); toast('<span class="ti">⚠️</span><span>Type a number, like 1e15 or 2.5M</span>'); return; } devInput(d.dataset.din,v); sfx('buy'); inp.value=''; } };
   const vol=(id,out,key)=>{ const i=$(id); i.oninput=()=>{ S.settings[key]=i.value/100; $(out).textContent=i.value+'%'; audioUnlock(); applyVolumes(); }; i.onchange=()=>{ if(key==='sfx') sfx('tap'); saveLocal(); }; };
@@ -3350,17 +3831,17 @@ function openSettings(){ const s=S.settings, sky=S.realm==='sky';
   seg('#devSpd',v=>{ devSpeed=+v; });
   seg('#devDay',v=>{ dayFix=v===''?null:+v; });
   const sw=(id,key,fn)=>{ const b=$(id); b.onclick=()=>{ S.settings[key]=!S.settings[key]; b.setAttribute('aria-checked',S.settings[key]); sfx('click'); if(fn) fn(); saveLocal(); }; };
-  sw('#setParticles','particles'); sw('#setFloaters','floaters'); sw('#setShake','shake'); sw('#setMentor','mentor'); sw('#setEco','eco',()=>{ ui.app.classList.toggle('eco',S.settings.eco); stageResize(); });
+  sw('#setSilent','silent',applySilent); sw('#setParticles','particles'); sw('#setFloaters','floaters'); sw('#setShake','shake'); sw('#setMentor','mentor'); sw('#setEco','eco',()=>{ ui.app.classList.toggle('eco',S.settings.eco); stageResize(); });
   $('#saveNow').onclick=()=>{ saveLocal(); cloudSave(); toast('<span class="ti">💾</span><span>Game saved</span>'); };
   $('#expBtn').onclick=()=>{ $('#ioBox').hidden=false; const t=$('#ioText'); t.value=btoa(unescape(encodeURIComponent(serialize()))); t.focus(); t.select(); $('#ioLoad').hidden=true; $('#ioCopy').hidden=false; };
   $('#impBtn').onclick=()=>{ $('#ioBox').hidden=false; const t=$('#ioText'); t.value=''; t.placeholder='Paste your save code here'; t.focus(); $('#ioLoad').hidden=false; $('#ioCopy').hidden=true; };
   $('#ioCopy').onclick=()=>{ const t=$('#ioText'); t.select(); const done=()=>toast('<span class="ti">📋</span><span>Save code copied</span>'); if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t.value).then(done,()=>{ try{ document.execCommand('copy'); done(); }catch(e){} }); else { try{ document.execCommand('copy'); done(); }catch(e){} } };
   $('#ioLoad').onclick=()=>{ let json; try{ json=decodeURIComponent(escape(atob($('#ioText').value.trim()))); JSON.parse(json); }catch(e){ toast('<span class="ti">⚠️</span><span>That save code is not valid. Copy the whole code and try again.</span>'); return; } applySave(json,'import'); closeModal(); };
-  let armed=0; $('#resetBtn').onclick=e=>{ const b=e.currentTarget; if(Date.now()-armed<4000){ wipeAll(); closeModal(); return; } armed=Date.now(); b.textContent='Tap again to erase all progress'; setTimeout(()=>{ if(b.isConnected) b.textContent='Reset everything'; },4000); };
+  let armed=0; $('#resetBtn').onclick=e=>{ const b=e.currentTarget; if(nowT()-armed<4000){ wipeAll(); closeModal(); return; } armed=nowT(); b.textContent='Tap again to erase all progress'; setTimeout(()=>{ if(b.isConnected) b.textContent='Reset everything'; },4000); };
 }
 function wipeAll(){ const set=S.settings; S=fresh(); S.settings=set; for(const x in hatching) delete hatching[x]; refreshAll(); saveLocal(); cloudSave(); toast('<span class="ti">🧽</span><span>Everything was reset. Fresh puddle!</span>'); }
 function parseNum(s){ s=String(s).trim().replace(/[,\s]/g,'').toLowerCase(); const m=s.match(/^(\d*\.?\d+(?:e[+-]?\d+)?)([a-z]*)$/); if(!m) return NaN; let v=parseFloat(m[1]); if(m[2]){ const i=SUF.findIndex(x=>x&&x.toLowerCase()===m[2]); if(i<0) return NaN; v*=Math.pow(1000,i); } return v; }
-function refreshAll(){ useRealmArt(); raiseLow(true); recalc(); computeG(); B=null; ST.hop.length=0; syncHoppers(); ui.facKey=null; ui.tabKey=null; ui.orrKey=null; ui.nestKey=ui.expKey=ui.shopKey=null; ui.started=false; ui.app.classList.toggle('eco',!!S.settings.eco);
+function refreshAll(){ INTRO.q.length=0; PK.list.length=0; AWAY.sec=0; clearSel(); ui.dockKey=null; closeSheet(); useRealmArt(); raiseLow(true); recalc(); computeG(); B=null; ST.hop.length=0; syncHoppers(); ui.facKey=null; ui.tabKey=null; ui.orrKey=null; ui.nestKey=ui.expKey=ui.shopKey=null; ui.started=false; ui.app.classList.toggle('eco',!!S.settings.eco);
   applyRealm(); setWorld(S.world); ui.started=true; stageResize(); renderBoard(); renderUpg(true); renderPerks(); ui.tapHint.hidden=S.taps>=15||S.world==='hollow'; applyVolumes(); uiTick(); }
 function setLevel(L){ S.level=clamp(Math.round(L),1,100); S.xp=0; recalc(); levelSync(); }
 function devInput(id,v){ const Hh=S.hollow;
@@ -3383,11 +3864,19 @@ function devAction(k){ const Hh=S.hollow;
     S.orr.rings.forEach(ring=>{ for(let i=0;i<ring.length;i++) if(!ring[i]) ring[i]=Math.max(1,top-Math.floor(Math.random()*3)); }); discover(top); recalc(); computeG(); renderOrr(true); }
   else if(k==='conj'||k==='grand'){ if(S.realm!=='sky'){ toast('The Orrery is in the Celestial Realm. Use Starfall first.'); return; } if(planets().length<(k==='grand'?3:2)||(k==='grand'&&!planets().some(p=>p.r>=2))) devAction('fillorr'); closeModal(); if(S.world!=='meadow') setWorld('meadow'); if(!forceConj(k==='grand')) toast('Could not line the planets up. Try again.'); }
   else if(k==='arts'){ for(let i=0;i<6;i++) S.arts[i]+=3; recalc(); }
-  else if(k==='exps') Hh.exps.forEach(e=>{ e.end=Date.now(); });
+  else if(k==='exps') Hh.exps.forEach(e=>{ e.end=nowT(); });
   else if(k==='grow') Hh.dragons.forEach(d=>{ if(!d.born){ d.hatchAt=0; } else if(d.st<3) d.st++; });
   else if(k==='heart'){ if(Hh.tia){ toast('Tiamatra is already awake.'); return; } Hh.hearts=Math.min(3,Hh.hearts+1); closeModal(); heartFound(); }
   else if(k==='tia'){ if(Hh.tia){ toast('Tiamatra is already awake. Use "Put Tiamatra back to sleep" first.'); return; } if(S.level<HOLLOW_LV) setLevel(HOLLOW_LV); Hh.hearts=Math.max(3,Hh.hearts); if(Hh.embers<TIA_EMBERS) earnEmbers(TIA_EMBERS-Hh.embers); closeModal(); startAwakening(); return; }
   else if(k==='tiasleep'){ Hh.tia=null; Hh.waking=false; ST.tia.leaving=null; recalc(); computeG(); toast('<span class="ti">🗿</span><span>Tiamatra is stone again. Wake her from her chamber.</span>'); }
+  else if(k==='gems') S.gems=(S.gems||0)+100;
+  else if(k==='candy'){ if(!season()){ toast('No event is running right now.'); return; } addCandy(120); }
+  else if(k==='newday'){ const y=localDay(nowT()-864e5); S.goals.day=''; S.goals.full=''; S.wheel.last=''; if(S.login.last) S.login.last=y; rollGoals(); closeModal(); if(loginPending()){ AWAY.timer=setTimeout(showWelcomeBack,400); } toast('<span class="ti">🌅</span><span>A new day: new goals, a free spin and the daily reward.</span>'); }
+  else if(k==='away'){ closeModal(); creditAway(7200); return; }
+  else if(k==='pumpkin'){ if(!season()){ toast('No event is running right now.'); return; } closeModal(); if(S.world!=='meadow') setWorld('meadow'); const kg=kingGeom(); PK.list.push({x:clamp(kg.cx+kg.w*.9,ST.w*.08,ST.w*.92),life:35,t:0,ph:0}); }
+  else if(k==='items'){ for(const id in ITEMS) giveItem(id,1); }
+  else if(k==='cos'){ for(const id in COS) S.cos.owned[id]=1; }
+  else if(k==='research'){ S.tut.mile=1; S.tut.mileT=S.playTime-RESEARCH_DELAY; S.tut.penups=1; }
   else if(k==='wipe'){ wipeAll(); closeModal(); return; }
   computeG(); ui.nestKey=ui.expKey=ui.shopKey=null; uiTick(); }
 // version 1 saves earn their past progress as XP once
@@ -3402,7 +3891,7 @@ function applySave(json,src){ S=parseSave(json); for(const x in hatching) delete
 /* cloud save (claude.ai viewer only) */
 const CL={ok:false,ref:null,busy:false,last:0,state:'off'};
 let freshStart=false;
-function cloudText(){ if(CL.state==='on') return '☁️ Cloud save is on. Progress syncs between your devices when you open this game at its claude.ai link'+(CL.last?' · last synced '+fmtTime((Date.now()-CL.last)/1000)+' ago':'')+'.'; if(CL.state==='error') return '☁️ Cloud save could not connect right now. Progress is still saved on this device.'; return '💾 Progress is saved on this device. Use Export and Import to move it to another device.'; }
+function cloudText(){ if(CL.state==='on') return '☁️ Cloud save is on. Progress syncs between your devices when you open this game at its claude.ai link'+(CL.last?' · last synced '+fmtTime((nowT()-CL.last)/1000)+' ago':'')+'.'; if(CL.state==='error') return '☁️ Cloud save could not connect right now. Progress is still saved on this device.'; return '💾 Progress is saved on this device. Use Export and Import to move it to another device.'; }
 async function cloudInit(){
   try{
     if(!window.claude||typeof window.claude.use!=='function') return;
@@ -3410,16 +3899,16 @@ async function cloudInit(){
     if(!db||!user) return; const uid=await user.id(); if(!uid) return;
     CL.ref=db.doc('data/users/'+uid+'/save');
     const snap=await CL.ref.get();
-    if(snap.exists){ const d=snap.data(); if(d&&typeof d.json==='string'&&parseSave(d.json).earnedAll>S.earnedAll*.5&&(freshStart||d.t>S.lastSave+3000)){ const away=(Date.now()-d.t)/1000; closeModal(); applySave(d.json,'cloud'); if(away>60) showOffline(away); } }
+    if(snap.exists){ const d=snap.data(); if(d&&typeof d.json==='string'&&parseSave(d.json).earnedAll>S.earnedAll*.5&&(freshStart||d.t>S.lastSave+3000)){ AWAY.sec=0; clearTimeout(AWAY.timer); AWAY.timer=0; closeModal(); applySave(d.json,'cloud'); TIME.fresh=false; if(TIME.trust==='none'){ TIME.off=d.t-Date.now(); anchorTime(); } TIME.simT=Math.min(nowT(),d.t); } }
     CL.ok=true; CL.state='on'; cloudSave();
   }catch(e){ CL.state='error'; }
 }
-async function cloudSave(){ if(!CL.ok||CL.busy) return; CL.busy=true; try{ const json=serialize(); await CL.ref.set({json,t:S.lastSave,v:1}); CL.last=Date.now(); CL.state='on'; }catch(e){ CL.state='error'; } CL.busy=false; }
+async function cloudSave(){ if(!CL.ok||CL.busy) return; CL.busy=true; try{ const json=serialize(); await CL.ref.set({json,t:S.lastSave,v:1}); CL.last=nowT(); CL.state='on'; }catch(e){ CL.state='error'; } CL.busy=false; }
 
 /* ================= loop ================= */
 let lastT=0, saveAcc=0, achAcc=0, cloudAcc=0, uiAcc=0, lastHud='', hudV=null;
 function logic(dt){
-  const now=Date.now(); S.playTime+=dt;
+  const now=nowT(); S.playTime+=dt;
   if(S.buffs.length) S.buffs=S.buffs.filter(b=>b.until>now);
   computeG(); earn(G.total*dt); if(G.base>S.bestGps) S.bestGps=G.base;
   if(rushActive()) S.rush=100*(S.rushUntil-now)/(15000*M.rushDur); else if(S.rush>0&&now-lastTapAt>1500) S.rush=Math.max(0,S.rush-dt*2.5);
@@ -3427,10 +3916,10 @@ function logic(dt){
   // the robot charges up, then waits fully charged and merges the moment a matching pair exists
   if(S.amLvl>0&&S.amOn&&!drag){ S.amProg=Math.min(1,S.amProg+dt/amInt()); if(S.amProg>=1){ const n=penSize(), seen={};
     for(let i=0;i<n;i++){ const L=S.board[i]; if(!L||L>=MAXL||hatching[i]>now) continue; if(seen[L]!=null){ mergeCells(i,seen[L],true); S.amProg=0; break; } seen[L]=i; } } }
-  // golden slimes only start once the basics are learned: 100 goo earned and a first merge
-  if(!goldenOn&&S.world==='meadow'&&!B&&!CINE&&(S.goldens>0||ascTotal()>0||S.starfalls>0||(S.earnedAll>=100&&S.merges>=1))){ goldenNext-=dt; if(goldenNext<=0) spawnGolden(); }
-  bossLogic(dt); hollowLogic(dt); wispLogic(dt); orrLogic(dt); tiaLogic(dt);
-  if(ui.modal.hidden&&ui.coach.hidden){ mentorNext-=dt; if(mentorNext<=0){ mentorNext=rand(70,120); if(!B) say(tipText()); } }
+  // golden slimes wait until Research has opened, so the first minutes stay simple
+  if(!goldenOn&&S.world==='meadow'&&!B&&!CINE&&(S.goldens>0||researchOpen())){ goldenNext-=dt; if(goldenNext<=0) spawnGolden(); }
+  bossLogic(dt); hollowLogic(dt); wispLogic(dt); orrLogic(dt); tiaLogic(dt); pumpkinLogic(dt);
+  if(ui.modal.hidden&&ui.coach.hidden&&ui.sheet.hidden&&researchOpen()){ mentorNext-=dt; if(mentorNext<=0){ mentorNext=rand(70,120); if(!B&&!INTRO.q.length) say(tipText()); } }
   saveAcc+=dt; if(saveAcc>10){ saveAcc=0; saveLocal(); }
   achAcc+=dt; if(achAcc>1){ achAcc=0; checkAch(); syncHoppers(); while(S.earnedAll>=Math.pow(10,S.tenPow+1)){ S.tenPow++; gainXP(15*S.tenPow); } }
   cloudAcc+=dt; if(cloudAcc>60){ cloudAcc=0; cloudSave(); }
@@ -3438,15 +3927,15 @@ function logic(dt){
 function frame(ts){
   if(S.settings.eco&&lastT&&ts-lastT<30){ requestAnimationFrame(frame); return; }
   let dt=lastT?(ts-lastT)/1000:0; lastT=ts;
-  if(dt>5){ const gap=dt; dt=0; if(gap>600){ S.lastSave=Date.now()-gap*1000; showOffline(gap); } else { computeG(); earn(G.base*gap); earnEmbers(nestRate()/60*gap); } }
+  clockTick(); if(dt>5) dt=0; // a long gap is paid out by creditCheck
   dt=Math.min(dt,.25);
-  try{ let L=dt*devSpeed; while(L>1e-6){ const s=Math.min(L,.25); logic(s); L-=s; } drawStage(ts/1000,dt); }catch(e){ console.error(e); }
+  try{ let L=dt*devSpeed; while(L>1e-6){ const s=Math.min(L,.25); logic(s); L-=s; } creditCheck(dt); drawStage(ts/1000,dt); }catch(e){ console.error(e); }
   // the counter rolls up toward the real number instead of jumping
   const hol=S.world==='hollow', target=hol?S.hollow.embers:S.goo;
   if(hudV==null||hol!==ui.hudHol||!isFinite(hudV)||target<hudV){ hudV=target; ui.hudHol=hol; } else { hudV+=(target-hudV)*Math.min(1,dt*10); if(target-hudV<=Math.max(.5,target*2e-4)) hudV=target; }
   const h=hol?fmtE(hudV):fmt(hudV,false,true); if(h!==lastHud){ lastHud=h; ui.gooAmt.textContent=h; }
   ui.rushFill.style.width=clamp(S.rush,0,100)+'%'; ui.rush.classList.toggle('on',rushActive());
-  if(hol){ const Hh=S.hollow, z=zone(), cool=Date.now()<Hh.coolUntil; ui.heatFill.style.width=Hh.heat+'%'; ui.heatMark.style.left=Hh.heat+'%'; ui.heatZone.style.left=z[0]+'%'; ui.heatZone.style.width=(z[1]-z[0])+'%';
+  if(hol){ const Hh=S.hollow, z=zone(), cool=nowT()<Hh.coolUntil; ui.heatFill.style.width=Hh.heat+'%'; ui.heatMark.style.left=Hh.heat+'%'; ui.heatZone.style.left=z[0]+'%'; ui.heatZone.style.width=(z[1]-z[0])+'%';
     ui.heat.classList.toggle('gold',!cool&&Hh.heat>=z[0]&&Hh.heat<=z[1]); ui.heat.classList.toggle('cool',cool); }
   if(B&&!hol&&B.phase!=='dead'){ ui.bossBar.hidden=false; setTxt(ui.bossName,B.n); setTxt(ui.bossTime,B.phase==='fight'?Math.max(0,Math.ceil(B.time))+'s':''); const sh=B.shield>0; ui.bossHp.classList.toggle('shield',sh); ui.bossHp.style.width=(sh?B.shield/12*100:clamp(B.hp/B.max,0,1)*100)+'%'; }
   else if(!ui.bossBar.hidden) ui.bossBar.hidden=true;
@@ -3461,6 +3950,8 @@ function setIcons(){ try{ if(document.querySelector('link[rel="apple-touch-icon"
 function start(hotData){
   const raw=(hotData&&hotData.save)||lsGet();
   S=parseSave(raw); freshStart=!raw||S.earnedAll===0;
+  // until the clock is checked, game time carries on from the last save, so changing the phone's clock gives nothing
+  TIME.off=raw&&S.lastSave>0?S.lastSave-Date.now():0; anchorTime(); TIME.simT=nowT(); TIME.fresh=!raw; lastTapAt=nowT();
   makeImages(); useRealmArt(); recalc(); raiseLow(true); recalc(); computeG(); buildUI(); ui.app.classList.toggle('eco',!!S.settings.eco); applyRealm(); setWorld(S.world); ui.started=true; syncHoppers(); setIcons(); setupTouchTaps();
   ui.tapHint.hidden=S.taps>=15||S.world==='hollow';
   applyRetro(); levelSync();
@@ -3468,10 +3959,12 @@ function start(hotData){
   document.addEventListener('keydown',e=>{ if(e.code==='Space'&&ui.modal.hidden&&ui.coach.hidden&&ui.cine.hidden&&!/INPUT|TEXTAREA|BUTTON/.test(e.target.tagName)){ e.preventDefault(); const k=kingGeom();
     if(S.world==='hollow') hollowTap(ST.w/2,ST.h*.5); else if(B){ if(B.phase==='fight') bossTap(B.x+rand(-10,10),B.y); } else tapKing(k.cx+rand(-20,20),k.by-k.h*.6); } });
   window.addEventListener('resize',()=>{ if(coachQ) placeCoach(); });
-  document.addEventListener('visibilitychange',()=>{ if(document.hidden){ saveLocal(); cloudSave(); if(AU.ctx) AU.ctx.suspend(); } else if(AU.ctx) AU.ctx.resume(); });
+  document.addEventListener('visibilitychange',()=>{ if(document.hidden){ saveLocal(); cloudSave(); if(AU.ctx) AU.ctx.suspend(); } else { if(AU.ctx) AU.ctx.resume(); verifyClock(); } });
+  window.addEventListener('online',()=>verifyClock());
   window.addEventListener('pagehide',saveLocal);
   setInterval(musicSched,40);
-  if(!raw) showWelcome(); else { const away=(Date.now()-S.lastSave)/1000; if(away>60) showOffline(away); }
+  if(!raw) showWelcome();
+  ui.sessT=performance.now(); applySilent(); verifyClock();
   if(S.hollow.waking&&!S.hollow.tia) setTimeout(()=>{ closeModal(); setWorld('hollow'); ST.chamber=true; ui.heat.hidden=true; playTiaCine(); },800);
   uiTick(); requestAnimationFrame(frame);
   cloudInit();
