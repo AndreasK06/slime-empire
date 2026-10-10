@@ -12,7 +12,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<meta name="build" content="3.3.2">
+<meta name="build" content="3.4">
 <script>
 // install as an app: works offline and opens full screen from the home screen
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
@@ -785,7 +785,7 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
             <div class="fuse" id="fuseGrid"></div>
             <div class="btnrow"><button class="btn" id="fuseAll">Fuse all</button></div>
           </div>
-          <p class="hint" id="fuseLocked">🔒 Minibosses and the Fuse unlock at Lv 10.</p>
+          <p class="hint" id="fuseLocked">🔒 Minibosses and the Fuse unlock at Lv 13.</p>
           <div class="row-head"><h3 class="sec">Stats</h3><button class="btn ghost" id="cardBtn">📸 Kingdom card</button></div>
           <dl class="stats" id="statList"></dl>
           <div id="shinySec" hidden><h3 class="sec">Shiny slimes <span id="shinyCount" style="color:var(--muted);font-size:15px"></span></h3>
@@ -924,11 +924,20 @@ let SPECIES=MEADOW_SPECIES;
 const MAXL=20;
 // balance knobs, tuned with a simulated player (see the v3 notes)
 let BAL={pen:2.8,eq:30,egg:1.09,jelly:1e11};
-const slimeProd=L=>0.3*Math.pow(BAL.pen,L-1);
+// 3.4: in the meadow the pen is the engine. Slimes above Lv.5 grow faster per level, factories are rare, bigger
+// purchases (each one costs 50% more than the last) and give about a fifth of your goo. The sky keeps the 3.3 economy.
+const SKY_BOOST=2.5;
+const MB={tierK:1.107,tierFrom:5,growth:1.5,feed:1,eggS0:10,eggR:1.009,eggMax:45,priceLo:.3,priceA:7,priceB:13,jellyK:4e10,jellyP:1/3,
+  miles:[5,10,15,20,25,30,40,50,60,75,100],
+  stars:[[1,1.5],[3,7],[5,25],[10,400],[15,3e4],[20,1e6],[25,3e7]], // [owned needed, cost × the factory's base price]
+  penRes:{pen1:3,pen2:3,pen3:4,pen4:4,pen5:5,pen6:5},tierTo:16,palsMax:3,
+  fac:[[1.8e3,2],[5.2e3,5.4],[1.66e4,17],[5.4e4,51],[5.35e5,490],[5.8e6,4900],[9.7e7,3.5e4],[4.76e8,1.35e5],[9.7e9,7.2e5],[1.95e10,1.3e6],[3.7e12,8e7],[3.4e15,1e10]]};
+const meadowEco=()=>typeof S==='undefined'||!S||S.realm!=='sky';
+const slimeProd=L=>0.3*Math.pow(BAL.pen,L-1)*(L>MB.tierFrom&&meadowEco()?Math.pow(MB.tierK,Math.min(L,MB.tierTo)-MB.tierFrom):1);
 
 const FAC_BASE=[[15,0.1],[100,1],[1100,8],[12000,47],[130000,260],[1.4e6,1400],[2e7,7800],[3.3e8,44000],[5.1e9,260000],[7.5e10,1.6e6],[1e12,1e7],[1.4e13,6.5e7]];
-const mkFact=list=>list.map((a,i)=>({name:a[0],ico:a[1],color:a[2],desc:a[3],plural:a[4],cost:FAC_BASE[i][0],prod:FAC_BASE[i][1]}));
-const MEADOW_FACT=mkFact([
+const mkFact=(base,list)=>list.map((a,i)=>({name:a[0],ico:a[1],color:a[2],desc:a[3],plural:a[4],cost:base[i][0],prod:base[i][1]}));
+const MEADOW_FACT=mkFact(MB.fac,[
  ['Goo Puddle','💧','#5CD3FF','A humble puddle that oozes a little goo.','Puddles'],
  ['Slime Pond','🐸','#3DDC97','Frogs and slimes, living in harmony.','Ponds'],
  ['Jelly Farm','🌱','#9BE15D','Rows of jelly, grown fresh daily.','Farms'],
@@ -941,7 +950,7 @@ const MEADOW_FACT=mkFact([
  ['Goo Galaxy','🌌','#7B5CFF','An entire galaxy made of jelly.','Galaxies'],
  ['Multiverse Mush','🍄','#E2384D','Every universe where slimes won.','Mushes'],
  ['Slime Singularity','🕳️','#4a3f7a','All the goo, everywhere, all at once.','Singularities']]);
-const SKY_FACT=mkFact([
+const SKY_FACT=mkFact(FAC_BASE,[
  ['Moon Pool','🌙','#9fb3ff','Moonlight drips into a silver pool.','Moon Pools'],
  ['Comet Catcher','☄️','#5cd3ff','Nets passing comets for their icy goo.','Catchers'],
  ['Star Garden','🌟','#ffd43f','Baby stars, planted in neat rows.','Gardens'],
@@ -959,7 +968,8 @@ let FACT=MEADOW_FACT;
 // in the meadow the first factory waits for a Lv.5 slime, so hatching and merging come first; the sky keeps its quick start
 const FAC_UNLOCK_MEADOW=[5,6,7,8,9,10,11,12,13,14,16,18], FAC_UNLOCK_SKY=[1,3,4,6,8,9,11,12,13,14,16,18];
 let FAC_UNLOCK=FAC_UNLOCK_MEADOW;
-const MILES=[10,25,50,100,150,200,250,300,350,400,450,500,600,700,800,900,1000];
+const MILES_SKY=[10,25,50,100,150,200,250,300,350,400,450,500,600,700,800,900,1000];
+let MILES=MB.miles;
 
 const UPGRADES=[], UPMAP={};
 function U(id,name,ico,desc,cost,e,unlock,tier,fi){ const u={id,name,ico,desc,cost,e,unlock:unlock||(()=>S.earnedRun>=cost*.35),tier,fi}; UPGRADES.push(u); UPMAP[id]=u; }
@@ -969,7 +979,7 @@ U('pen1','Slime Vitamins','💊','Slimes in the pen make 2× goo.',2000,{pen:2})
 U('crit1','Lucky Squish','🍀','+5% chance for 10× critical taps.',3000,{crit:.05});
 U('rush1','Wobble Battery','🔋','The Wobble meter fills 50% faster.',5000,{rushFill:1.5});
 U('tap3','Power Poke','👉','Taps are twice as strong.',12000,{tap:2});
-U('gold1','Lucky Clover','☘️','Golden slimes appear twice as often.',40000,{goldFreq:2});
+U('gold1','Lucky Clover','☘️','Golden slimes appear 50% more often.',40000,{goldFreq:1.5});
 U('tapP1','Squish Theory','📘','Taps also earn 1% of your goo/s.',60000,{tapPct:.01});
 U('glob1','Goo Science','🔬','All goo +10%.',1e5,{global:1.1});
 U('pen2','Protein Jelly','🥤','Slimes in the pen make 2× goo.',2e5,{pen:2});
@@ -978,7 +988,7 @@ U('pol1','Trophy Polish','🏆','Each trophy boosts goo by +1% more.',5e5,{polis
 U('tap4','Mega Squish','🖐️','Taps are 3× stronger.',8e5,{tap:3});
 U('syn1','Pen Pals','🤝','Your pen boosts factories. Bigger slimes count for more, so merging never lowers it.',1e6,{penPals:.02});
 U('crit2','Critical Goo','💥','+5% chance for critical taps.',2e6,{crit:.05});
-U('gold2','Gold Rush','🌟','Golden slime effects last twice as long.',4e6,{goldDur:2});
+U('gold2','Gold Rush','🌟','Golden slime effects last 50% longer.',4e6,{goldDur:1.5});
 U('glob2','Goo Engineering','⚙️','All goo +15%.',1e7,{global:1.15});
 U('tapP2','Slap Science','🧪','Taps earn another 2% of your goo/s.',1e7,{tapPct:.02});
 U('syn2','Factory Feeding','🍽️','Every factory you own boosts the pen by +0.5%.',1e7,{feeding:.005});
@@ -1002,12 +1012,20 @@ U('pen6','Slime Nirvana','☯️','Slimes in the pen make 5× goo.',5e15,{pen:5}
   for(const id in EARLY){ const u=UPMAP[id]; u.cost=EARLY[id]; if(id!=='tap1') u.unlock=()=>S.earnedRun>=u.cost*.35; } }
 // each factory's own ★ upgrades live on its row: name, owned count needed, cost × the factory's base price
 const TIERS=[['Shiny',1,10],['Turbo',5,50],['Mega',25,500],['Ultra',50,5e4],['Hyper',100,5e6],['Cosmic',150,5e8],['Legendary',200,5e10]];
-FAC_BASE.forEach((f,i)=>TIERS.forEach((t,k)=>U('f'+i+'_'+k,'','','',f[0]*t[2],{fac:i,mult:2},()=>S.fac[i]>=t[1],k+1,i)));
+// ★ upgrades: how many you must own and the price both depend on the realm
+const starNeed=k=>meadowEco()?MB.stars[k][0]:TIERS[k][1], starMul=k=>meadowEco()?MB.stars[k][1]:TIERS[k][2];
+FAC_BASE.forEach((f,i)=>TIERS.forEach((t,k)=>{ U('f'+i+'_'+k,'','','',0,{fac:i,mult:2},()=>S.fac[i]>=starNeed(k),k+1,i); Object.defineProperty(UPMAP['f'+i+'_'+k],'cost',{get:()=>FACT[i].cost*starMul(k)}); }));
+for(const id in MB.penRes){ const u=UPMAP[id]; Object.defineProperty(u,'desc',{get:()=>'Slimes in the pen make '+(meadowEco()?MB.penRes[id]:u.e.pen)+'× goo.'}); }
+Object.defineProperty(UPMAP.syn2,'desc',{get:()=>'Every factory you own boosts the pen by +'+(meadowEco()?.5*MB.feed:.5)+'%.'});
+// the meadow earns less in the middle of a run than when factories ran the show, so Research and pen upgrades cost less there:
+// about 30% of the old price up to 10M, rising smoothly back to the full price at 10T
+const mPrice=c=>meadowEco()?c*Math.pow(MB.priceLo,1-clamp((Math.log10(Math.max(1,c))-MB.priceA)/(MB.priceB-MB.priceA),0,1)):c;
+for(const u of UPGRADES) if(!u.tier){ const base=u.cost; Object.defineProperty(u,'cost',{get:()=>mPrice(base)}); if(u.id!=='tap1') u.unlock=()=>S.earnedRun>=u.cost*.35; }
 const upgName=u=>u.tier?TIERS[u.tier-1][0]+' '+FACT[u.fi].plural:u.name;
 const tierOf=i=>{ let k=0; while(k<TIERS.length&&S.ups['f'+i+'_'+k]) k++; return k; };
 
 const PERKS=[
- {id:'start',name:'Head Start',ico:'🎒',desc:'Begin each run with 10 of your first factory and 5 of your second.',cost:1},
+ {id:'start',name:'Head Start',ico:'🎒',desc:'Begin each run with 3 of your first factory and 2 of your second (10 and 5 among the stars).',cost:1},
  {id:'nose',name:'Golden Nose',ico:'👃',desc:'Golden slimes appear 30% more often and stay longer.',cost:3},
  {id:'eggs',name:'Royal Eggs',ico:'🥚',desc:'Eggs hatch one level higher.',cost:8},
  {id:'night',name:'Night Shift',ico:'🌙',desc:'Offline earnings at 100% for up to 24 h (normally 50%, 8 h).',cost:15},
@@ -1026,7 +1044,7 @@ function A(id,name,desc,ico,test){ACH.push({id,name,desc,ico,test});}
 [[100,'First Squish','💧'],[1e4,'Goo Getter','🥤'],[1e6,'Goo Baron','💰'],[1e9,'Goo Mogul','💎'],[1e12,'Goo Emperor','👑'],[1e15,'Goo Overlord','🌍'],[1e18,'Goo Deity','🌌'],[1e21,'Beyond Goo','✨']].forEach((a,i)=>A('g'+i,a[1],'Earn '+fmtStatic(a[0])+' goo in total.',a[2],()=>S.earnedAll>=a[0]));
 [[10,'Trickle','🚿'],[1000,'Stream','⛲'],[1e6,'River','🌊'],[1e9,'Ocean','🌀'],[1e12,'Goo-niverse','☄️']].forEach((a,i)=>A('p'+i,a[1],'Reach '+fmtStatic(a[0])+' goo per second.',a[2],()=>G.base>=a[0]));
 [[100,'Poker','👆'],[1000,'Squisher','✋'],[10000,'Tap Titan','🙌']].forEach((a,i)=>A('t'+i,a[1],'Tap the King '+fmtStatic(a[0])+' times.',a[2],()=>S.taps>=a[0]));
-[[10,'Landlord','🏠'],[50,'Developer','🏘️'],[100,'Tycoon','🏙️'],[250,'Magnate','🌆'],[500,'Industrialist','🗺️'],[1000,'Goo Planet','🌐']].forEach((a,i)=>A('f'+i,a[1],'Own '+a[0]+' factories.',a[2],()=>G.totalFac>=a[0]));
+[[5,'Landlord','🏠'],[15,'Developer','🏘️'],[30,'Tycoon','🏙️'],[60,'Magnate','🌆'],[100,'Industrialist','🗺️'],[150,'Goo Planet','🌐']].forEach((a,i)=>A('f'+i,a[1],'Own '+a[0]+' factories.',a[2],()=>G.totalFac>=a[0]));
 A('fv','Hot Stuff','Own a Slime Volcano or a Solar Forge.','🌋',()=>S.fac[6]>0);
 A('fs','Event Horizon','Own a Slime Singularity or a Big Bang.','🕳️',()=>S.fac[11]>0);
 [[1,'Better Together','🔗'],[100,'Merge Maniac','⛓️'],[1000,'Merge Master','🧩']].forEach((a,i)=>A('m'+i,a[1],'Merge slimes '+a[0]+(a[0]>1?' times.':' time.'),a[2],()=>S.merges>=a[0]));
@@ -1064,8 +1082,10 @@ const RL=()=>REALM[S.realm]||REALM.meadow;
 /* ---- levels, bosses, artifacts ---- */
 // early levels take longer (the need is stretched up to Lv 30, fading back to the old curve), so the first hour unfolds slowly
 const XP_EARLY=4, XP_END=30, XP_P=1.6;
-const xpNeed=L=>Math.round((25*Math.pow(L,1.35)+25)*(L<XP_END?1+XP_EARLY*Math.pow((XP_END-L)/(XP_END-1),XP_P):1));
-const BOSS_LV=10, HOLLOW_LV=50, STARFALL_LV=75, STARFALL_ASC=10;
+// 3.4: every level up to 14 unlocks a feature, so the first levels are shaped a little to space those out
+const XP_F=[1,1.8,.9,.85,.8,1,1,.97,.97,.97,.97,.97,.95,.95,.95];
+const xpNeed=L=>Math.round((25*Math.pow(L,1.35)+25)*(L<XP_END?1+XP_EARLY*Math.pow((XP_END-L)/(XP_END-1),XP_P):1)*(XP_F[L]||(L<75?.93:1)));
+const BOSS_LV=13, HOLLOW_LV=50, STARFALL_LV=75, STARFALL_ASC=10;
 const RARITY=[{n:'Common',c:'#9fe08a',b:1,a:'Glob'},{n:'Uncommon',c:'#5cd3ff',b:4,a:'Bubble Orb'},{n:'Rare',c:'#b37bff',b:15,a:'Swirl Orb'},{n:'Epic',c:'#ff6fb5',b:50,a:'Crystal Heart'},{n:'Legendary',c:'#ffd23f',b:200,a:'Sun Pearl'},{n:'Mythic',c:'#ff9ff3',b:750,a:'Cosmic Core'}];
 const ART_W=[55,27,12,4.5,1.3,.2];
 const BOSSES=[
@@ -1128,13 +1148,20 @@ const RELICS=[
 ];
 const SOON='This chapter is still being written. It arrives in a future update.';
 const CHRON=[
- {lv:1,t:'The Puddle King',txt:'Long ago a single droplet wished to be bigger. It wobbled, it squished, it grew, and the meadow crowned it King.',un:'The meadow, the pen and the factories'},
- {lv:4,t:'Treasures of the Kingdom',hint:'The King has started a collection. Of everything.',txt:'The King keeps every trophy, every kind of slime he has met, and a calendar of gifts for loyal visitors. Some say a slime or two even sparkles.',un:'The Collection, trophies, shiny slimes and the daily reward'},
- {lv:6,t:'The Wheel of Fortune',hint:'Grandpa Gloop is carving something round out of old jelly…',txt:'Grandpa Gloop finally finished his wheel. One free spin a day, he says, and no peeking at the prizes.',un:'The Daily Wheel'},
- {lv:8,t:'A Busy Kingdom',hint:'The castle\'s calendar is filling up fast.',txt:'Every day brings new goals, every month a new festival, and the shops of the kingdom finally open their doors.',un:'Goals, monthly events, the Royal Road and the Gem shop'},
- {lv:9,t:'Royal Requests',hint:'The King keeps glancing at your pen…',txt:'The King has started asking for things. Specific things. A Lv.7 slime, please, and quickly. He always pays well.',un:'Royal Requests'},
- {lv:10,t:'Uninvited Guests',hint:'The King\'s goo smells delicious. Something out there has noticed.',txt:'Strange creatures slip through cracks in the world to steal the King\'s goo. Squish them and they drop treasure, and sometimes their secrets.',un:'Minibosses, Artifacts, the Fuse and lore cards'},
- {lv:12,t:'The Throne',hint:'The crown feels heavier every day. As if it wants something.',txt:'A King can melt his kingdom back into a puddle and rise again, stronger, with Royal Jelly. After three ascensions the Trials of the Crown await.',un:'Ascending, Royal perks and the Trials of the Crown'},
+ {lv:1,t:'The Puddle King',txt:'Long ago a single droplet wished to be bigger. It wobbled, it squished, it grew, and the meadow crowned it King.',un:'The meadow and the pen. Factories come with your first Lv.5 slime'},
+ {lv:2,t:'The Wobble',hint:'The King jiggles a little more with every tap…',txt:'Tap the King long enough and he wobbles so hard the whole meadow joins in. A Wobble Rush does not come often, but while it lasts, everything makes double goo.',un:'The Wobble meter and Wobble Rush'},
+ {lv:3,t:'A Sleepy King',hint:'The King yawns. A lot.',txt:'The King dozes off when nobody pays him attention. Tap him and he wakes up, and an awake King makes the whole kingdom work harder. Tap in a steady rhythm and your taps grow even stronger.',un:'King awake (×1.5 goo) and tap streaks'},
+ {lv:4,t:'A Better Pen',hint:'Grandpa Gloop is drawing plans for the pen.',txt:'Grandpa Gloop builds a Hatchery that lays eggs by itself and teaches you to hatch better eggs. The meadow even gets its own weather.',un:'Pen upgrades and weather'},
+ {lv:5,t:'Slime Science',hint:'Strange bubbling sounds come from a little shed.',txt:'The cleverest slimes in the kingdom open a research shed. Vitamins, gloves, theories: anything for more goo.',un:'Research and ★ upgrades'},
+ {lv:6,t:'Golden Slimes',hint:'Something glittered at the edge of the meadow…',txt:'Now and then a golden slime wanders by. They are shy and rare, so catch them while you can: they bring frenzies, lucky goo and egg storms.',un:'Golden slimes'},
+ {lv:7,t:'Treasures of the Kingdom',hint:'The King has started a collection. Of everything.',txt:'The King keeps every trophy and every kind of slime he has met. Some say a slime or two even sparkles.',un:'The Collection, trophies and shiny slimes'},
+ {lv:8,t:'Loyal Visitors',hint:'The castle is writing down who comes to visit.',txt:'The King rewards everyone who visits him, and the gifts grow with every day in a row you come back.',un:'The daily reward calendar'},
+ {lv:9,t:'The Wheel of Fortune',hint:'Grandpa Gloop is carving something round out of old jelly…',txt:'Grandpa Gloop finally finished his wheel. One free spin a day, he says, and no peeking at the prizes.',un:'The Daily Wheel'},
+ {lv:10,t:'A Busy Kingdom',hint:'The castle\'s calendar is filling up fast.',txt:'Every day brings new goals, and every day one size of slime is the Slime of the Day.',un:'Daily and weekly goals, and the Slime of the Day'},
+ {lv:11,t:'Festivals and Shops',hint:'Banners are going up all over the meadow.',txt:'Every month the kingdom throws a new festival with its own Royal Road, and the shops of the kingdom finally open their doors.',un:'Monthly events, the Royal Road and the Gem shop'},
+ {lv:12,t:'Royal Requests',hint:'The King keeps glancing at your pen…',txt:'The King has started asking for things. Specific things. A Lv.7 slime, please, and quickly. He always pays well.',un:'Royal Requests'},
+ {lv:13,t:'Uninvited Guests',hint:'The King\'s goo smells delicious. Something out there has noticed.',txt:'Strange creatures slip through cracks in the world to steal the King\'s goo. Squish them and they drop treasure, and sometimes their secrets.',un:'Minibosses, Artifacts, the Fuse and lore cards'},
+ {lv:14,t:'The Throne',hint:'The crown feels heavier every day. As if it wants something.',txt:'A King can melt his kingdom back into a puddle and rise again, stronger, with Royal Jelly. After three ascensions the Trials of the Crown await.',un:'Ascending, Royal perks and the Trials of the Crown'},
  {lv:25,t:'The Laboratory',hint:'Bubbling sounds come from behind Grandpa Gloop\'s hut…',txt:SOON},
  {lv:40,t:'A Small Friend',hint:'Something tiny keeps following you around. It hides when you look.',txt:SOON},
  {lv:50,t:'The Hollow',hint:'The crack in the meadow grows warmer every day. Something stirs beneath.',txt:'The crack beneath the meadow finally splits open. Warm air rises from the dark, and with it, the sound of wings.',un:'The Hollow, dragons, dragon breeding, Dragon Scales and the Dragon Patrol'},
@@ -1142,7 +1169,7 @@ const CHRON=[
  {lv:75,t:'Starfall',hint:'Some nights the stars seem to whisper the King\'s name…',txt:'After ten ascensions the King finally answers the stars. Starfall lifts him out of the meadow and into the Celestial Realm, where planets dance, comets race and constellations wait to be drawn.',un:'Starfall, after 10 ascensions'},
  {lv:100,t:'Among the Stars',hint:'At night, the stars arrange themselves into the shape of a crown.',txt:SOON}
 ];
-const GLOOP_TIPS=['Golden slimes appear every couple of minutes. Tap them before they fade!','Factories double their output at 10, 25, 50 and 100 owned.','Tap fast to fill the Wobble meter. A Rush boosts <b>everything</b>.','Every level gives +1% goo. Tap your level to read the Chronicle.','Each new kind of slime boosts goo by 3%, forever.','Merge slimes to unlock new factories and raise their caps.','Look for the gold <b>BEST VALUE</b> tag when you are not sure what to buy.','The ★ button on a factory row doubles that factory.'];
+const GLOOP_TIPS=['Golden slimes are rare. When one shows up, tap it before it fades!','Factories double their output at 5, 10, 15 and 20 owned.','Tap fast to fill the Wobble meter. A Rush boosts <b>everything</b>.','Every level gives +1% goo. Tap your level to read the Chronicle.','Each new kind of slime boosts goo by 3%, forever.','Merge slimes to unlock new factories and raise their caps.','Look for the gold <b>BEST VALUE</b> tag when you are not sure what to buy.','The ★ button on a factory row doubles that factory.'];
 const SKY_TIPS=['Line up planets in the <b>Orrery</b> for Conjunctions.','Put your biggest star jellies on different rings. Bigger planets make stronger beams.','A <b>Grand Alignment</b> needs planets on three rings in a row. It gives Stardust!','Spend Stardust on <b>Constellations</b> in the Ascend tab.','Shooting stars streak across the sky. Tap one before it is gone!','Tap fast to charge a <b>Supernova</b>.'];
 const SPIRIT_TIPS=['Keep the flame in the <b>golden zone</b>. Too hot and it flares out.','Feed your hatchlings embers to grow them.','Different elements in the nest make every dragon stronger.','Long expeditions with old dragons bring back the most scales.','Drakes and older can join the Dragon Patrol and roast the King for goo.','Shadow wisps drift through the dark. Catch them for embers.','The Deep hides old relics. They tell the story of this place.','Long expeditions with old dragons sometimes find a <b>Dragon Heart</b>. Three of them can open the sealed door.','Something enormous sleeps behind the sealed door. Every dragon here can feel it.'];
 
@@ -1181,7 +1208,7 @@ const DEF_SET={music:.5,sfx:.7,track:0,particles:true,floaters:true,shake:true,f
 const BOARD_MAX=32;
 function freshHollow(){ return {embers:0,embersAll:0,heat:0,coolUntil:0,ups:{},dragons:[],exps:[],scales:0,scalesAll:0,sh:{},relics:[],nextId:1,hearts:0,tia:null,waking:false,eggsBought:0,visited:false,wisps:0}; }
 function freshOrr(){ return {rings:RING_N.map(n=>new Array(n).fill(0)),ups:{},t:0}; }
-function fresh(){ return {v:5,goo:0,earnedRun:0,earnedAll:0,earnedRealm:0,taps:0,crits:0,merges:0,pets:0,goldens:0,rushes:0,ascensions:0,skyAsc:0,twinLvl:0,ascSeen:[],gems:0,items:{},bpNew:0,cos:{owned:{},hat:null,theme:null},login:{day:0,last:''},goals:{day:'',list:[],week:'',wlist:[],bonus:0,full:''},wheel:{last:''},season:{id:'',pts:0,prem:false,got:{}},bonusEggs:0,maLvl:0,maNext:0,offline:0,
+function fresh(){ return {v:6,goo:0,earnedRun:0,earnedAll:0,earnedRealm:0,taps:0,crits:0,merges:0,pets:0,goldens:0,rushes:0,ascensions:0,skyAsc:0,twinLvl:0,ascSeen:[],gems:0,items:{},bpNew:0,cos:{owned:{},hat:null,theme:null},login:{day:0,last:''},goals:{day:'',list:[],week:'',wlist:[],bonus:0,full:''},wheel:{last:''},season:{id:'',pts:0,prem:false,got:{}},bonusEggs:0,maLvl:0,maNext:0,offline:0,
   shiny:new Array(BOARD_MAX).fill(0),shinyDex:{},req:{L:0,next:0,until:0,n:0,rew:null},lore:{},loreNew:0,run:null,trial:null,trials:{},steward:false,shop:{day:'',bought:{}},kname:'',
   fac:FAC_BASE.map(()=>0),ups:{},perks:{},ach:{},board:new Array(BOARD_MAX).fill(0),penLvl:0,eggLevel:1,eggsBought:0,eggPrice:0,facOpen:0,facOpenT:0,hatchLvl:0,amLvl:0,amOn:true,hatchProg:0,amProg:0,
   maxSpecies:0,skyMax:0,runBest:0,jelly:0,jellyEarned:0,rush:0,rushUntil:0,buffs:[],playTime:0,bestGps:0,created:nowT(),lastSave:nowT(),
@@ -1232,7 +1259,12 @@ function parseSave(raw){
     if(o.tut.u_col){ F('shiny'); o.tut.achq=1; } if(o.tut.u_goals) F('shop');
     if(o.earnedAll>0) o.tut.new33=1; // a short "what is new" for players who were already here
   }
-  o.v=5;
+  if(!d.v||d.v<6){ // 3.3 saves: Research now opens at a level, so keep it open for anyone who already had it
+    const F=k=>{ o.tut['u_'+k]=1; o.tut['i_u_'+k]=1; }, pt=o.playTime||0;
+    if((o.tut.mile&&pt-(o.tut.mileT||0)>=150)||pt>=1260||o.ascensions>0) F('research'); if(o.tut.penups) F('penups');
+    if(o.earnedAll>0) o.tut.new34=1;
+  }
+  o.v=6;
   return o;
 }
 function serialize(){ S.lastSave=nowT(); return JSON.stringify(S); }
@@ -1246,7 +1278,7 @@ function recalc(){
   for(const u of UPGRADES){ if(!S.ups[u.id]) continue; const e=u.e;
     if(e.tap)m.tap*=e.tap; if(e.tapPct)m.tapPct+=e.tapPct; if(e.crit)m.crit+=e.crit; if(e.rushFill)m.rushFill*=e.rushFill; if(e.rushDur)m.rushDur*=e.rushDur;
     if(e.rushPow)m.rushPow=Math.max(m.rushPow,e.rushPow); if(e.goldFreq)m.goldFreq*=e.goldFreq; if(e.goldDur)m.goldDur*=e.goldDur; if(e.lucky)m.lucky*=e.lucky;
-    if(e.pen)m.pen*=e.pen; if(e.penPals)m.penPals+=e.penPals; if(e.feeding)m.feeding+=e.feeding; if(e.global)m.global*=e.global; if(e.polish)m.polish+=e.polish;
+    if(e.pen)m.pen*=(S.realm!=='sky'&&MB.penRes[u.id])||e.pen; if(e.penPals)m.penPals+=e.penPals; if(e.feeding)m.feeding+=e.feeding; if(e.global)m.global*=e.global; if(e.polish)m.polish+=e.polish;
     if(e.fac!=null)m.fac[e.fac]*=e.mult; }
   const sh=S.hollow.sh, cb=cstBonus();
   if(S.perks.nose)m.goldFreq*=1.3; if(S.perks.rush)m.rushDur*=2; if(sh.rush)m.rushDur*=1.5;
@@ -1269,7 +1301,9 @@ function recalc(){
   m.tia=tiaAtKing()?1.5:1;
   m.shinyB=1+.01*shinyCount(); m.loreB=1+.03*LORE_CH.filter(ch=>loreChDone(ch[0])).length;
   const tr=S.trials||{}; if(tr.hands) m.tap*=1.25; if(tr.drought) m.pen*=1.25; if(tr.oldways) m.global*=1.1; m.trialFac=tr.silent?1.1:1; if(tr.tiny) m.hatchSpeed*=1.15;
-  m.all=m.global*m.prestige*m.species*m.trophy*m.levelB*m.art*m.scaleGoo*m.star*m.tia*m.shinyB*m.loreB;
+  // 3.4: the sky was balanced around frequent Rushes and golden slimes; now that those are rare, a steady bonus makes up for them
+  m.skyB=S.realm==='sky'?SKY_BOOST:1;
+  m.all=m.global*m.prestige*m.species*m.trophy*m.levelB*m.art*m.scaleGoo*m.star*m.tia*m.shinyB*m.loreB*m.skyB;
   M=m;
 }
 function facMult(i){ let m=M.fac[i]; const c=S.fac[i]; for(const t of MILES){ if(c>=t) m*=2; else break; } return m; }
@@ -1285,13 +1319,14 @@ function facUnlocked(i){ return S.fac[i]>0||(S.runBest>=FAC_UNLOCK[i]&&(i===0||!
 function facWait(i){ return i>0&&facGated()&&i===Math.max(1,S.facOpen||0)&&S.runBest>=FAC_UNLOCK[i]&&!S.fac[i]?Math.max(0,FAC_GAP-(S.playTime-(S.facOpenT||0))):-1; }
 // the second factory gets its own short lesson: newer factories cost more but make far more, and each buy raises the price
 function fac2Coach(){ if(S.tut.fac2!==1||!S.tut.facdone) return; S.tut.fac2=2; const f=FACT[1], row=()=>ui.facList.querySelector('[data-row="1"]');
-  setTimeout(()=>coach([{el:row,text:'Meet your second factory, the <b>'+f.name+'</b>! Every new kind of factory costs more, but makes far more <b>goo</b> than the one before. One '+f.name.split(' ').pop()+' makes about as much as ten '+FACT[0].plural+'.'},
-    {el:()=>ui.facList.querySelector('[data-i="1"]')||row(),text:'Each factory you buy makes the next one of that kind a little pricier. The small number under <b>Buy</b> shows how much <b>goo per second</b> it adds, so you can see which one is the better deal.'}]),350); }
+  setTimeout(()=>coach([{el:row,text:'Meet your second factory, the <b>'+f.name+'</b>! Every new kind of factory costs more, but makes far more <b>goo</b> than the one before. One '+f.name.split(' ').pop()+' makes about as much as '+Math.round(f.prod/FACT[0].prod)+' '+FACT[0].plural+'.'},
+    {el:()=>ui.facList.querySelector('[data-i="1"]')||row(),text:'Each one you buy makes the next of that kind <b>'+Math.round((facG()-1)*100)+'% pricier</b>, so factories are a slow, steady bonus on top of your '+RL().slimes+'. The small number under <b>Buy</b> shows how much <b>goo per second</b> it adds.'}]),350); }
 function facReveal(){ if(!facGated()||!unlocked('fac')) return; const n=Math.max(1,S.facOpen||0); if(n>=FACT.length||S.runBest<FAC_UNLOCK[n]||S.playTime-(S.facOpenT||0)<FAC_GAP||bossBusy()) return;
   S.facOpen=n+1; S.facOpenT=S.playTime; const f=FACT[n];
   if(n===1&&!S.tut.fac2){ S.tut.fac2=1; sfx('ach'); intro('fac2',()=>{ if(tab==='fac') fac2Coach(); else coach([{el:()=>ui.tabMap.fac,text:'Your <b>Lv.'+FAC_UNLOCK[1]+' '+RL().slime+'</b> unlocked a second factory, the <b>'+f.name+'</b>! Open <b>'+tabName('fac')+'</b> to have a look.'}]); },5); return; }
   toast('<span class="ti">'+f.ico+'</span><span><b>New: '+f.name+'!</b><br>Unlocked by your Lv.'+FAC_UNLOCK[n]+' '+RL().slime+'</span>','gold'); sfx('ach'); }
-function facCap(){ return Math.max(10,10*S.runBest+2*S.level); }
+// in the meadow each factory starts with room for 2 and every bigger slime adds one more of every kind
+function facCap(i){ return meadowEco()?Math.max(1,2+S.runBest-FAC_UNLOCK[i==null?0:i]):Math.max(10,10*S.runBest+2*S.level); }
 function orrUp(k){ return (S.orr&&S.orr.ups[k])||0; }
 function planets(){ const out=[]; if(S.realm!=='sky') return out; S.orr.rings.forEach((ring,r)=>{ if(!ringOpen(r)) return; ring.forEach((L,k)=>{ if(L) out.push({r,k,L}); }); }); return out; }
 function ringOpen(r){ return r<2||(r===2&&orrUp('ring3'))||(r===3&&orrUp('ring4')); }
@@ -1300,15 +1335,16 @@ function computeG(){
   // "power" counts each slime as the number of Lv.1 eggs merged into it, so merging never lowers it
   let slimes=0,penRaw=0,power=0; const n=penSize(), sd=sotdL(); for(let i=0;i<n;i++){ const L=S.board[i]; if(L){ slimes++; penRaw+=slimeProd(L)*(S.shiny[i]?2:1)*(L===sd?2:1); power+=Math.pow(2,L-1); } }
   for(const p of planets()){ penRaw+=slimeProd(p.L)*1.25; power+=Math.pow(2,p.L-1); }
-  const pal=1+M.penPals*Math.sqrt(power); G.power=power; let tf=0;
+  const pal=meadowEco()?Math.min(MB.palsMax,1+M.penPals*Math.sqrt(power)):1+M.penPals*Math.sqrt(power); G.power=power; let tf=0;
   const fon=!trialOn('hands'); for(let i=0;i<FACT.length;i++){ const v=S.fac[i]&&fon?FACT[i].prod*S.fac[i]*facMult(i)*pal*M.all*(M.trialFac||1):0; G.fac[i]=v; tf+=v; }
-  G.pen=penRaw*M.pen*(1+M.feeding*totalFac)*M.all*wxPen(); G.penRaw=penRaw; G.facTot=tf; G.base=tf+G.pen; G.pal=pal;
+  G.pen=penRaw*M.pen*(1+M.feeding*feedK()*totalFac)*M.all*wxPen(); G.penRaw=penRaw; G.facTot=tf; G.base=tf+G.pen; G.pal=pal;
   G.mult=(rushActive()?M.rushPow:1)*buffMult('frenzy')*buffMult('potion')*buffMult('star')*buffMult('boost2')*(kingAwake()?AWAKE_MULT:1); G.total=G.base*G.mult; G.totalFac=totalFac; G.slimes=slimes;
 }
 function facEach(i){ return FACT[i].prod*facMult(i)*(G.pal||1)*M.all; }
 // what buying n more of factory i really adds to goo/s right now: milestones, Factory Feeding and active boosts included
 function facGain(i,n,noBoost){ const c=S.fac[i], mult=k=>{ let m=M.fac[i]; for(const t of MILES){ if(k>=t) m*=2; else break; } return m; };
-  return (FACT[i].prod*((c+n)*mult(c+n)-c*mult(c))*(G.pal||1)*M.all+(G.penRaw||0)*M.pen*M.feeding*n*M.all)*(noBoost?1:(G.mult||1)); }
+  return (FACT[i].prod*((c+n)*mult(c+n)-c*mult(c))*(G.pal||1)*M.all+(G.penRaw||0)*M.pen*M.feeding*feedK()*n*M.all)*(noBoost?1:(G.mult||1)); }
+const feedK=()=>meadowEco()?MB.feed:1;
 function upgGain(u,noBoost){ const e=u.e, m=noBoost?1:(G.mult||1); if(e.fac!=null) return (G.fac[e.fac]||0)*(e.mult-1)*m; if(e.pen) return G.pen*(e.pen-1)*m; if(e.global) return G.base*(e.global-1)*m; return 0; }
 // every tap is worth at least 10% of your goo/s, so tapping matters all game
 function tapBase(){ return M.tap*M.all+(.1+M.tapPct)*G.base; }
@@ -1318,7 +1354,10 @@ function tapValue(){ return tapBase()*tapBoost()*streakMult(); }
 // active play: the King stays awake (×1.5 goo) for a minute after you tap or merge; steady tapping builds a streak
 const AWAKE_MULT=1.5, AWAKE_SEC=60, STREAK=[0,12,35,70,120];
 // bursts are kept modest so goo does not flood in faster than players can understand what to spend it on
-const RUSH_SEC=12, RUSH_FILL=1, MANIA=10;
+// 3.4: boosts are rare events that last long enough to enjoy: a Rush takes a few minutes of tapping to fill
+// (the very first one fills fast, so the tutorial can show it) and then lasts half a minute
+const RUSH_SEC=30, RUSH_FILL=.25, MANIA=10;
+const rushFillTap=()=>RUSH_FILL*M.rushFill*(S.rushes?1:3.4);
 function kingAwake(){ return unlocked('awake')&&nowT()-lastTapAt<AWAKE_SEC*1000; }
 function streakTier(){ if(!unlocked('streak')||nowT()-ST.streakLast>2000) return 1; let k=1; for(let i=1;i<STREAK.length;i++) if(ST.streakN>=STREAK[i]) k=i+1; return k; }
 function streakMult(){ return streakTier(); }
@@ -1326,16 +1365,21 @@ function tiaAtKing(){ const T=S.hollow&&S.hollow.tia; return !!(T&&T.at==='king'
 function tiaHome(){ const T=S.hollow&&S.hollow.tia; return !!(T&&T.at==='home'); }
 // goo earned through play counts toward goals; goo paid for time away does not
 function earn(v,away){ S.goo+=v; S.earnedRun+=v; S.earnedAll+=v; S.earnedRealm+=v; if(!away&&S.goals&&S.goals.day) goalAdd('earn',v); }
-function facCost(i,n){ const b=FACT[i].cost*Math.pow(1.15,S.fac[i]); return b*(Math.pow(1.15,n)-1)/.15; }
-function facRoom(i){ return Math.max(0,facCap()-S.fac[i]); }
-function facMax(i){ const b=FACT[i].cost*Math.pow(1.15,S.fac[i]); return Math.min(facRoom(i),Math.max(0,Math.floor(Math.log(S.goo*.15/b+1)/Math.log(1.15)))); }
+const facG=()=>meadowEco()?MB.growth:1.15;
+function facCost(i,n){ const g=facG(), b=FACT[i].cost*Math.pow(g,S.fac[i]); return b*(Math.pow(g,n)-1)/(g-1); }
+function facRoom(i){ return Math.max(0,facCap(i)-S.fac[i]); }
+function facMax(i){ const g=facG(), b=FACT[i].cost*Math.pow(g,S.fac[i]); return Math.min(facRoom(i),Math.max(0,Math.floor(Math.log(S.goo*(g-1)/b+1)/Math.log(g)))); }
 function facWant(i){ const c=S.fac[i], room=facRoom(i); if(buyMode==='max') return facMax(i); if(buyMode==='next'){ const nx=MILES.find(m=>m>c)||c+1; return Math.min(room,nx-c); } return Math.min(room,buyMode); }
 // eggs get pricier with every egg bought this run, but always cost between 8 seconds and 2 minutes of goo/s
 // the floor uses what you really earn per second, taps included, so tapping cannot make eggs free
 // the egg price only moves when you buy an egg, and never down: each egg costs a bit more than the last, and at least
 // EGG_MIN_S seconds of steady income: goo/s plus EGG_TAPS plain taps a second (boosts, streaks and weather left out), at most EGG_MAX_S seconds once that passes 20K
 const EGG_TAPS=2;
-function eggAnchor(){ const raw=15*Math.pow(BAL.egg,S.eggsBought), b=Math.max(0,(G.base||0)-(G.pen||0)*(1-1/wxPen()))+(trialOn('silent')?0:EGG_TAPS*tapBase()); return Math.max(15,Math.min(Math.max(raw,b*EGG_MIN_S),Math.max(b*EGG_MAX_S,2e4))); }
+function eggAnchor(){ const raw=15*Math.pow(BAL.egg,S.eggsBought), b=Math.max(0,(G.base||0)-(G.pen||0)*(1-1/wxPen()))+(trialOn('silent')?0:EGG_TAPS*tapBase());
+  // in the meadow an egg costs seconds of steady income, a little more for every egg this run, so the pace of
+  // hatching and merging stays the same however big (or small) your goo per second is
+  if(meadowEco()) return Math.max(15,b*Math.min(MB.eggMax,MB.eggS0*Math.pow(MB.eggR,S.eggsBought)));
+  return Math.max(15,Math.min(Math.max(raw,b*EGG_MIN_S),Math.max(b*EGG_MAX_S,2e4))); }
 function eggCost(){ let c=S.eggPrice; if(!(c>0)){ c=eggAnchor(); if(G.base>0||!S.eggsBought) S.eggPrice=c; } return trialOn('drought')?c*10:c; }
 const EGG_MIN_S=8, EGG_MAX_S=120;
 function effEgg(){ return Math.min(MAXL-1,S.eggLevel+(S.perks.eggs?1:0)+(S.hollow.sh.yolk?1:0)+(M.eggBonus||0)); }
@@ -1347,8 +1391,10 @@ function curMax(){ return S.realm==='sky'?S.skyMax:S.maxSpecies; }
 function raiseLow(quiet){ const e=effEgg(); let n=0; for(let i=0;i<S.board.length;i++){ if(S.board[i]&&S.board[i]<e){ S.board[i]=e; n++; popSet.add(i); } }
   S.runBest=Math.max(S.runBest,e);
   if(!n) return; if(quiet){ popSet.clear(); if(S.realm==='sky') S.skyMax=Math.max(S.skyMax,e); else S.maxSpecies=Math.max(S.maxSpecies,e); return; } discover(e); { renderBoard(); toast('<img src="'+SPIMG[e]+'" alt=""><span><b>'+n+' '+RL().slimes+' grew up!</b><br>Everything below Lv.'+e+' is now Lv.'+e+'</span>','disc'); } }
-function jellyFor(e){ return Math.floor(Math.cbrt(e/BAL.jelly)); }
+// the meadow snowballs less than the old factory economy did, so Royal Jelly grows a little faster with goo there
+function jellyFor(e){ return Math.floor(meadowEco()?Math.pow(Math.max(0,e)/MB.jellyK,MB.jellyP):Math.cbrt(e/BAL.jelly)); }
 function jellyGain(){ return Math.max(0,jellyFor(S.earnedRealm)-S.jellyEarned); }
+const gooForJelly=j=>meadowEco()?MB.jellyK*Math.pow(j,1/MB.jellyP):Math.pow(j,3)*BAL.jelly;
 function ascTotal(){ return S.ascensions+S.skyAsc; }
 function ascReq(){ return Math.min(100,10+5*(ascTotal()+1)); }
 function canStarfall(){ return S.realm==='meadow'&&S.ascensions>=STARFALL_ASC&&S.level>=STARFALL_LV; }
@@ -1895,7 +1941,7 @@ function makeImages(){
   HEARTE_IMG=mkCanvas(96,c=>{ c.fillStyle='#0b0612'; c.strokeStyle='#4a3a5a'; c.lineWidth=4; c.beginPath(); c.arc(48,48,36,0,TAU); c.fill(); c.stroke(); c.globalAlpha=.25; c.strokeStyle='#ff7a5a'; c.lineWidth=3; c.beginPath(); c.moveTo(48,74); c.bezierCurveTo(10,48,18,16,48,36); c.bezierCurveTo(78,16,86,48,48,74); c.stroke(); }).toDataURL();
   for(let t=0;t<6;t++) ARTIMG[t]=mkCanvas(128,c=>drawArtifact(c,64,58,36,t)).toDataURL();
 }
-function useRealmArt(){ const r=S.realm==='sky'?'sky':'meadow'; SPECIES=r==='sky'?SKY_SPECIES:MEADOW_SPECIES; FACT=r==='sky'?SKY_FACT:MEADOW_FACT; FAC_UNLOCK=r==='sky'?FAC_UNLOCK_SKY:FAC_UNLOCK_MEADOW; SPCAN=IMG[r].can; SPIMG=IMG[r].img; }
+function useRealmArt(){ const r=S.realm==='sky'?'sky':'meadow'; SPECIES=r==='sky'?SKY_SPECIES:MEADOW_SPECIES; FACT=r==='sky'?SKY_FACT:MEADOW_FACT; FAC_UNLOCK=r==='sky'?FAC_UNLOCK_SKY:FAC_UNLOCK_MEADOW; MILES=r==='sky'?MILES_SKY:MB.miles; SPCAN=IMG[r].can; SPIMG=IMG[r].img; }
 const eggImg=()=>S.realm==='sky'?SKYEGG_IMG:EGG_IMG;
 const mentorImg=()=>S.world==='hollow'?SPIRIT_IMG:S.realm==='sky'?SKYGLOOP_IMG:GLOOP_IMG;
 
@@ -2518,7 +2564,7 @@ function tapKing(x,y){
   addFloat(x,y-12,(crit?'CRIT! +':'+')+fmt(v,true),crit?'#FFD23F':'#fff',crit?30:22);
   if(crit){ ST.shake=Math.max(ST.shake,7); addSparks(x,y,8,'#FFD23F'); }
   sfx('tap',crit); if(crit||S.taps%3===0) flyGoo(x,y,crit?3:1);
-  if(!rushActive()&&unlocked("wobble")){ S.rush+=RUSH_FILL*M.rushFill; if(S.rush>=100) startRush(); }
+  if(!rushActive()&&unlocked("wobble")){ S.rush+=rushFillTap(); if(S.rush>=100) startRush(); }
   if(S.taps>=15) ui.tapHint.hidden=true;
 }
 // steady tapping builds a streak: ×2 → ×3 → ×4 → ×5 taps; it fizzles after 2 seconds without a tap
@@ -2535,7 +2581,7 @@ function flyGoo(x,y,n,cls){ if(eco()||RM||!S.settings.particles||!ui.gooIcon) re
     let fin=false; const done=()=>{ if(fin) return; fin=true; d.remove(); flyN--; pulseIcon(); }; a.onfinish=done; a.oncancel=done; setTimeout(done,1500); } }
 let pulseAt=0;
 function pulseIcon(){ const now=nowT(); if(now-pulseAt<120) return; pulseAt=now; const g=ui.gooIcon; g.classList.remove('pulse'); void g.offsetWidth; g.classList.add('pulse'); }
-function startRush(){ const dur=RUSH_SEC*M.rushDur, sky=S.realm==='sky'; goalAdd('rush'); S.rushUntil=nowT()+dur*1000; S.rush=100; S.rushes++; gainXP(30);
+function startRush(){ const dur=RUSH_SEC*M.rushDur, sky=S.realm==='sky'; goalAdd('rush'); S.rushUntil=nowT()+dur*1000; S.rush=100; S.rushes++; gainXP(100);
   if(sky){ sfx('nova'); ST.nova={t:0}; ST.flash=.55; ST.flashCol='#e6fbff'; } else sfx('rush');
   ST.shake=Math.max(ST.shake,9); toast('<span class="ti">'+(sky?'💥':'🌈')+'</span><span><b>'+RL().rushName.toUpperCase()+'!</b> Everything ×'+M.rushPow+' for '+Math.round(dur)+'s</span>','rush'); }
 function addBuff(k,name,m,sec){ S.buffs=S.buffs.filter(b=>b.k!==k); S.buffs.push({k,name,m,until:nowT()+sec*1000}); }
@@ -2555,7 +2601,7 @@ function discover(L){
   const prev=S.runBest; S.runBest=Math.max(prev,L);
   if(S.runBest>prev&&ui.started){
     if(TABDEF[2].show()&&!facGated()) for(let i=0;i<FAC_UNLOCK.length;i++) if(FAC_UNLOCK[i]>Math.max(prev,1)&&FAC_UNLOCK[i]<=S.runBest&&!S.fac[i]){ const f=FACT[i]; setTimeout(()=>{ toast('<span class="ti">'+f.ico+'</span><span><b>New: '+f.name+'!</b><br>Unlocked by your Lv.'+FAC_UNLOCK[i]+' '+RL().slime+'</span>','gold'); sfx('ach'); },650); ui.facN=-1; }
-    const oldCap=Math.max(10,10*prev+2*S.level); if(prev>0&&S.fac.some(c=>c>=oldCap)) setTimeout(()=>toast('<span class="ti">📈</span><span><b>Factory cap raised!</b><br>You can now own '+facCap()+' of each</span>'),1100); }
+    const oldCap=Math.max(10,10*prev+2*S.level); if(!meadowEco()&&prev>0&&S.fac.some(c=>c>=oldCap)) setTimeout(()=>toast('<span class="ti">📈</span><span><b>Factory cap raised!</b><br>You can now own '+facCap()+' of each</span>'),1100); }
   const sky=S.realm==='sky', cur=sky?S.skyMax:S.maxSpecies;
   if(L>cur){ if(sky) S.skyMax=L; else S.maxSpecies=L; recalc(); if(L>1){ gainXP(15*L); toast('<img src="'+SPIMG[L]+'" alt=""><span><b>New '+RL().slime+': '+SPECIES[L-1].n+'!</b><br>Lv.'+L+' · +3% goo forever</span>','disc'); if(S.world!=='hollow') sfx('discover'); } } }
 function nope(el){ sfx('no'); if(!el) return; el.classList.remove('nope'); void el.offsetWidth; el.classList.add('nope'); }
@@ -2563,21 +2609,23 @@ function checkAch(){ let got=false; for(const a of ACH){ if(S.ach[a.id]) continu
 
 /* golden slimes, and shooting stars in the sky */
 let goldenNext=rand(40,70), goldenOn=false, goldenTimer=null;
+// golden slimes are rare (every 4 to 6 minutes before research), so each one stays on screen a while
+const GOLD_GAP=[240,360], goldenGap=()=>rand(GOLD_GAP[0],GOLD_GAP[1])/M.goldFreq;
 function spawnGolden(){ const g=ui.golden, r=ui.app.getBoundingClientRect(), sky=S.realm==='sky'; clearTimeout(goldenTimer); goldenOn=true; g.hidden=false; g.className=''; void g.offsetWidth;
-  if(sky){ const sr=ui.stage.getBoundingClientRect(), left=Math.random()<.5, x0=sr.left-r.left+sr.width*(left?rand(.06,.25):rand(.75,.94)), y0=sr.top-r.top+sr.height*rand(.12,.3), dx=(left?1:-1)*sr.width*rand(.45,.62), dy=sr.height*rand(.25,.42), dur=rand(6.5,8.5)*(S.perks.nose?1.25:1);
+  if(sky){ const sr=ui.stage.getBoundingClientRect(), left=Math.random()<.5, x0=sr.left-r.left+sr.width*(left?rand(.06,.25):rand(.75,.94)), y0=sr.top-r.top+sr.height*rand(.12,.3), dx=(left?1:-1)*sr.width*rand(.45,.62), dy=sr.height*rand(.25,.42), dur=rand(9,11.5)*(S.perks.nose?1.25:1);
     g.src=STAR_IMG; g.alt='Shooting star! Tap it'; g.style.left=x0+'px'; g.style.top=y0+'px'; g.style.setProperty('--dx',dx+'px'); g.style.setProperty('--dy',dy+'px'); g.style.setProperty('--dur',dur+'s'); g.className='shoot'; sfx('shoot');
-    goldenTimer=setTimeout(()=>{ goldenOn=false; g.hidden=true; g.className=''; goldenNext=rand(70,160)/M.goldFreq; },dur*1000); return; }
+    goldenTimer=setTimeout(()=>{ goldenOn=false; g.hidden=true; g.className=''; goldenNext=goldenGap(); },dur*1000); return; }
   g.src=GOLD_IMG; g.alt='Golden slime! Tap it'; g.style.left=(rand(.12,.88)*r.width)+'px'; g.style.top=(rand(.2,.75)*r.height)+'px'; sfx('gold');
-  goldenTimer=setTimeout(hideGolden,13000*(S.perks.nose?1.25:1)); }
-function hideGolden(){ if(!goldenOn) return; goldenOn=false; clearTimeout(goldenTimer); ui.golden.className='bye'; setTimeout(()=>{ if(!goldenOn) ui.golden.hidden=true; },500); goldenNext=rand(70,160)/M.goldFreq; }
+  goldenTimer=setTimeout(hideGolden,20000*(S.perks.nose?1.25:1)); }
+function hideGolden(){ if(!goldenOn) return; goldenOn=false; clearTimeout(goldenTimer); ui.golden.className='bye'; setTimeout(()=>{ if(!goldenOn) ui.golden.hidden=true; },500); goldenNext=goldenGap(); }
 function clickGolden(e){
   if(!goldenOn) return; e.preventDefault(); audioUnlock();
   const gr=ui.golden.getBoundingClientRect(), ar=ui.app.getBoundingClientRect(), px=gr.left-ar.left+gr.width/2, py=gr.top-ar.top, sky=S.realm==='sky';
-  goldenOn=false; ui.golden.hidden=true; ui.golden.className=''; clearTimeout(goldenTimer); goalAdd('golden'); goldenNext=rand(70,160)/M.goldFreq; S.goldens++; gainXP(40); if(S.run) S.run.goldens++;
+  goldenOn=false; ui.golden.hidden=true; ui.golden.className=''; clearTimeout(goldenTimer); goalAdd('golden'); goldenNext=goldenGap(); S.goldens++; gainXP(100); if(S.run) S.run.goldens++;
   const roll=Math.random(), empty=emptyCells().length; let msg;
-  if(roll<.42||(roll>=.87&&empty===0)){ const gain=(Math.min(S.goo*.15,G.base*900)+G.base*30+13)*M.lucky; earn(gain); msg=(sky?'Lucky starlight':'Lucky goo')+'! +'+fmt(gain); }
-  else if(roll<.72){ const d=77*M.goldDur; addBuff('frenzy','Goo Frenzy ×7',7,d); msg='Goo Frenzy! ×7 goo for '+Math.round(d)+'s'; }
-  else if(roll<.87){ const d=13*M.goldDur; addBuff('mania','Tap Mania ×'+MANIA,MANIA,d); msg='Tap Mania! Taps ×'+MANIA+' for '+Math.round(d)+'s'; }
+  if(roll<.42||(roll>=.87&&empty===0)){ const gain=(Math.min(S.goo*.25,G.base*1500)+G.base*60+13)*M.lucky; earn(gain); msg=(sky?'Lucky starlight':'Lucky goo')+'! +'+fmt(gain); }
+  else if(roll<.72){ const d=120*M.goldDur; addBuff('frenzy','Goo Frenzy ×7',7,d); msg='Goo Frenzy! ×7 goo for '+Math.round(d)+'s'; }
+  else if(roll<.87){ const d=30*M.goldDur; addBuff('mania','Tap Mania ×'+MANIA,MANIA,d); msg='Tap Mania! Taps ×'+MANIA+' for '+Math.round(d)+'s'; }
   else { const n=Math.min(6,empty); for(let i=0;i<n;i++) spawnEgg(Math.min(MAXL-1,effEgg()+1),true,i*140); msg=(sky?'Star Shower! ':'Egg Storm! ')+n+' bonus eggs'; }
   popText(px,py,msg); sfx('goldGet'); ST.shake=Math.max(ST.shake,6); toast('<span class="ti">'+(sky?'🌠':'🌟')+'</span><span><b>'+msg+'</b></span>','gold'); uiTick();
 }
@@ -2651,7 +2699,7 @@ function bossTap(x,y){
   const b=B; lastTapAt=nowT(); S.taps++; gainXP(.1); bumpStreak(x,y); goalAdd('tap');
   if(b.k==='shroom') for(let i=0;i<b.spores.length;i++){ const s=b.spores[i]; if(Math.hypot(x-s.x,y-s.y)<s.r+14){ b.spores.splice(i,1); addSparks(x,y,8,b.sky?'#fff3a8':'#b8ff7a'); bossHit(b.max*.08,false,x,y,'SPORE!'); return; } }
   const dx=(x-b.x)/b.rx, dy=(y-b.y)/b.ry; if(dx*dx+dy*dy>1.5) return;
-  if(!rushActive()&&unlocked("wobble")){ S.rush+=RUSH_FILL*M.rushFill; if(S.rush>=100) startRush(); }
+  if(!rushActive()&&unlocked("wobble")){ S.rush+=rushFillTap(); if(S.rush>=100) startRush(); }
   bossHit(tapValue(),Math.random()<M.crit,x,y);
 }
 function bossHit(v,crit,x,y,label){
@@ -2728,7 +2776,7 @@ function tipText(){
   if(S.realm==='sky'){
     if(S.board.some(v=>v)&&S.orr.rings.some((ring,r)=>ringOpen(r)&&ring.some(v=>!v))) return 'An Orrery ring has an empty slot. Put a star jelly there in the <b>Orrery</b> tab!';
     if(CONST.some(k=>k.stars.some((_,i)=>cstAvail(k,i))&&S.stardust>=cstCost(cstCount(k)))) return 'You have Stardust for a new star. Light it in <b>Constellations</b> (Ascend tab).'; }
-  for(let i=0;i<FACT.length;i++) if(facUnlocked(i)&&S.fac[i]>=facCap()) return 'Your '+FACT[i].plural+' hit the cap of '+facCap()+'. Merge a bigger '+R.slime+' to raise it!';
+  for(let i=0;i<FACT.length;i++) if(facUnlocked(i)&&S.fac[i]>=facCap(i)) return 'Your '+FACT[i].plural+' hit the cap of '+facCap(i)+'. Merge a bigger '+R.slime+' to raise it!';
   if(researchOpen()&&upgQueue().slice(0,3).some(u=>S.goo>=u.cost)) return 'You can afford new <b>Research</b>. Check the 🔬 tab!';
   if(penUpsOpen()&&PENUPS.some(p=>(!p.show||p.show())&&p.lvl()<p.max&&S.goo>=p.cost())) return 'A pen upgrade is ready! Tap <b>🏡 Upgrades</b> under the '+R.pen+'.';
   if(FACT.some((_,i)=>{ const u=UPMAP['f'+i+'_'+tierOf(i)]; return u&&u.unlock()&&S.goo>=u.cost; })) return 'A ★ upgrade is ready on one of your '+(S.realm==='sky'?'celestial bodies':'factories')+'. It doubles its output!';
@@ -2891,7 +2939,7 @@ function drawWarp(c,w,h,dt){ const W=ST.warp; if(!W) return; W.t+=dt; const t=W.
       c.strokeStyle='rgba('+col+','+a+')'; c.lineWidth=lw*a+2; c.beginPath(); c.arc(C.x,C.y,rr*k,0,TAU); c.stroke(); } }
   c.restore(); if(t>=W.dur) ST.warp=null; }
 function buyShop(k,btn){ const Hh=S.hollow, c=SHOP_CONS.find(x=>x.k===k);
-  if(c){ if(Hh.scales<c.cost){ nope(btn); return; } if(k==='bait'&&S.level<BOSS_LV){ toast('Minibosses unlock at Lv 10.'); return; }
+  if(c){ if(Hh.scales<c.cost){ nope(btn); return; } if(k==='bait'&&S.level<BOSS_LV){ toast('Minibosses unlock at Lv '+BOSS_LV+'.'); return; }
     Hh.scales-=c.cost; const msg=c.use(); sfx('buy'); gainXP(10); toast('<span class="ti">'+c.ico+'</span><span><b>'+msg+'</b></span>','gold'); renderShop(true); return; }
   const p=SHOP_PERM.find(x=>x.k===k); if(!p) return; const l=Hh.sh[k]||0; if(l>=p.max) return; const cost=p.cost(l); if(Hh.scales<cost){ nope(btn); return; }
   Hh.scales-=cost; Hh.sh[k]=l+1; recalc(); if(k==='yolk') raiseLow(); if(k==='merger'&&S.amLvl<3) S.amLvl=3; if(k==='row') renderBoard();
@@ -3281,34 +3329,38 @@ function intro(key,fn,pri,cond){ if(S.tut['i_'+key]||INTRO.q.some(x=>x.key===key
 function introTick(){ if(!INTRO.q.length||coachQ||!ui.modal.hidden||!ui.sheet.hidden||!ui.cine.hidden||ST.trans||bossQuiet()) return;
   const top=INTRO.q.find(x=>!x.cond||x.cond()); if(!top) return; const gap=S.playTime<900?32:10; if(top.pri<9&&S.playTime-INTRO.last<gap) return;
   INTRO.q.splice(INTRO.q.indexOf(top),1); S.tut['i_'+top.key]=1; INTRO.last=S.playTime; try{ top.fn(); }catch(e){ console.error(e); } }
-const PEN_INTRO_GOO=400, RESEARCH_DELAY=150, WHEEL_LV=6, GOALS_LV=8, LOGIN_LV=4, MERGEALL_LV=20, REQ_LV=9, STEWARD_LV=60;
-function researchOpen(){ if(trialOn('oldways')) return false; return S.realm==='sky'||ascTotal()>0||S.starfalls>0||(S.tut.mile&&S.playTime-(S.tut.mileT||0)>=RESEARCH_DELAY)||S.playTime>=1260; }
+// 3.4: every feature opens at a level (the Chronicle lists them all); only factories follow your slimes
+const LV={wobble:2,awake:3,streak:3,penups:4,weather:4,research:5,golden:6,col:7,login:8,wheel:9,goals:10,ev:11,shop:11,req:12,boss:BOSS_LV,asc:14}, MERGEALL_LV=20, STEWARD_LV=60;
+function researchOpen(){ if(trialOn('oldways')) return false; return S.realm==='sky'||ascTotal()>0||S.starfalls>0||unlocked('research'); }
 function mileShown(){ return !!S.tut.i_mile||ascTotal()>0||S.realm==='sky'; }
 function penUpsOpen(){ return !!S.tut.penups||ascTotal()>0||S.realm==='sky'; }
 // bigger features open one at a time: each waits its turn in the intro queue, then shows its own tip right away
 function unlocked(k){ return !!S.tut['u_'+k]; }
 function unlockTick(){ const L=S.level, pt=S.playTime, vet=ascTotal()>0||S.realm==='sky';
   const U=(k,cond,pri,then)=>{ if(!S.tut['u_'+k]&&cond) intro('u_'+k,()=>{ S.tut['u_'+k]=1; if(then) then(); if(k==='login'&&loginPending()&&!AWAY.timer) AWAY.timer=setTimeout(showWelcomeBack,350); uiTick(); },pri); };
-  // the first hour introduces one thing at a time, with room to enjoy each before the next arrives
+  // one new thing per level (two on a few), so every level-up brings something; vets get everything at once
   U('fac',vet||(S.runBest>=FAC_UNLOCK[0]&&pt>=FAC_MIN_T),6,()=>{ S.facOpen=Math.max(S.facOpen||0,1); S.facOpenT=S.playTime; });
-  U('wobble',vet||(unlocked('fac')&&pt>=(S.facOpenT||0)+75&&S.taps>=80),6,()=>coach([{el:'#rush',text:'See the <b>Wobble meter</b>? Every tap fills it a little. When it is full, the '+RL().king+' goes into a <b>Wobble Rush</b> and everything makes double goo for a few seconds!'}]));
-  U('awake',vet||(unlocked('wobble')&&S.tut.facdone&&pt>=390),4,()=>coach([{el:'#stage',text:'Did you notice? When you tap the '+RL().king+', he wakes up, and while he is awake <b>everything makes ×1.5 goo</b>. Leave him alone for a minute and he dozes off again.'}]));
-  U('streak',vet||(unlocked('awake')&&pt>=480),4,()=>{ S.tut.streak=1; say('Tap in a steady rhythm to build a <b>tap streak</b>: your taps grow to ×2, ×3, ×4 and finally ×5. Stop for two seconds and it fizzles out.',9000); });
-  U('weather',vet||(penUpsOpen()&&pt>=660),1);
-  U('golden',vet||(researchOpen()&&pt>=1140),3,()=>{ goldenNext=Math.min(goldenNext,20); });
-  U('col',L>=LOGIN_LV&&(pt>=1320||vet),2,()=>{ S.tut.achq=1; });
+  U('wobble',vet||L>=LV.wobble,6,()=>coach([{el:'#rush',text:'See the <b>Wobble meter</b>? Every tap fills it a little. When it is full, the '+RL().king+' goes into a <b>Wobble Rush</b> and everything makes double goo for half a minute! After the first one it takes a while to fill, so a Rush is something special.'}]));
+  U('awake',vet||(L>=LV.awake&&unlocked('wobble')),4,()=>coach([{el:'#stage',text:'Did you notice? When you tap the '+RL().king+', he wakes up, and while he is awake <b>everything makes ×1.5 goo</b>. Leave him alone for a minute and he dozes off again.'}]));
+  U('streak',vet||(L>=LV.streak&&unlocked('awake')),4,()=>{ S.tut.streak=1; say('Tap in a steady rhythm to build a <b>tap streak</b>: your taps grow to ×2, ×3, ×4 and finally ×5. Stop for two seconds and it fizzles out.',9000); });
+  U('penups',vet||L>=LV.penups,3,()=>{ S.tut.penups=1; if(tab!=='pen') setTab('pen'); uiTick(); coach([{el:'#penUpBtn',text:'Level '+LV.penups+'! Your '+RL().pen.toLowerCase()+' can learn new tricks in <b>🏡 Upgrades</b>. Start with the <b>Hatchery</b>: it lays free eggs for you.'}]); });
+  U('weather',vet||(L>=LV.weather&&penUpsOpen()),1);
+  U('research',vet||L>=LV.research,3);
+  U('golden',vet||L>=LV.golden,3,()=>{ goldenNext=Math.min(goldenNext,20); });
+  U('col',vet||L>=LV.col,2,()=>{ S.tut.achq=1; });
   U('shiny',unlocked('col'),1);
-  U('login',unlocked('col')&&(pt>=1500||vet),2);
-  U('wheel',L>=WHEEL_LV&&(pt>=1740||vet),2);
-  U('goals',L>=GOALS_LV&&(pt>=1980||vet),2,()=>{ setTimeout(()=>{ const sd=sotdL(); if(sd) intro('sotd',()=>say('Every day one size of '+RL().slime+' is the <b>Slime of the Day</b> and makes <b>double goo</b>. Today it is the <b>Lv.'+sd+' '+SPECIES[sd-1].n+'</b>. Look for the ⭐ in your '+RL().pen.toLowerCase()+'.',9000),2); },500); });
-  U('ev',unlocked('goals')&&(pt>=2220||vet),2);
-  U('shop',unlocked('ev')&&(pt>=2340||vet),2,()=>coach([{el:()=>ui.dock.querySelector('[data-d="bag"]')||ui.dock,text:'The <b>Gem shop</b> is open in your 🎒 Backpack! Gems 💎 come from levels, trophies, goals and the daily reward. Spend them on items, new looks, <b>Royal Spins</b> and the Royal Road.'}]));
-  U('req',L>=REQ_LV&&(pt>=2460||vet),2,()=>{ S.req.next=S.playTime+3; });
-  U('boss',L>=BOSS_LV&&researchOpen()&&(pt>=2700||vet),2,levelSync);
-  U('asc',(L>=12||S.earnedRealm>=1e7)&&(pt>=3000||vet),2);
+  U('login',vet||L>=LV.login,2);
+  U('wheel',vet||L>=LV.wheel,2);
+  U('goals',vet||L>=LV.goals,2,()=>{ setTimeout(()=>{ const sd=sotdL(); if(sd) intro('sotd',()=>say('Every day one size of '+RL().slime+' is the <b>Slime of the Day</b> and makes <b>double goo</b>. Today it is the <b>Lv.'+sd+' '+SPECIES[sd-1].n+'</b>. Look for the ⭐ in your '+RL().pen.toLowerCase()+'.',9000),2); },500); });
+  U('ev',vet||L>=LV.ev,2);
+  U('shop',vet||(L>=LV.shop&&unlocked('ev')),2,()=>coach([{el:()=>ui.dock.querySelector('[data-d="bag"]')||ui.dock,text:'The <b>Gem shop</b> is open in your 🎒 Backpack! Gems 💎 come from levels, trophies, goals and the daily reward. Spend them on items, new looks, <b>Royal Spins</b> and the Royal Road.'}]));
+  U('req',vet||L>=LV.req,2,()=>{ S.req.next=S.playTime+3; });
+  U('boss',vet||L>=LV.boss,2,levelSync);
+  U('asc',vet||L>=LV.asc,2);
   U('steward',L>=STEWARD_LV,2,()=>coach([{el:()=>ui.tabMap.fac||ui.tabs,text:'Level '+STEWARD_LV+'! The <b>Royal Steward</b> joins your court. Switch him on in the '+tabName('fac')+' tab and he buys the best value for you, so there are fewer buttons to press.'}]));
   if(trialsOpen()&&!S.tut.trialsTip){ S.tut.trialsTip=1; intro('trials',()=>coach([{el:()=>ui.tabMap.asc||ui.tabs,text:'Three ascensions! The <b>Trials of the Crown</b> are open in the Ascend tab: runs with a twist, each with a permanent reward and a jewel for the crown.'}]),2); }
-  if(S.tut.new33===1) intro('new33',()=>{ S.tut.new33=2; S.tut.new32=2; openModal('<h2 class="mh">✨ New in Slime Empire 3.3</h2><ul class="howto"><li><span>📅</span>A new event every month, each with its own Royal Road, three hats, two colors and a meadow theme. See what is coming in the event Calendar.</li><li><span>👑</span>Royal Requests: the King asks for a slime, and pays well for it.</li><li><span>✨</span>Shiny slimes: about 1 in 100 eggs, with double goo.</li><li><span>⭐</span>Slime of the Day: one size makes double goo, every day.</li><li><span>🛒</span>The Gem shop and the Royal Spin, in your Backpack.</li><li><span>🌧️</span>Weather in the meadow, and the real moon phase in the night sky.</li><li><span>📜</span>Lore cards in the Chronicle.</li><li><span>🏆</span>Trials of the Crown after 3 ascensions, a run summary after every ascension, and the Royal Steward at level '+STEWARD_LV+'.</li><li><span>🐉</span>Dragon breeding in the Hollow, and comets among the stars.</li><li><span>📸</span>The Kingdom card: a picture of your kingdom to share (Collection tab).</li></ul><p class="note">The start of the game was rebalanced as well, so new players meet one thing at a time over their first hour.</p>'); },8,()=>S.world!=='hollow');
+  if(S.tut.new34===1) intro('new34',()=>{ S.tut.new34=2; openModal('<h2 class="mh">✨ New in Slime Empire 3.4</h2><ul class="howto"><li><span>🐣</span>Your slimes are the heart of the kingdom now: bigger slimes make much more goo, and most of your goo comes from the pen.</li><li><span>🏭</span>Factories are rarer, bigger buys. Each one costs 50% more than the last, and they double at 5, 10, 15 and 20 owned.</li><li><span>⭐</span>Every level unlocks something new. The Chronicle shows what comes next.</li><li><span>🌈</span>Wobble Rush and golden slimes are rarer, but they last much longer.</li></ul><div class="btnrow" style="justify-content:center"><button class="btn" id="n34Ok">Let\'s go!</button></div>'); $('#n34Ok').onclick=closeModal; },8,()=>S.world!=='hollow');
+  else if(S.tut.new33===1) intro('new33',()=>{ S.tut.new33=2; S.tut.new32=2; openModal('<h2 class="mh">✨ New in Slime Empire 3.3</h2><ul class="howto"><li><span>📅</span>A new event every month, each with its own Royal Road, three hats, two colors and a meadow theme. See what is coming in the event Calendar.</li><li><span>👑</span>Royal Requests: the King asks for a slime, and pays well for it.</li><li><span>✨</span>Shiny slimes: about 1 in 100 eggs, with double goo.</li><li><span>⭐</span>Slime of the Day: one size makes double goo, every day.</li><li><span>🛒</span>The Gem shop and the Royal Spin, in your Backpack.</li><li><span>🌧️</span>Weather in the meadow, and the real moon phase in the night sky.</li><li><span>📜</span>Lore cards in the Chronicle.</li><li><span>🏆</span>Trials of the Crown after 3 ascensions, a run summary after every ascension, and the Royal Steward at level '+STEWARD_LV+'.</li><li><span>🐉</span>Dragon breeding in the Hollow, and comets among the stars.</li><li><span>📸</span>The Kingdom card: a picture of your kingdom to share (Collection tab).</li></ul><p class="note">The start of the game was rebalanced as well, so new players meet one thing at a time over their first hour.</p>'); },8,()=>S.world!=='hollow');
   else if(S.tut.new32===1) intro('new32',()=>{ S.tut.new32=2; if(tab!=='pen') setTab('pen'); uiTick(); coach([
     {el:'#board',text:'<b>New in 3.2:</b> tap a '+RL().slime+', then a matching one, to merge them. Hold and drag still works, and the '+RL().pen+' now scrolls like the rest of the page.'},
     {el:'#penUpBtn',text:'Pen upgrades moved here. <b>🏡 Upgrades</b> opens them as a panel, with a badge when one is ready.'},
@@ -3389,7 +3441,7 @@ const ITEMS={
  frenzy:{ico:'🌟',n:'Frenzy Flask',sn:'Frenzy',d:'×7 goo for 2 minutes.',use:()=>{ addBuff('frenzy','Goo Frenzy ×7',7,120); return 'Goo Frenzy! ×7 goo for 2 minutes'; }},
  eggcrate:{ico:'📦',n:'Egg Crate',sn:'Eggs',d:'10 eggs that hatch 2 levels higher.',use:()=>{ S.bonusEggs=(S.bonusEggs||0)+10; return '10 bonus eggs are waiting in the '+RL().pen; }},
  bell:{ico:'🔔',n:'Golden Bell',d:'A golden slime (or shooting star) appears right away.',use:()=>{ if(S.world!=='meadow') return {fail:'Use it in the King\'s world.'}; if(goldenOn) return {fail:'One is already here!'}; spawnGolden(); return 'Something shiny appeared!'; }},
- bait:{ico:'🎣',n:'Boss Bait',d:'A miniboss appears right away (Lv 10+).',use:()=>{ if(S.level<BOSS_LV) return {fail:'Minibosses come at Lv 10.'}; if(S.world!=='meadow') return {fail:'Use it in the King\'s world.'}; if(B) return {fail:'A miniboss is already here!'}; spawnBoss(); return 'A miniboss smells the bait…'; }},
+ bait:{ico:'🎣',n:'Boss Bait',d:'A miniboss appears right away (Lv 13+).',use:()=>{ if(S.level<BOSS_LV) return {fail:'Minibosses come at Lv '+BOSS_LV+'.'}; if(S.world!=='meadow') return {fail:'Use it in the King\'s world.'}; if(B) return {fail:'A miniboss is already here!'}; spawnBoss(); return 'A miniboss smells the bait…'; }},
  compass:{ico:'🧭',n:'Swift Compass',d:'Every running expedition finishes now.',use:()=>{ const ex=S.hollow.exps.filter(e=>e.end>nowT()); if(!ex.length) return {fail:'No expeditions are running.'}; ex.forEach(e=>{ e.end=nowT(); }); return ex.length+' expedition'+(ex.length>1?'s':'')+' came back!'; }},
  chest:{ico:'🎁',n:'Artifact Chest',d:'3 random Artifacts.',use:()=>{ const g=[rollArtifact(),rollArtifact(),rollArtifact()]; g.forEach(t=>S.arts[t]++); recalc(); if(g.includes(5)) mythicAnnounce(); return 'Artifacts: '+g.map(t=>RARITY[t].n).join(', '); }},
  rchest:{ico:'💝',n:'Royal Chest',d:'3 Artifacts, each Rare or better.',use:()=>{ const g=[0,1,2].map(()=>Math.max(2,rollArtifact())); g.forEach(t=>S.arts[t]++); recalc(); if(g.includes(5)) mythicAnnounce(); return 'Artifacts: '+g.map(t=>RARITY[t].n).join(', '); }}
@@ -3564,11 +3616,11 @@ const GOALDEF={
  tap:{t:(n)=>'Tap the '+RL().king+' '+n.toLocaleString('en-US')+' times',d:[150,500,1500],w:[2500,6000,15000]},
  merge:{t:(n)=>'Merge '+RL().slimes+' '+n+' times',d:[25,80,200],w:[400,1000,2500]},
  hatch:{t:(n)=>'Hatch '+n+' eggs',d:[20,60,150],w:[300,800,2000]},
- fac:{t:(n)=>'Buy '+n+' '+(S.realm==='sky'?'celestial bodies':'factories'),d:[15,50,150],w:[200,500,1200],ok:()=>TABDEF[2].show()},
+ fac:{t:(n)=>'Buy '+n+' '+(S.realm==='sky'?'celestial bodies':'factories'),d:[15,50,150],w:[200,500,1200],dm:[2,5,10],wm:[15,30,60],ok:()=>TABDEF[2].show()},
  earn:{t:(n)=>'Earn '+fmtRough(n)+' goo',s:[600,2400,6000],ws:[21600,54000,108000]},
- golden:{t:(n)=>'Catch '+n+' '+RL().golden+(n>1?'s':''),d:[1,3,6],w:[10,20,35],ok:()=>S.goldens>0},
+ golden:{t:(n)=>'Catch '+n+' '+RL().golden+(n>1?'s':''),d:[1,2,4],w:[6,12,20],ok:()=>S.goldens>0},
  boss:{t:(n)=>'Defeat '+n+' miniboss'+(n>1?'es':''),d:[1,2,4],w:[6,12,20],ok:()=>unlocked('boss')},
- rush:{t:(n)=>'Trigger '+n+' '+RL().rushName+(n>1?(S.realm==='sky'?'s':'es'):''),d:[2,5,10],w:[20,40,70]},
+ rush:{t:(n)=>'Trigger '+n+' '+RL().rushName+(n>1?(S.realm==='sky'?'s':'es'):''),d:[1,3,6],w:[10,20,35]},
  streak:{t:(n)=>'Reach a ×'+n+' tap streak',d:[3,4,5],max:true},
  exp:{t:(n)=>'Send '+n+' expedition'+(n>1?'s':''),d:[1,3,5],w:[8,15,25],ok:()=>S.level>=HOLLOW_LV&&S.hollow.dragons.some(d=>d.born)},
  conj:{t:(n)=>'See '+n+' Conjunctions',d:[10,30,80],w:[150,400,900],ok:()=>S.realm==='sky'&&planets().length>=2},
@@ -3579,7 +3631,7 @@ const DIFF=[{n:'EASY',c:'#98f25a'},{n:'MEDIUM',c:'#ffd43f'},{n:'HARD',c:'#ff7b8a
 function seeded(str){ let h=2166136261; for(let i=0;i<str.length;i++){ h^=str.charCodeAt(i); h=Math.imul(h,16777619); } return mulberry32(h>>>0); }
 function makeGoals(key,weekly){ const r=seeded(key+(S.created||0)), pool=Object.keys(GOALDEF).filter(k=>{ const g=GOALDEF[k]; return (weekly?(g.w||g.ws):(g.d||g.s))&&!(g.week&&!weekly)&&(!g.ok||g.ok()); });
   const pick3=[]; if(weekly){ pick3.push('dailies'); } while(pick3.length<3&&pool.length){ const k=pool.splice(Math.floor(r()*pool.length),1)[0]; if(!pick3.includes(k)) pick3.push(k); }
-  return pick3.map((k,i)=>{ const g=GOALDEF[k]; let n; if(k==='earn') n=Math.max(500,roundSig(gooFor((weekly?g.ws:g.s)[i]),2)); else n=(weekly?g.w:g.d)[i]; return {k,diff:i,n,p:0,c:0}; }); }
+  return pick3.map((k,i)=>{ const g=GOALDEF[k]; let n; if(k==='earn') n=Math.max(500,roundSig(gooFor((weekly?g.ws:g.s)[i]),2)); else n=(weekly?(meadowEco()&&g.wm||g.w):(meadowEco()&&g.dm||g.d))[i]; return {k,diff:i,n,p:0,c:0}; }); }
 function goalRewards(diff,weekly){ const cand=!!season();
   if(weekly) return [[{k:'gems',n:15},{k:'item',id:'warp2h'}],[{k:'gems',n:20},{k:'item',id:'chest'}],[{k:'gems',n:25},{k:'item',id:'warp8h'}]][diff].concat(cand?[{k:'candy',n:[80,100,120][diff]}]:[]);
   return [[{k:'goo',s:900}],[{k:'item',id:['frenzy','bell','eggcrate'][(S.goals.day||'').length%3]}],[{k:'goo',s:3600},{k:'gems',n:2}]][diff].concat(cand?[{k:'candy',n:[10,20,35][diff]}]:[]); }
@@ -3906,13 +3958,14 @@ function nextHint(){ if(S.world!=='meadow') return null; const R=RL();
   if(S.req&&S.req.L&&penHas(S.req.L)>=0) return {ico:'👑',txt:'The '+R.king+' wants your <b>Lv.'+S.req.L+' '+SPECIES[S.req.L-1].n+'</b>. Tap to give it!',go:'req'};
   let tease=-1; for(let i=0;i<FACT.length;i++) if(!facUnlocked(i)){ tease=i; break; }
   if(tease>=0&&facWait(tease)>=0) return {ico:FACT[tease].ico,txt:'Your Lv.'+FAC_UNLOCK[tease]+' '+R.slime+' unlocked the <b>'+FACT[tease].name+'</b>. It arrives in '+Math.max(1,Math.ceil(facWait(tease)))+'s!',go:'fac'};
-  const capped=FACT.some((_,i)=>facUnlocked(i)&&S.fac[i]>=facCap());
+  const capped=FACT.some((_,i)=>facUnlocked(i)&&S.fac[i]>=facCap(i))&&!meadowEco();
   if(capped&&S.runBest<MAXL) return {ico:'📦',txt:'Make a <b>Lv.'+(S.runBest+1)+' '+R.slime+'</b> to own more '+(S.realm==='sky'?'celestial bodies':'factories')+'.',go:'pen'};
   if(tease>=0&&FAC_UNLOCK[tease]-S.runBest<=2) return {ico:FACT[tease].ico,txt:'Make a <b>Lv.'+FAC_UNLOCK[tease]+' '+R.slime+'</b> to unlock the <b>'+FACT[tease].name+'</b> ('+S.runBest+'/'+FAC_UNLOCK[tease]+').',go:'pen'};
-  if(mileShown()){ let best=null; for(let i=0;i<FACT.length;i++){ if(!S.fac[i]) continue; const nx=MILES.find(m=>m>S.fac[i]); if(!nx||nx>facCap()) continue; const need=nx-S.fac[i]; if(!best||need<best.need) best={i,need,nx}; } if(best&&best.need<=6) return {ico:'✖️2',txt:'Buy <b>'+best.need+' more '+FACT[best.i].plural+'</b> to double their output.',go:'fac'}; }
+  if(mileShown()){ let best=null; for(let i=0;i<FACT.length;i++){ if(!S.fac[i]) continue; const nx=MILES.find(m=>m>S.fac[i]); if(!nx||nx>facCap(i)) continue; const need=nx-S.fac[i]; if(!best||need<best.need) best={i,need,nx}; } if(best&&best.need<=6) return {ico:'✖️2',txt:'Buy <b>'+best.need+' more '+FACT[best.i].plural+'</b> to double their output.',go:'fac'}; }
   if(unlocked('asc')&&jellyGain()>0&&S.level>=ascReq()) return {ico:S.realm==='sky'?'🌙':'👑',txt:'You can <b>ascend</b> for <b>+'+fmt(jellyGain())+' '+R.jelly+'</b>.',go:'asc'};
   if(tease>=0) return {ico:FACT[tease].ico,txt:'Make a <b>Lv.'+FAC_UNLOCK[tease]+' '+R.slime+'</b> to unlock the <b>'+FACT[tease].name+'</b> ('+S.runBest+'/'+FAC_UNLOCK[tease]+').',go:'pen'};
-  return {ico:'⭐',txt:'<b>'+fmt(Math.max(0,xpNeed(S.level)-S.xp))+' XP</b> to Level '+(S.level+1)+'.',go:'lvl'}; }
+  const nc=CHRON.find(c=>c.lv===S.level+1&&c.un);
+  return {ico:'⭐',txt:'<b>'+fmt(Math.max(0,xpNeed(S.level)-S.xp))+' XP</b> to Level '+(S.level+1)+(nc?': '+nc.un:'')+'.',go:'lvl'}; }
 function updateNext(){ const h=nextHint(), key=h?h.txt:''; if(key===ui.nextKey) return; ui.nextKey=key;
   for(const el of [ui.nextPen,ui.nextFac]){ if(!el) continue; el.hidden=!h; if(h){ el.innerHTML='<span class="nx-i">'+h.ico+'</span><span class="nx-t"><small>NEXT</small>'+h.txt+'</span>'; el.dataset.go=h.go; hl(el); } } }
 function nextClick(e){ const go=e.currentTarget.dataset.go; sfx('click'); if(go==='req') openRequest(); else if(go==='lvl') openChronicle(); else if(go&&ui.tabMap[go]) setTab(go); }
@@ -4046,7 +4099,7 @@ function showRunSummary(sum){ const rows=[['⏱️','Time',fmtTime(sum.time)],['
 
 /* ================= Trials of the Crown ================= */
 const TRIALS=[
- {k:'hands',n:'Hands Only',ico:'✋',rule:'Factories are closed.',goal:'Create a Lv.10 slime.',test:()=>S.runBest>=10,perk:'Taps +25% forever',jewel:'#ff6f9a',lore:'c1'},
+ {k:'hands',n:'Hands Only',ico:'✋',rule:'Factories and the Hatchery are closed.',goal:'Create a Lv.10 slime.',test:()=>S.runBest>=10,perk:'Taps +25% forever',jewel:'#ff6f9a',lore:'c1'},
  {k:'tiny',n:'Tiny Pen',ico:'🧺',rule:'The pen has only 8 spaces.',goal:'Create a Lv.12 slime.',test:()=>S.runBest>=12,perk:'The Hatchery works 15% faster forever',jewel:'#5cd3ff',lore:'c2'},
  {k:'silent',n:'Silent King',ico:'🤫',rule:'Tapping the King gives no goo.',goal:'Earn 1T goo in this run.',test:()=>S.earnedRun>=1e12,perk:'Factories +10% forever',jewel:'#98f25a',lore:'c3'},
  {k:'drought',n:'Egg Drought',ico:'🥚',rule:'Eggs cost 10× more and the Hatchery is closed.',goal:'Create a Lv.11 slime.',test:()=>S.runBest>=11,perk:'Slimes in the pen +25% forever',jewel:'#ffd43f',lore:'c4'},
@@ -4229,6 +4282,7 @@ const PENUPS=[
  {k:'twin',ico:'🍳',name:'Twin Yolks',show:()=>S.level>=30,lvl:()=>S.twinLvl,max:5,cost:()=>1e10*Math.pow(50,S.twinLvl),desc:()=>(S.hatchLvl?'':'Works with the Hatchery. ')+'The Hatchery lays two eggs '+S.twinLvl*10+'% → '+(S.twinLvl+1)*10+'% of the time',buy:()=>{S.twinLvl++;}},
  {k:'ma',ico:'⚡',name:'Merge All',show:()=>S.level>=MERGEALL_LV,lvl:()=>S.maLvl,max:4,cost:()=>1e8*Math.pow(100,S.maLvl),desc:()=>S.maLvl?'One press merges every matching pair once. Cooldown '+MA_CD[S.maLvl-1]+'s'+(S.maLvl<4?' → '+MA_CD[S.maLvl]+'s':''):'A button that merges every matching pair in the '+RL().pen+' once, then rests for a minute',buy:()=>{ S.maLvl++; if(S.maLvl===1) intro('ma',()=>coach([{el:'#mergeAllBtn',text:'<b>Merge all</b> merges every matching pair once. Press again after the cooldown for the next layer.'}]),8); }}
 ];
+for(const p of PENUPS){ const f=p.cost; p.cost=()=>mPrice(f()); }
 function buildPenUps(){
   ui.penUps.innerHTML=PENUPS.map(p=>'<div class="pu card" data-k="'+p.k+'"><span class="pi">'+p.ico+'</span><div><div class="pn">'+(S.realm==='sky'&&p.sname||p.name)+'<em></em></div><div class="pd"></div>'+(p.k==='am'?'<div class="amtoggle" hidden>Robot <button class="sw" role="switch" id="amSw" aria-label="Auto-Merger on or off"></button></div>':'')+'</div><button class="btn"></button></div>').join('');
   ui.pu=PENUPS.map(p=>{ const r=ui.penUps.querySelector('[data-k="'+p.k+'"]'); return {p,row:r,lv:r.querySelector('em'),d:r.querySelector('.pd'),b:r.querySelector('.btn')}; });
@@ -4336,7 +4390,7 @@ function dragHint(pr){ const a=ui.board.children[pr[0]], b=ui.board.children[pr[
   const dx=rb.left-ra.left, dy=rb.top-ra.top, an=d.animate([{transform:'translate(0,0)',opacity:0},{transform:'translate(0,0)',opacity:1,offset:.1},{transform:'translate(0,0) scale(.8)',offset:.2},{transform:'translate(0,0)',offset:.3},{transform:'translate('+dx+'px,'+dy+'px)',offset:.55},{transform:'translate('+dx+'px,'+dy+'px) scale(.8)',offset:.65},{transform:'translate('+dx+'px,'+dy+'px)',opacity:1,offset:.78},{transform:'translate('+dx+'px,'+dy+'px)',opacity:0}],{duration:1800,iterations:3,easing:'ease-in-out'});
   an.onfinish=()=>d.remove(); setTimeout(()=>{ if(d.isConnected) d.remove(); },5900); }
 function tapPen(i){ const L=S.board[i]; if(!L) return; S.pets++; const sd=sotdL(); const c=ui.board.children[i]; if(c){ c.classList.remove('wiggle'); void c.offsetWidth; c.classList.add('wiggle'); }
-  ui.penInfo.innerHTML='<b style="color:#fff">'+(S.shiny[i]?'✨ Shiny ':'')+'Lv.'+L+' '+SPECIES[L-1].n+'</b> makes '+fmt(slimeProd(L)*(S.shiny[i]?2:1)*(L===sd?2:1)*M.pen*(1+M.feeding*G.totalFac)*M.all*G.mult*wxPen(),true)+' goo/s'+(L===sd?' · ⭐ Slime of the Day ×2':'')+(L<MAXL?' · merge two to get a '+SPECIES[L].n:''); hl(ui.penInfo);
+  ui.penInfo.innerHTML='<b style="color:#fff">'+(S.shiny[i]?'✨ Shiny ':'')+'Lv.'+L+' '+SPECIES[L-1].n+'</b> makes '+fmt(slimeProd(L)*(S.shiny[i]?2:1)*(L===sd?2:1)*M.pen*(1+M.feeding*feedK()*G.totalFac)*M.all*G.mult*wxPen(),true)+' goo/s'+(L===sd?' · ⭐ Slime of the Day ×2':'')+(L<MAXL?' · merge two to get a '+SPECIES[L].n:''); hl(ui.penInfo);
   sfx('egg'); }
 
 /* factories */
@@ -4349,38 +4403,38 @@ function buildFacList(){ const list=[]; let tease=-1; for(let i=0;i<FACT.length;
   ui.facRows=list.map(i=>{ const r=ui.facList.querySelector('[data-row="'+i+'"]'); return {i,row:r,own:r.querySelector('.fac-own'),stars:r.querySelector('.fac-stars'),sub:r.querySelector('.fac-sub'),bar:r.querySelector('.bar i'),mt:r.querySelector('.fac-mile span:last-child'),btn:r.querySelector('.buy'),bn:r.querySelector('.bn'),bc:r.querySelector('.bc'),bg:r.querySelector('.bg'),star:r.querySelector('.star-btn'),k:{}}; }); }
 function buyFac(i,btn){ audioUnlock(); if(trialOn('hands')) return; const R=RL(); if(facRoom(i)<=0){ nope(btn); toast('<span class="ti">🔒</span><span><b>Cap reached!</b> Create a Lv.'+(S.runBest+1)+' '+R.slime+' to own more.</span>'); return; }
   const n=facWant(i); if(n<=0){ nope(btn); return; } const c=facCost(i,n); if(c>S.goo){ nope(btn); return; }
-  S.goo=Math.max(0,S.goo-c); const before=S.fac[i]; S.fac[i]+=n; goalAdd('fac',n); sfx('buy'); if(!before) gainXP(20);
+  S.goo=Math.max(0,S.goo-c); const before=S.fac[i]; S.fac[i]+=n; goalAdd('fac',n); sfx('buy'); if(!before) gainXP(meadowEco()?40:20);
   if(!S.tut.mile&&S.fac[i]>=MILES[0]){ S.tut.mile=1; S.tut.mileT=1e9; S.tut.milePend=i+1; } // revealed a little later (see uiTick)
-  else for(const m of MILES) if(before<m&&S.fac[i]>=m){ gainXP(25); toast('<span class="ti">'+FACT[i].ico+'</span><span><b>'+FACT[i].name+' milestone!</b><br>'+m+' owned: output ×2</span>','gold'); }
-  if(!S.tut.facdone){ S.tut.facdone=1; S.tut.facbuy=1; setTimeout(()=>coach([{el:'.gps-line',text:'Your '+FACT[i].name+' makes goo <b>all by itself</b>, even when you are not tapping. One is tiny, but they add up fast, and the bigger factories further down make far more. Watch your <b>goo per second</b> up here grow as you build!'},{el:()=>ui.tabMap.pen,text:'Bigger '+RL().slimes+' unlock new kinds of factories and let you own more of each. Keep hatching and merging in the '+RL().pen+'!'}]),450); }
-  if(S.fac[i]>=facCap()&&!S.tut.cap){ S.tut.cap=1; setTimeout(()=>coach([{el:'#capNote',text:'You hit the <b>cap</b>! You can own '+facCap()+' of each '+(S.realm==='sky'?'celestial body':'factory')+' right now. To raise it, merge a bigger '+R.slime+' in the '+R.pen+'. Merging is the key to everything!'}]),300); }
+  else for(const m of MILES) if(before<m&&S.fac[i]>=m){ gainXP(meadowEco()?50:25); toast('<span class="ti">'+FACT[i].ico+'</span><span><b>'+FACT[i].name+' milestone!</b><br>'+m+' owned: output ×2</span>','gold'); }
+  if(!S.tut.facdone){ S.tut.facdone=1; S.tut.facbuy=1; setTimeout(()=>coach([{el:'.gps-line',text:'Your '+FACT[i].name+' makes goo <b>all by itself</b>, even when you are not tapping. Factories are a nice extra, but they get pricier with every one you buy. Most of your goo will always come from your '+RL().slimes+'.'},{el:()=>ui.tabMap.pen,text:'Bigger '+RL().slimes+' unlock new kinds of factories and let you own more of each. Keep hatching and merging in the '+RL().pen+'!'}]),450); }
+  if(S.fac[i]>=facCap(i)&&!S.tut.cap){ S.tut.cap=1; setTimeout(()=>coach([{el:'#capNote',text:'You hit the <b>cap</b>! You can own '+facCap(i)+' '+(meadowEco()?FACT[i].plural+' right now. Every bigger '+R.slime+' lets you own one more of each factory, so merge':'of each celestial body right now. To raise it, merge')+' a bigger '+R.slime+' in the '+R.pen+'. Merging is the key to everything!'}]),300); }
   computeG(); syncHoppers(); uiTick(); }
 // the first time a factory reaches 10, the ×2 milestones are revealed with a little show
-function mileReveal(i){ gainXP(25); sfx('levelup'); const f=FACT[i];
+function mileReveal(i){ gainXP(meadowEco()?50:25); sfx('levelup'); const f=FACT[i];
   setTimeout(()=>{ const r=ui.facList.querySelector('[data-row="'+i+'"]'); if(r&&tab==='fac'){ const cr=r.getBoundingClientRect(), ar=ui.app.getBoundingClientRect(); popText(cr.left-ar.left+cr.width/2,cr.top-ar.top+cr.height*.3,'×2 OUTPUT!'); if(r.animate) r.animate([{transform:'scale(1)'},{transform:'scale(1.04)',boxShadow:'0 0 24px rgba(255,212,63,.8)'},{transform:'scale(1)'}],{duration:700,easing:'ease-out'}); } },60);
-  toast('<span class="ti">'+f.ico+'</span><span><b>Milestone! '+f.name+' ×2</b><br>10 owned: double output</span>','gold');
-  intro('mile',()=>{ S.tut.mileT=S.playTime; ui.facKey=null; uiTick(); coach([{el:()=>ui.facList.querySelector('[data-row="'+i+'"] .fac-mile')||ui.facList,text:'You found a <b>milestone</b>! When you own <b>10</b> of a '+(S.realm==='sky'?'celestial body':'factory')+', it makes <b>twice</b> as much goo. It happens again at 25, 50, 100 and beyond. This bar shows how close the next one is.'},{el:()=>ui.buyMode.querySelector('[data-m="next"]')||ui.buyMode,text:'Tip: <b>Next ×2</b> buys exactly enough to reach the next milestone.'}]); },9,()=>!!S.tut.i_tab_fac&&tab==='fac'); }
+  toast('<span class="ti">'+f.ico+'</span><span><b>Milestone! '+f.name+' ×2</b><br>'+MILES[0]+' owned: double output</span>','gold');
+  intro('mile',()=>{ S.tut.mileT=S.playTime; ui.facKey=null; uiTick(); coach([{el:()=>ui.facList.querySelector('[data-row="'+i+'"] .fac-mile')||ui.facList,text:'You found a <b>milestone</b>! When you own <b>'+MILES[0]+'</b> of a '+(S.realm==='sky'?'celestial body':'factory')+', it makes <b>twice</b> as much goo. It happens again at '+MILES.slice(1,4).join(', ')+' and beyond. This bar shows how close the next one is.'},{el:()=>ui.buyMode.querySelector('[data-m="next"]')||ui.buyMode,text:'Tip: <b>Next ×2</b> buys exactly enough to reach the next milestone.'}]); },9,()=>!!S.tut.i_tab_fac&&tab==='fac'); }
 function buyStar(i,btn){ const k=tierOf(i), u=UPMAP['f'+i+'_'+k]; if(!u) return;
-  if(!u.unlock()){ nope(btn); toast('<span class="ti">★</span><span>Own <b>'+TIERS[k][1]+' '+FACT[i].plural+'</b> to unlock this upgrade.</span>'); return; }
-  if(S.goo<u.cost){ nope(btn); return; } S.goo-=u.cost; S.ups[u.id]=true; sfx('buy'); gainXP(10); recalc(); computeG();
+  if(!u.unlock()){ nope(btn); toast('<span class="ti">★</span><span>Own <b>'+starNeed(k)+' '+FACT[i].plural+'</b> to unlock this upgrade.</span>'); return; }
+  if(S.goo<u.cost){ nope(btn); return; } S.goo-=u.cost; S.ups[u.id]=true; sfx('buy'); gainXP(meadowEco()?20:10); recalc(); computeG();
   toast('<span class="ti">'+FACT[i].ico+'</span><span><b>'+upgName(u)+'!</b><br>'+FACT[i].plural+' make ×2 goo</span>','gold'); uiTick(); }
 function pctTxt(v){ return v<1e6?Math.round(v).toLocaleString('en-US'):fmt(v); }
 function setTxt(el,v,html){ if(el._v===v) return; el._v=v; if(html) el.innerHTML=v; else el.textContent=v; }
 function updateFac(best){ if(!ui.facRows) return; const m=G.mult||1, cap=facCap(), R=RL(), ms=mileShown(), ro=researchOpen();
   const fw=ui.facList.querySelector('.fac-wait'); if(fw) fw.textContent=Math.max(1,Math.ceil(facWait(ui.facTease)))+'s';
   // the early game stays simple: milestones appear when the first factory reaches 10, ★ upgrades when Research opens
-  ui.capNote.hidden=!(ms||S.tut.cap); ui.facHint.hidden=!ms; const nb=ui.buyMode.querySelector('[data-m="next"]'); if(nb){ nb.hidden=!ms; if(!ms&&buyMode==='next'){ buyMode=1; for(const x of ui.buyMode.children) x.setAttribute('aria-pressed',x.dataset.m==='1'); } }
-  const next=S.runBest<MAXL?Math.max(10,10*(S.runBest+1)+2*S.level):0;
-  setTxt(ui.capNote,'<span style="font-size:18px">📦</span><span>Own up to <b>'+cap+'</b> of each.'+(next?' A Lv.'+(S.runBest+1)+' '+R.slime+' raises it to <b>'+next+'</b>.':'')+'</span>',true);
+  ui.capNote.hidden=!(ms||S.tut.cap); ui.facHint.hidden=!ms; if(ms) setTxt(ui.facHint,'Each '+(S.realm==='sky'?'celestial body':'factory')+' doubles its output at '+MILES.slice(0,4).join(', ')+' owned and beyond. Its ★ upgrades appear on its row.'); const nb=ui.buyMode.querySelector('[data-m="next"]'); if(nb){ nb.hidden=!ms; if(!ms&&buyMode==='next'){ buyMode=1; for(const x of ui.buyMode.children) x.setAttribute('aria-pressed',x.dataset.m==='1'); } }
+  const next=S.runBest<MAXL?Math.max(10,10*(S.runBest+1)+2*S.level):0, mcap=meadowEco();
+  setTxt(ui.capNote,'<span style="font-size:18px">📦</span><span>'+(mcap?'Every bigger '+R.slime+' lets you own <b>one more</b> of each factory.':'Own up to <b>'+cap+'</b> of each.'+(next?' A Lv.'+(S.runBest+1)+' '+R.slime+' raises it to <b>'+next+'</b>.':''))+'</span>',true);
   ui.facRows.forEach(r=>{ const i=r.i, c=S.fac[i], k=tierOf(i), u=UPMAP['f'+i+'_'+k];
-    setTxt(r.own,c+'/'+cap); r.own.classList.toggle('full',c>=cap);
+    const ci=facCap(i); setTxt(r.own,c+'/'+ci); r.own.classList.toggle('full',c>=ci);
     r.stars.hidden=!ro; r.bar.parentNode.parentNode.hidden=!ms;
     setTxt(r.stars,'★'.repeat(k)+'<i>'+'★'.repeat(TIERS.length-k)+'</i>',true);
     setTxt(r.sub,c?'+'+fmt(facEach(i)*m,true)+'/s each · <b>'+fmt((G.fac[i]||0)*m,true)+'/s</b>':FACT[i].desc,true);
     const nx=MILES.find(v=>v>c), pv=MILES.filter(v=>v<=c).pop()||0; if(nx){ r.bar.style.width=((c-pv)/(nx-pv)*100)+'%'; setTxt(r.mt,c+'/'+nx+' → ×2'); } else { r.bar.style.width='100%'; setTxt(r.mt,'All milestones!'); }
     if(facRoom(i)<=0){ setTxt(r.bn,'Cap reached'); setTxt(r.bc,'🔒'); setTxt(r.bg,'merge to raise'); r.btn.classList.add('off'); }
     else { const n=Math.max(1,facWant(i)), cost=facCost(i,n); setTxt(r.bn,'Buy ×'+n); setTxt(r.bc,fmt(cost)); setTxt(r.bg,'+'+fmt(facGain(i,n),true)+'/s'); r.btn.classList.toggle('off',S.goo<cost||facWant(i)<1); }
-    if(!u||!c||!ro) r.star.hidden=true; else { r.star.hidden=false; const ok=u.unlock(); setTxt(r.star,ok?'★ '+TIERS[k][0]+' ×2<br>'+fmt(u.cost):'★ at '+TIERS[k][1]+' owned',true); r.star.classList.toggle('lock',!ok); r.star.classList.toggle('off',ok&&S.goo<u.cost); }
+    if(!u||!c||!ro) r.star.hidden=true; else { r.star.hidden=false; const ok=u.unlock(); setTxt(r.star,ok?'★ '+TIERS[k][0]+' ×2<br>'+fmt(u.cost):'★ at '+starNeed(k)+' owned',true); r.star.classList.toggle('lock',!ok); r.star.classList.toggle('off',ok&&S.goo<u.cost); }
     const isBest=!!best&&best.i===i&&best.t!=='upg'; r.row.classList.toggle('best',isBest); r.star.classList.toggle('bestb',isBest&&best.t==='star'); }); }
 // the "best value" tag: the purchase that pays itself back fastest, counting the wait to afford it
 function bestPick(){ if(!G.base) return null; const cand=[];
@@ -4406,7 +4460,7 @@ function buyPerk(id,btn){ const p=PERKS.find(x=>x.id===id); if(!p||S.perks[id]) 
   if(id==='merger'&&S.amLvl<1) S.amLvl=1; if(id==='rhatch'&&S.hatchLvl<3) S.hatchLvl=3; if(id==='eggs') raiseLow(); sfx('ach'); recalc(); computeG(); renderBoard(); renderPerks(); uiTick(); }
 function askAscend(){ const g=jellyGain(), R=RL(), req=ascReq(), sky=S.realm==='sky';
   if(S.level<req){ nope(ui.ascBtn); toast('<span class="ti">⭐</span><span>Reach <b>Level '+req+'</b> to ascend'+(ascTotal()?' again':'')+'. You are Level '+S.level+'.</span>'); return; }
-  if(g<=0){ nope(ui.ascBtn); toast('<span class="ti">'+(sky?'🌙':'👑')+'</span><span>Earn '+fmt(Math.pow(jellyFor(S.earnedRealm)+1,3)*BAL.jelly)+' goo in total to earn your next '+R.jelly+'.</span>'); return; }
+  if(g<=0){ nope(ui.ascBtn); toast('<span class="ti">'+(sky?'🌙':'👑')+'</span><span>Earn '+fmt(gooForJelly(jellyFor(S.earnedRealm)+1))+' goo in total to earn your next '+R.jelly+'.</span>'); return; }
   openModal('<div class="mcenter"><img src="'+(sky?MOONJELLY_IMG:JELLY_IMG)+'" alt=""><h2 class="mh">Ascend the throne?</h2><p>You will gain <b>+'+fmt(g)+' '+R.jelly+'</b>, boosting all goo by <b>+'+Math.round(g*M.jellyRate*100)+'%</b> more.</p><p>'+(sky?'Your goo, celestial bodies, upgrades, Nebula and Orrery will reset.':'Your goo, factories, upgrades and pen will reset.')+'</p><div class="btnrow" style="justify-content:center"><button class="btn ghost" id="ascNo">Not yet</button><button class="btn pink" id="ascYes">Ascend!</button></div></div>');
   $('#ascNo').onclick=closeModal; $('#ascYes').onclick=()=>{ closeModal(); if(RM||!ST.w) doAscend(); else { const k=kingGeom(); sfx('ascend'); startTrans(k.cx,k.by-k.h*.5,sky?'#e6fbff':'#ffd9ec',sky?'rgba(127,232,255,.95)':'rgba(255,111,181,.95)',doAscend); } }; }
 function doAscend(){ const g=jellyGain(); if(g<=0||S.level<ascReq()) return; const sky=S.realm==='sky';
@@ -4416,7 +4470,7 @@ function doAscend(){ const g=jellyGain(); if(g<=0||S.level<ascReq()) return; con
     'shinyDex','lore','loreNew','trials','steward','shop','kname','req'];
   const k={}; keep.forEach(x=>k[x]=S[x]); k.jelly+=g; k.jellyEarned+=g; if(sky) k.skyAsc++; else k.ascensions++;
   S=Object.assign(fresh(),k); S.run=freshRun(); S.trial=ui.pendingTrial?{k:ui.pendingTrial,t0:S.playTime}:null; ui.pendingTrial=null; S.req.L=0; S.req.next=S.playTime+300;
-  if(S.perks.start&&!trialOn('hands')){ S.fac[0]=10; S.fac[1]=5; } if(S.perks.merger) S.amLvl=1; if(S.perks.rhatch) S.hatchLvl=Math.max(S.hatchLvl,3); if(S.hollow.sh.merger) S.amLvl=Math.max(S.amLvl,3);
+  if(S.perks.start&&!trialOn('hands')){ const st=meadowEco()?[3,2]:[10,5]; S.fac[0]=st[0]; S.fac[1]=st[1]; } if(S.perks.merger) S.amLvl=1; if(S.perks.rhatch) S.hatchLvl=Math.max(S.hatchLvl,3); if(S.hollow.sh.merger) S.amLvl=Math.max(S.amLvl,3);
   B=null; ORR.on={}; for(const x in hatching) delete hatching[x];
   recalc(); raiseLow(true); recalc(); computeG(); gainXP(Math.min(3000,300+20*g)); ST.hop.length=0; syncHoppers(); ui.facKey=null; ui.orrKey=null; ui.trialKey=null; buildTabs(); setTab(tab); renderBoard(); renderUpg(true); renderPerks();
   ST.shake=12; const k2=kingGeom(); addSparks(k2.cx,k2.by-k2.h*.6,30,sky?'#7fe8ff':'#FF6FB5'); addSparks(k2.cx,k2.by-k2.h*.6,30,'#FFD23F');
@@ -4427,7 +4481,7 @@ function doAscend(){ const g=jellyGain(); if(g<=0||S.level<ascReq()) return; con
   saveLocal(); cloudSave(); uiTick(); }
 // what the Ascend tab has to offer; its "!" only shows for things that are new since you last looked
 function ascItems(){ const it=[]; if(jellyGain()>0&&S.level>=ascReq()) it.push('asc'+ascTotal()); if(canStarfall()) it.push('sf'); for(const p of PERKS) if(!S.perks[p.id]&&S.jelly>=p.cost) it.push('p'+p.id); if(S.stardust>0&&CONST.some(k=>k.stars.some((_,i)=>cstAvail(k,i))&&S.stardust>=cstCost(cstCount(k)))) it.push('d'+Math.floor(S.stardustAll)); return it; }
-function renderAsc(){ const sky=S.realm==='sky', R=RL(), g=jellyGain(), cur=jellyFor(S.earnedRealm), a=Math.pow(cur,3)*BAL.jelly, b=Math.pow(cur+1,3)*BAL.jelly, req=ascReq(), ok=S.level>=req;
+function renderAsc(){ const sky=S.realm==='sky', R=RL(), g=jellyGain(), cur=jellyFor(S.earnedRealm), a=gooForJelly(cur), b=gooForJelly(cur+1), req=ascReq(), ok=S.level>=req;
   setTxt(ui.jellyOwned,fmt(S.jelly)); setTxt(ui.jellyRateTxt,'+'+Math.round(M.jellyRate*100)+'%'); setTxt(ui.jellyBonus,'+'+pctTxt(M.jellyRate*S.jellyEarned*100)+'%');
   setTxt(ui.jellyGain,'+'+fmt(g)+' '+R.jelly); setTxt(ui.jellyNext,fmt(b)+' goo'); ui.jellyBar.style.width=(clamp((S.earnedRealm-a)/(b-a),0,1)*100)+'%';
   setTxt(ui.ascReq,ok?'✓ Level '+req+' reached':'🔒 Requires Level '+req+' (you are Level '+S.level+')'); ui.ascReq.classList.toggle('ok',ok); ui.ascBtn.classList.toggle('off',g<=0||!ok);
@@ -4467,7 +4521,7 @@ function uiTick(){
     if(NEWTAB_TIPS[id]&&!S.tut['tab_'+id]){ S.tut['tab_'+id]=1; const txt=NEWTAB_TIPS[id](R); intro('tab_'+id,()=>{ if(id==='fac'||id==='upg'||unlocked(id)) coach([{el:()=>ui.tabMap[id],text:txt}]); else say(txt,8000); },unlocked(id)?9:id==='fac'?4:id==='upg'?3:1); } }
   unlockTick(); introTick(); updateDock(); rollGoals();
   // a new day while the game is open: the daily reward shows up on its own (after the intro queue is quiet)
-  if(S.tut.milePend&&(S.playTime>=600||ascTotal()>0)){ const mi=S.tut.milePend-1; delete S.tut.milePend; mileReveal(mi); }
+  if(S.tut.milePend){ const mi=S.tut.milePend-1; delete S.tut.milePend; mileReveal(mi); }
   if(TOASTQ.length&&!bossBusy()&&performance.now()-(ui.toastAt||0)>toastGap()){ const tq=TOASTQ.shift(); toastShow(tq[0],tq[1]); }
   if(performance.now()-(ui.nextAt||0)>1000){ ui.nextAt=performance.now(); updateNext(); }
   if(!AWAY.timer&&ui.modal.hidden&&!coachQ&&!INTRO.q.length&&!bossQuiet()&&performance.now()-(ui.sessT||0)>8000&&S.playTime-INTRO.last>20&&loginPending()) AWAY.timer=setTimeout(showWelcomeBack,350);
@@ -4508,7 +4562,7 @@ function uiTick(){
   if(S.realm==='sky'){ const free=S.orr.rings.reduce((a,ring,r)=>a+(ringOpen(r)?ring.filter(v=>!v).length:0),0); setBadge('orr',free&&S.board.some(v=>v)?free:0); }
   // the Pen upgrades panel is introduced once the first upgrade (the Hatchery) is affordable
   ui.rush.hidden=!unlocked('wobble');
-  if(!penUpsOpen()&&TABDEF[2].show()&&S.goo>=PEN_INTRO_GOO&&(S.playTime>=540||ascTotal()>0)){ intro('penups',()=>{ S.tut.penups=1; if(tab!=='pen') setTab('pen'); uiTick(); coach([{el:'#penUpBtn',text:'You can afford a <b>Hatchery</b>: it lays free eggs for you! Your pen can learn new tricks here in <b>🏡 Upgrades</b>.'}]); },3); }
+
   if(tab==='pen'){ introCoach(); const ec=eggCost(), n=penSize(), full=!emptyCells().length, bo=S.bonusEggs>0, fr=S.freeEggs>0;
     setTxt(ui.eggCost,full?R.pen+' is full':bo?'BONUS ×'+S.bonusEggs:fr?'FREE ×'+S.freeEggs:fmt(ec)+' goo'); ui.eggBtn.classList.toggle('off',full||(!fr&&!bo&&S.goo<ec)); ui.eggBtn.classList.toggle('gold',(fr||bo)&&!full);
     setTxt(ui.penGps,fmt(G.pen*G.mult,true)); setTxt(ui.penCount,G.slimes+'/'+n); setTxt(ui.eggLvlTxt,'Lv.'+effEgg());
@@ -4560,7 +4614,7 @@ function openSettings(){ const s=S.settings, sky=S.realm==='sky';
   '<div class="btnrow"><button class="btn" id="saveNow">Save now</button><button class="btn ghost" id="expBtn">Export save</button><button class="btn ghost" id="impBtn">Import save</button></div>'+
   '<div id="ioBox" hidden><textarea id="ioText" rows="4" spellcheck="false" aria-label="Save code"></textarea><div class="btnrow"><button class="btn ghost" id="ioCopy">Copy</button><button class="btn" id="ioLoad">Load this save</button></div></div>'+
   '<div class="btnrow"><button class="btn danger" id="resetBtn">Reset everything</button></div></section>'+
-  '<p class="note" id="verTxt">Slime Empire 3.3.2 · saves automatically every 10 seconds.</p>'+
+  '<p class="note" id="verTxt">Slime Empire 3.4 · saves automatically every 10 seconds.</p>'+
   '<section class="set" id="devBox" hidden><h3>Test tools</h3><p class="note">For testing only. These skip normal progress. Numbers can be typed like 1e15, 2.5M or 40B.</p>'+
   '<div class="devgrid">'+din('dvGoo','Goo','1e15','Add')+din('dvLv','Level','50','Set')+din('dvXp','XP','1000','Add')+din('dvAsc','Ascensions','10','Set')+din('dvJelly',RL().jelly,'500','Add')+din('dvDust','Stardust','25','Add')+din('dvEmb','Embers','5000','Add')+din('dvScl','Scales','50','Add')+'</div>'+
   '<div class="srow"><span>Time speed</span><div class="seg" id="devSpd">'+[1,10,100].map(v=>'<button data-v="'+v+'" aria-pressed="'+(devSpeed===v)+'">×'+v+'</button>').join('')+'</div></div>'+
@@ -4622,7 +4676,7 @@ function devAction(k){ const Hh=S.hollow;
   else if(k==='pumpkin'){ if(!season()){ toast('No event is running right now.'); return; } closeModal(); if(S.world!=='meadow') setWorld('meadow'); const kg=kingGeom(); PK.list.push({x:clamp(kg.cx+kg.w*.9,ST.w*.08,ST.w*.92),life:35,t:0,ph:0}); }
   else if(k==='items'){ for(const id in ITEMS) giveItem(id,1); }
   else if(k==='cos'){ for(const id in COS) S.cos.owned[id]=1; }
-  else if(k==='research'){ S.tut.mile=1; S.tut.mileT=S.playTime-RESEARCH_DELAY; S.tut.penups=1; }
+  else if(k==='research'){ S.tut.u_research=1; S.tut.penups=1; S.tut.u_penups=1; }
   else if(k==='unlockall'){ ['wobble','fac','awake','streak','weather','golden','col','shiny','login','wheel','goals','ev','shop','req','boss','asc'].forEach(x=>{ S.tut['u_'+x]=1; S.tut['i_u_'+x]=1; }); S.tut.facbuy=S.tut.facdone=S.tut.achq=1; S.tut.mile=1; S.tut.mileT=-999; S.tut.penups=1; levelSync(); ui.tabKey=null; }
   else if(k==='shiny'){ ui.devShiny=1; toast('The next egg will be shiny.'); }
   else if(k==='req'){ S.tut.u_req=1; S.req.L=0; newRequest(); closeModal(); }
@@ -4666,8 +4720,8 @@ function logic(dt){
   const now=nowT(); S.playTime+=dt;
   if(S.buffs.length) S.buffs=S.buffs.filter(b=>b.until>now);
   computeG(); earn(G.total*dt); if(G.base>S.bestGps) S.bestGps=G.base;
-  if(rushActive()) S.rush=100*(S.rushUntil-now)/(RUSH_SEC*1000*M.rushDur); else if(S.rush>0&&now-lastTapAt>1500) S.rush=Math.max(0,S.rush-dt*2.5);
-  if(S.hatchLvl>0&&!trialOn('drought')){ S.hatchProg+=dt/hatchInt(); if(S.hatchProg>=1){ if(spawnEgg(effEgg(),true,0)){ S.hatchProg-=1; if(S.twinLvl&&Math.random()<.1*S.twinLvl&&emptyCells().length){ const e=emptyCells()[0]; spawnEgg(effEgg(),true,150); twinPop(e); } } else S.hatchProg=1; } }
+  if(rushActive()) S.rush=100*(S.rushUntil-now)/(RUSH_SEC*1000*M.rushDur); else if(S.rush>0&&now-lastTapAt>1500) S.rush=Math.max(0,S.rush-dt*2.5*RUSH_FILL);
+  if(S.hatchLvl>0&&!trialOn('drought')&&!trialOn('hands')){ S.hatchProg+=dt/hatchInt(); if(S.hatchProg>=1){ if(spawnEgg(effEgg(),true,0)){ S.hatchProg-=1; if(S.twinLvl&&Math.random()<.1*S.twinLvl&&emptyCells().length){ const e=emptyCells()[0]; spawnEgg(effEgg(),true,150); twinPop(e); } } else S.hatchProg=1; } }
   // the robot charges up, then waits fully charged and merges the moment a matching pair exists
   if(S.amLvl>0&&S.amOn&&!drag){ S.amProg=Math.min(1,S.amProg+dt/amInt()); if(S.amProg>=1){ const n=penSize(), seen={};
     for(let i=0;i<n;i++){ const L=S.board[i]; if(!L||L>=MAXL||hatching[i]>now) continue; if(seen[L]!=null){ mergeCells(i,seen[L],true); S.amProg=0; break; } seen[L]=i; } } }
