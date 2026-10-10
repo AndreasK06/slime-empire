@@ -12,7 +12,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<meta name="build" content="3.3.1">
+<meta name="build" content="3.3.2">
 <script>
 // install as an app: works offline and opens full screen from the home screen
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
@@ -956,8 +956,8 @@ const SKY_FACT=mkFact([
  ['Big Bang','💥','#ffffff','It all started with one big squish.','Big Bangs']]);
 let FACT=MEADOW_FACT;
 // a factory unlocks when you create a slime of this level (this run); balanced with a simulated player
-// in the meadow the first factory waits for a Lv.4 slime, so hatching and merging come first; the sky keeps its quick start
-const FAC_UNLOCK_MEADOW=[4,5,6,7,8,9,11,12,13,14,16,18], FAC_UNLOCK_SKY=[1,3,4,6,8,9,11,12,13,14,16,18];
+// in the meadow the first factory waits for a Lv.5 slime, so hatching and merging come first; the sky keeps its quick start
+const FAC_UNLOCK_MEADOW=[5,6,7,8,9,10,11,12,13,14,16,18], FAC_UNLOCK_SKY=[1,3,4,6,8,9,11,12,13,14,16,18];
 let FAC_UNLOCK=FAC_UNLOCK_MEADOW;
 const MILES=[10,25,50,100,150,200,250,300,350,400,450,500,600,700,800,900,1000];
 
@@ -1283,8 +1283,14 @@ function facGated(){ return S.realm==='meadow'&&ascTotal()===0; }
 function facUnlocked(i){ return S.fac[i]>0||(S.runBest>=FAC_UNLOCK[i]&&(i===0||!facGated()||i<(S.facOpen||0))); }
 // seconds until an earned factory shows up, or -1 when none is waiting
 function facWait(i){ return i>0&&facGated()&&i===Math.max(1,S.facOpen||0)&&S.runBest>=FAC_UNLOCK[i]&&!S.fac[i]?Math.max(0,FAC_GAP-(S.playTime-(S.facOpenT||0))):-1; }
+// the second factory gets its own short lesson: newer factories cost more but make far more, and each buy raises the price
+function fac2Coach(){ if(S.tut.fac2!==1||!S.tut.facdone) return; S.tut.fac2=2; const f=FACT[1], row=()=>ui.facList.querySelector('[data-row="1"]');
+  setTimeout(()=>coach([{el:row,text:'Meet your second factory, the <b>'+f.name+'</b>! Every new kind of factory costs more, but makes far more <b>goo</b> than the one before. One '+f.name.split(' ').pop()+' makes about as much as ten '+FACT[0].plural+'.'},
+    {el:()=>ui.facList.querySelector('[data-i="1"]')||row(),text:'Each factory you buy makes the next one of that kind a little pricier. The small number under <b>Buy</b> shows how much <b>goo per second</b> it adds, so you can see which one is the better deal.'}]),350); }
 function facReveal(){ if(!facGated()||!unlocked('fac')) return; const n=Math.max(1,S.facOpen||0); if(n>=FACT.length||S.runBest<FAC_UNLOCK[n]||S.playTime-(S.facOpenT||0)<FAC_GAP||bossBusy()) return;
-  S.facOpen=n+1; S.facOpenT=S.playTime; const f=FACT[n]; toast('<span class="ti">'+f.ico+'</span><span><b>New: '+f.name+'!</b><br>Unlocked by your Lv.'+FAC_UNLOCK[n]+' '+RL().slime+'</span>','gold'); sfx('ach'); }
+  S.facOpen=n+1; S.facOpenT=S.playTime; const f=FACT[n];
+  if(n===1&&!S.tut.fac2){ S.tut.fac2=1; sfx('ach'); intro('fac2',()=>{ if(tab==='fac') fac2Coach(); else coach([{el:()=>ui.tabMap.fac,text:'Your <b>Lv.'+FAC_UNLOCK[1]+' '+RL().slime+'</b> unlocked a second factory, the <b>'+f.name+'</b>! Open <b>'+tabName('fac')+'</b> to have a look.'}]); },5); return; }
+  toast('<span class="ti">'+f.ico+'</span><span><b>New: '+f.name+'!</b><br>Unlocked by your Lv.'+FAC_UNLOCK[n]+' '+RL().slime+'</span>','gold'); sfx('ach'); }
 function facCap(){ return Math.max(10,10*S.runBest+2*S.level); }
 function orrUp(k){ return (S.orr&&S.orr.ups[k])||0; }
 function planets(){ const out=[]; if(S.realm!=='sky') return out; S.orr.rings.forEach((ring,r)=>{ if(!ringOpen(r)) return; ring.forEach((L,k)=>{ if(L) out.push({r,k,L}); }); }); return out; }
@@ -4208,6 +4214,7 @@ function applyRealm(){ useRealmArt(); const sky=S.realm==='sky', R=RL();
 function setLook(x,y,k){ const dx=x-k.cx, dy=y-(k.by-k.h*.5), d=Math.hypot(dx,dy)||1, m=Math.min(1,d/(k.w*.8)); ST.lookT.x=dx/d*m; ST.lookT.y=dy/d*m; }
 function setTab(t){ if(ui.tabMap&&!ui.tabMap[t]) t=S.world==='hollow'?'nest':'pen'; tab=t; for(const b of ui.tabBtns) b.setAttribute('aria-selected',b.dataset.t===t); for(const id of ALLVIEWS) $('#view-'+id).hidden=id!==t;
   if(S.seenTabs[t]===1){ S.seenTabs[t]=2; const b=ui.tabMap[t]; if(b) b.classList.remove('fresh'); }
+  if(t==='fac'&&S.tut.fac2===1) fac2Coach();
   if(t==='fac'&&unlocked('fac')&&!S.tut.facbuy&&!S.fac.some(c=>c>0)){ S.tut.facbuy=1; setTimeout(()=>coach([{el:()=>ui.facList.querySelector('.buy'),text:'This is your first factory, the <b>'+FACT[0].name+'</b>. Tap <b>Buy</b> to get one!'}]),350); }
   if(t==='upg') renderUpg(true); if(t==='col') renderCol(); if(t==='fac'){ ui.facKey=null; buildFacList(); } if(t==='asc'){ renderPerks(); CS.sel=null; renderCstInfo(); } if(t==='pen') renderBoard(); if(t==='orr') renderOrr(true);
   if(t==='nest') renderNest(true); if(t==='exp') renderExp(true); if(t==='hup') renderHup(); if(t==='shop') renderShop(true);
@@ -4312,7 +4319,7 @@ function dropCell(i,j){ if(i===j) return; const a=S.board[i], b=S.board[j], sa=S
   else { S.board[j]=a; S.board[i]=b; hatching[j]=0; S.shiny[j]=sa; S.shiny[i]=sb; }
   sfx('click'); renderBoard(); }
 function twinPop(i){ if(tab!=='pen'||S.world==='hollow') return; setTimeout(()=>{ const c=ui.board.children[i]; if(!c) return; const cr=c.getBoundingClientRect(), ar=ui.app.getBoundingClientRect(); popText(cr.left-ar.left+cr.width/2,cr.top-ar.top,'Twins!'); },250); }
-// the first minutes, one step at a time: hatch an egg, meet your first slime, then merge two (factories come with the first Lv.4 slime)
+// the first minutes, one step at a time: hatch an egg, meet your first slime, then merge two (factories come with the first Lv.5 slime)
 function findPair(){ const seen={}, now=nowT(); for(let i=0;i<penSize();i++){ const L=S.board[i]; if(!L||L>=MAXL||hatching[i]>now) continue; if(seen[L]!=null) return [seen[L],i]; seen[L]=i; } return null; }
 function pairRect(pr){ const a=ui.board.children[pr[0]], b=ui.board.children[pr[1]]; if(!a||!b) return null; const ra=a.getBoundingClientRect(), rb=b.getBoundingClientRect(), l=Math.min(ra.left,rb.left), t=Math.min(ra.top,rb.top); return {left:l,top:t,width:Math.max(ra.right,rb.right)-l,height:Math.max(ra.bottom,rb.bottom)-t}; }
 function introCoach(){ if(coachQ||!ui.modal.hidden||S.realm!=='meadow'||ascTotal()>0||S.world!=='meadow') return;
@@ -4492,8 +4499,10 @@ function uiTick(){
   if(bh!==ui.buffHtml){ ui.buffHtml=bh; ui.buffs.innerHTML=bh; }
   // badges
   const best=researchOpen()?bestPick():null, q=upgQueue().slice(0,3), penAff=penUpsOpen()&&PENUPS.some(p=>(!p.show||p.show())&&p.lvl()<p.max&&S.goo>=p.cost());
-  setBadge('pen',penAff&&ui.sheet.hidden?'!':0); setBadge('upg',q.filter(u=>S.goo>=u.cost).length);
-  setBadge('fac',researchOpen()&&FACT.filter((_,i)=>{ if(!facUnlocked(i)||!S.fac[i]) return false; const u=UPMAP['f'+i+'_'+tierOf(i)]; return u&&u.unlock()&&S.goo>=u.cost; }).length?'★':0);
+  // "!" on a tab you are not looking at means something there is ready to buy
+  const eggAff=tab!=='pen'&&emptyCells().length>0&&(S.freeEggs>0||S.bonusEggs>0||S.goo>=eggCost()), facAff=tab!=='fac'&&!trialOn('hands')&&FACT.some((_,i)=>facUnlocked(i)&&facRoom(i)>0&&S.goo>=facCost(i,1));
+  setBadge('pen',(penAff&&ui.sheet.hidden)||eggAff?'!':0); setBadge('upg',q.filter(u=>S.goo>=u.cost).length);
+  setBadge('fac',researchOpen()&&FACT.filter((_,i)=>{ if(!facUnlocked(i)||!S.fac[i]) return false; const u=UPMAP['f'+i+'_'+tierOf(i)]; return u&&u.unlock()&&S.goo>=u.cost; }).length?'★':facAff?'!':0);
   { const it=ascItems(); if(tab==='asc') S.ascSeen=it; setBadge('asc',it.some(x=>!S.ascSeen.includes(x))?'!':0); }
   setBadge('col',S.arts.slice(0,5).filter(n=>n>=3).length);
   if(S.realm==='sky'){ const free=S.orr.rings.reduce((a,ring,r)=>a+(ringOpen(r)?ring.filter(v=>!v).length:0),0); setBadge('orr',free&&S.board.some(v=>v)?free:0); }
@@ -4551,7 +4560,7 @@ function openSettings(){ const s=S.settings, sky=S.realm==='sky';
   '<div class="btnrow"><button class="btn" id="saveNow">Save now</button><button class="btn ghost" id="expBtn">Export save</button><button class="btn ghost" id="impBtn">Import save</button></div>'+
   '<div id="ioBox" hidden><textarea id="ioText" rows="4" spellcheck="false" aria-label="Save code"></textarea><div class="btnrow"><button class="btn ghost" id="ioCopy">Copy</button><button class="btn" id="ioLoad">Load this save</button></div></div>'+
   '<div class="btnrow"><button class="btn danger" id="resetBtn">Reset everything</button></div></section>'+
-  '<p class="note" id="verTxt">Slime Empire 3.3.1 · saves automatically every 10 seconds.</p>'+
+  '<p class="note" id="verTxt">Slime Empire 3.3.2 · saves automatically every 10 seconds.</p>'+
   '<section class="set" id="devBox" hidden><h3>Test tools</h3><p class="note">For testing only. These skip normal progress. Numbers can be typed like 1e15, 2.5M or 40B.</p>'+
   '<div class="devgrid">'+din('dvGoo','Goo','1e15','Add')+din('dvLv','Level','50','Set')+din('dvXp','XP','1000','Add')+din('dvAsc','Ascensions','10','Set')+din('dvJelly',RL().jelly,'500','Add')+din('dvDust','Stardust','25','Add')+din('dvEmb','Embers','5000','Add')+din('dvScl','Scales','50','Add')+'</div>'+
   '<div class="srow"><span>Time speed</span><div class="seg" id="devSpd">'+[1,10,100].map(v=>'<button data-v="'+v+'" aria-pressed="'+(devSpeed===v)+'">×'+v+'</button>').join('')+'</div></div>'+
