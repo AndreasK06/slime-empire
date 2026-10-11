@@ -12,7 +12,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<meta name="build" content="3.6.1">
+<meta name="build" content="3.6.2">
 <script>
 // install as an app: works offline and opens full screen from the home screen
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
@@ -227,6 +227,11 @@ h3.sec span{flex:none}
 .slsk.got em{color:var(--goo)}
 .slsk.locked{opacity:.6}
 .rh-btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.frbtns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.frreq{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:8px 10px;margin-bottom:8px;border-color:var(--gold)}
+.frreq .who b{font:16px var(--f-display);font-weight:400;color:#fff;display:block;word-break:break-word}
+.frreq .who small{display:block;font-size:12px;color:var(--muted)}
+.frdot{font-style:normal;display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:var(--pink);color:#fff;font:12px/18px var(--f-display);text-align:center}
 .decnow{display:flex;align-items:center;gap:10px;padding:8px 10px;margin-bottom:10px;border-radius:12px;background:rgba(255,212,63,.1);border:2px solid rgba(255,212,63,.35)}
 .decnow>span{font-size:24px}
 .decnow>div{flex:1;min-width:0}
@@ -3649,7 +3654,7 @@ function drawCine(t){ const C=CINE, c=C.c, W=C.W, H=C.H; c.setTransform(C.dpr,0,
   if(t>7.1){ c.fillStyle='rgba(3,5,26,'+clamp((t-7.1)/.7,0,1)+')'; c.fillRect(0,0,W,H); }
 }
 function doStarfall(){ const d=starfallDust();
-  const keep=['earnedAll','taps','crits','merges','pets','goldens','rushes','offline','ach','maxSpecies','skyMax','settings','playTime','created','bestGps','level','xp','tenPow','tut','freeEggs','arts','bossNext','bossKills','bossEscapes','hollow','ascensions','skyAsc','starfalls','stardust','stardustAll','cst','conj','grands','seenTabs','gems','items','bpNew','cos','login','goals','wheel','season','shinyDex','lore','loreNew','trials','steward','shop','kname','req','slEvo','slName','slPets','mast','bestCombo','slGiftT','fb','friends'];
+  const keep=['earnedAll','taps','crits','merges','pets','goldens','rushes','offline','ach','maxSpecies','skyMax','settings','playTime','created','bestGps','level','xp','tenPow','tut','freeEggs','arts','bossNext','bossKills','bossEscapes','hollow','ascensions','skyAsc','starfalls','stardust','stardustAll','cst','conj','grands','seenTabs','gems','items','bpNew','cos','login','goals','wheel','season','shinyDex','lore','loreNew','trials','steward','shop','kname','req','slEvo','slName','slPets','mast','bestCombo','slGiftT','fb','friends','frSeen'];
   const k={}; keep.forEach(x=>k[x]=S[x]); k.starfalls=(S.starfalls||0)+1; k.stardust=(S.stardust||0)+d; k.stardustAll=(S.stardustAll||0)+d;
   S=Object.assign(fresh(),k); S.realm='sky'; S.world='meadow'; S.run=freshRun(); S.req.L=0; if(S.hollow.sh.merger) S.amLvl=Math.max(S.amLvl,3);
   B=null; for(const x in hatching) delete hatching[x]; ORR.on={}; ui.starfallDust=d;
@@ -4588,31 +4593,50 @@ function frRows(){ const me=fbMine(), list=[{p:me,me:true}]; for(const f of S.fr
   return list.map((x,i)=>{ const p=x.p;
     if(!p) return '<div class="frrow gone"><span class="pos">·</span><div class="who"><b>'+esc(x.name||fcode(x.code))+'</b><small>'+(FB.at&&FB.data[x.code]===null?'No kingdom with this code':'Loading…')+'</small></div><span></span><button class="frrm" data-rm="'+x.code+'" aria-label="Remove friend">×</button></div>';
     const b=Math.max(1,Math.min(MEADOW_SPECIES.length,+p.best||1));
-    return '<div class="frrow'+(x.me?' me':'')+'"><span class="pos">'+(i+1)+'</span><div class="who"><span class="rtag" style="--rc:'+okCol(p.rc)+'">'+esc(p.rank||'Droplet')+'</span> <b>'+esc(p.name||'?')+'</b><small>Lv '+(+p.lvl||1)+' · best Lv.'+b+' '+MEADOW_SPECIES[b-1].n+' · '+(+p.asc||0)+' ascension'+((+p.asc||0)===1?'':'s')+' · '+(x.me?'you':ago(p.t))+'</small></div><b class="gps">'+fmt(Math.pow(10,+p.gpsL||0),true)+'/s</b>'+(x.me?'<span></span>':'<button class="frrm" data-rm="'+x.code+'" aria-label="Remove friend">×</button>')+'</div>'; }).join(''); }
+    return '<div class="frrow'+(x.me?' me':'')+'"><span class="pos">'+(i+1)+'</span><div class="who"><span class="rtag" style="--rc:'+okCol(p.rc)+'">'+esc(p.rank||'Droplet')+'</span> <b>'+esc(p.name||'?')+'</b><small>Lv '+(+p.lvl||1)+' · best Lv.'+b+' '+MEADOW_SPECIES[b-1].n+' · '+(+p.asc||0)+' ascension'+((+p.asc||0)===1?'':'s')+' · '+(x.me?'you':ago(p.t))+'</small></div><b class="gps">'+(FB.sort==='lvl'?'Lv '+(+p.lvl||1):FB.sort==='asc'?'👑 '+(+p.asc||0):fmt(Math.pow(10,+p.gpsL||0),true)+'/s')+'</b>'+(x.me?'<span></span>':'<button class="frrm" data-rm="'+x.code+'" aria-label="Remove friend">×</button>')+'</div>'; }).join(''); }
 function frNote(){ return FB.err?'📡 Could not reach the leaderboard. Check your internet and try again.':S.friends.length?(FB.at?'Updated '+ago(FB.at)+'. It refreshes every minute while this is open.':'Loading…'):'Add a friend with their code to start your leaderboard!'; }
-function frUpdate(){ const l=document.getElementById('frList'), n=document.getElementById('frNote'); if(l) l.innerHTML=frRows(); if(n) n.textContent=frNote(); }
+function frUpdate(){ const l=document.getElementById('frList'), n=document.getElementById('frNote'), q=document.getElementById('frReqs'); if(l) l.innerHTML=frRows(); if(n) n.textContent=frNote(); if(q) q.innerHTML=frReqHtml(); frBadge(); }
+/* friend requests (3.6.2): adding someone drops your code into their inbox; they accept to add you back */
+FB.reqs={}; FB.inboxN=0;
+function frReqHtml(){ const ks=Object.keys(FB.reqs||{}); if(!ks.length) return '';
+  return '<h3 class="sec" style="font-size:16px">Friend requests</h3>'+ks.map(c=>'<div class="frreq card"><div class="who"><b>'+esc(FB.reqs[c].n||'A kingdom')+'</b><small>'+fcode(c)+' · '+ago(FB.reqs[c].t)+' · wants to be friends</small></div><button class="btn gold" data-acc="'+c+'">Accept</button><button class="frrm" data-rej="'+c+'" aria-label="Decline">✕</button></div>').join(''); }
+function frBadge(){ const n=Object.keys(FB.reqs||{}).length, b=ui.friendsBtn; if(b) setTxt(b,'👥 Friends'+(n?' <i class="frdot">'+n+'</i>':''),true); }
+async function fbInbox(){ if(!S.fb||!S.fb.ok||navigator.onLine===false) return;
+  try{ const r=await fbReq('GET','inbox/'+S.fb.code); if(!r.ok&&r.status!==404) return; const f=(r.ok&&r.j&&r.j.fields&&r.j.fields.req&&r.j.fields.req.mapValue&&r.j.fields.req.mapValue.fields)||{}, out={};
+    for(const k in f){ const c=k.replace(/^c_/,''); if(!fbParse(c)||c===S.fb.code) continue; if(S.friends.some(x=>x.c===c)){ fbInboxClear(c); continue; } const v=(f[k].mapValue&&f[k].mapValue.fields)||{}; out[c]={n:String(fbGet(v.n)||'').slice(0,24),t:+fbGet(v.t)||0}; }
+    const seen=S.frSeen||(S.frSeen=[]); for(const c in out) if(!seen.includes(c)){ seen.push(c); if(seen.length>60) seen.shift(); sfx('ach'); toast('<span class="ti">👥</span><span><b>'+esc(out[c].n||'A kingdom')+'</b> wants to be friends!<br>Accept in 👥 Friends (Collection tab).</span>','gold'); }
+    FB.reqs=out; frUpdate(); }
+  catch(e){} }
+// clears one request from your own inbox (a field mask with no value deletes that key)
+async function fbInboxClear(c){ try{ await fbReq('PATCH','inbox/'+S.fb.code+'?updateMask.fieldPaths=req.c_'+c,{fields:{}}); }catch(e){} delete FB.reqs[c]; }
+async function fbSendReq(to){ if(!S.fb||!S.fb.ok) return; const me=S.fb.code, e={}; e['c_'+me]={mapValue:{fields:{n:fbVal((S.kname||'My Kingdom').slice(0,22)),t:fbVal(Date.now())}}};
+  try{ await fbReq('PATCH','inbox/'+to+'?updateMask.fieldPaths=req.c_'+me+'&updateMask.fieldPaths=by',{fields:{by:fbVal(me),req:{mapValue:{fields:e}}}}); }catch(err){} }
+async function copyText(t){ try{ await navigator.clipboard.writeText(t); return true; }catch(e){ try{ const ta=document.createElement('textarea'); ta.value=t; ta.setAttribute('readonly',''); ta.style.cssText='position:fixed;left:-9999px;top:0'; document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,t.length); const ok=document.execCommand('copy'); ta.remove(); return ok; }catch(e2){ return false; } } }
 function openFriends(){ const on=S.fb&&S.fb.ok; let h='<h2 class="mh">👥 Friends</h2>';
   if(!on) h+='<p>Add your friends and see all your kingdoms side by side on a live leaderboard.</p><ul class="howto"><li><span>🔑</span>You get a <b>friend code</b> to send to your friends. Add their codes, and they show up on your leaderboard.</li><li><span>👀</span>Your kingdom name, rank, level, best slime, goo/s and ascensions are shown to people who have your code. Nothing else.</li><li><span>📶</span>It needs internet. The rest of the game works as always without it.</li></ul><div class="btnrow" style="justify-content:center"><button class="btn gold" id="frStart">Get my friend code</button></div><p class="note" id="frNote">'+(FB.err?'📡 Could not reach the leaderboard. Check your internet and try again.':'')+'</p>';
-  else h+='<div class="frcode card"><div><small>Your friend code</small><b>'+fcode(S.fb.code)+'</b></div><button class="btn" id="frCopy">'+(navigator.share?'Share':'Copy')+'</button></div>'+
+  else h+='<div class="frcode card"><div><small>Your friend code</small><b>'+fcode(S.fb.code)+'</b></div><div class="frbtns"><button class="btn" id="frCopy">Copy</button>'+(navigator.share?'<button class="btn ghost" id="frShare">Share</button>':'')+'</div></div><div id="frReqs">'+frReqHtml()+'</div>'+
     '<div class="fradd"><input id="frIn" maxlength="9" placeholder="Friend code" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="btn gold" id="frAdd">Add</button></div>'+
     '<div class="seg" id="frSort"><button data-s="gps" aria-pressed="'+(FB.sort==='gps')+'">Best goo/s</button><button data-s="lvl" aria-pressed="'+(FB.sort==='lvl')+'">Level</button><button data-s="asc" aria-pressed="'+(FB.sort==='asc')+'">Ascensions</button></div>'+
     '<div class="frlist" id="frList">'+frRows()+'</div><p class="note" id="frNote">'+frNote()+'</p>';
   openModal(h);
-  ui.modalBody.onclick=async e=>{ const st=e.target.closest('#frStart'), cp=e.target.closest('#frCopy'), ad=e.target.closest('#frAdd'), so=e.target.closest('[data-s]'), rm=e.target.closest('[data-rm]');
+  ui.modalBody.onclick=async e=>{ const st=e.target.closest('#frStart'), cp=e.target.closest('#frCopy'), shr=e.target.closest('#frShare'), ad=e.target.closest('#frAdd'), so=e.target.closest('[data-s]'), rm=e.target.closest('[data-rm]'), acc=e.target.closest('[data-acc]'), rej=e.target.closest('[data-rej]');
+    if(acc&&!acc.classList.contains('off')){ const c=acc.dataset.acc, rq=FB.reqs[c]; acc.classList.add('off'); sfx('click');
+      if(!S.friends.some(f=>f.c===c)&&S.friends.length<30) S.friends.push({c,n:(rq&&rq.n)||''}); await fbInboxClear(c); toast('<span class="ti">👥</span><span><b>'+esc((rq&&rq.n)||'A kingdom')+'</b> is now your friend!</span>','gold'); sfx('ach'); saveLocal(); frUpdate(); fbRefresh(); return; }
+    if(rej){ const c=rej.dataset.rej; sfx('click'); await fbInboxClear(c); frUpdate(); return; }
+    if(shr){ sfx('click'); navigator.share({text:'Add me in Slime Empire! My friend code is '+fcode(S.fb.code)+' · https://andreask06.github.io/slime-empire/'}).catch(()=>{}); return; }
     if(st&&!st.classList.contains('off')){ st.classList.add('off'); st.textContent='Getting your code…'; sfx('click');
       try{ await fbEnsure(); FB.err=''; sfx('ach'); openFriends(); fbRefresh(); } catch(err){ FB.err='net'; st.classList.remove('off'); st.textContent='Try again'; const n=document.getElementById('frNote'); if(n) n.textContent='📡 Could not reach the leaderboard. Check your internet and try again.'; } return; }
-    if(cp){ sfx('click'); const txt='Add me in Slime Empire! My friend code is '+fcode(S.fb.code)+' · https://andreask06.github.io/slime-empire/';
-      if(navigator.share){ navigator.share({text:txt}).catch(()=>{}); return; } try{ await navigator.clipboard.writeText(fcode(S.fb.code)); toast('<span class="ti">📋</span><span>Your code <b>'+fcode(S.fb.code)+'</b> is copied.</span>'); }catch(err){ toast('<span class="ti">🔑</span><span>Your code is <b>'+fcode(S.fb.code)+'</b></span>'); } return; }
+    if(cp){ sfx('click'); const ok=await copyText(fcode(S.fb.code)); if(ok){ cp.textContent='Copied ✓'; setTimeout(()=>{ if(cp.isConnected) cp.textContent='Copy'; },1600); } else toast('<span class="ti">🔑</span><span>Your code is <b>'+fcode(S.fb.code)+'</b></span>'); return; }
     if(so){ FB.sort=so.dataset.s; for(const b of document.querySelectorAll('#frSort button')) b.setAttribute('aria-pressed',b.dataset.s===FB.sort); sfx('click'); frUpdate(); return; }
     if(rm){ if(!rm.dataset.sure){ rm.dataset.sure=1; rm.textContent='Remove?'; rm.classList.add('sure'); return; } S.friends=S.friends.filter(f=>f.c!==rm.dataset.rm); sfx('click'); frUpdate(); return; }
     if(ad){ const inp=document.getElementById('frIn'), c=fbParse(inp.value); if(!c){ nope(ad); toast('<span class="ti">🔑</span><span>A friend code has 6 letters and numbers, like <b>K7Q-2XM</b>.</span>'); return; }
       if(c===S.fb.code){ nope(ad); toast('<span class="ti">😄</span><span>That is your own code!</span>'); return; } if(S.friends.some(f=>f.c===c)){ nope(ad); toast('<span class="ti">👥</span><span>That friend is already on your list.</span>'); return; }
       if(S.friends.length>=30){ nope(ad); toast('<span class="ti">👥</span><span>Your list is full (30 friends).</span>'); return; }
       ad.classList.add('off'); try{ const d=await fbFetch([c]); const p=d[c]; if(!p){ nope(ad); toast('<span class="ti">🔍</span><span>No kingdom has the code <b>'+fcode(c)+'</b>. Check the letters?</span>'); }
-        else { S.friends.push({c,n:p.name||''}); FB.data[c]=p; inp.value=''; sfx('ach'); toast('<span class="ti">👥</span><span><b>'+esc(p.name||'A kingdom')+'</b> joined your leaderboard!</span>','gold'); frUpdate(); saveLocal(); } }
+        else { S.friends.push({c,n:p.name||''}); FB.data[c]=p; inp.value=''; sfx('ach'); fbSendReq(c); toast('<span class="ti">👥</span><span><b>'+esc(p.name||'A kingdom')+'</b> joined your leaderboard! They get a friend request to add you back.</span>','gold'); frUpdate(); saveLocal(); } }
       catch(err){ nope(ad); toast('<span class="ti">📡</span><span>Could not reach the leaderboard. Check your internet.</span>'); } ad.classList.remove('off'); return; } };
   const inp=document.getElementById('frIn'); if(inp) inp.onkeydown=e=>{ if(e.key==='Enter'){ e.preventDefault(); document.getElementById('frAdd').click(); } };
-  if(on){ fbPush(true); fbRefresh(); } }
+  if(on){ fbPush(true); fbRefresh(); fbInbox(); } }
 /* ================= the Kingdom card: a picture to share ================= */
 function drawKingdomCard(cv){ const c=cv.getContext('2d'), W=cv.width, H=cv.height, sky=S.realm==='sky', se=season();
   const g=c.createLinearGradient(0,0,0,H); g.addColorStop(0,sky?'#0b1140':'#2b1b5c'); g.addColorStop(1,sky?'#1b1452':'#5a2a7a'); c.fillStyle=g; c.fillRect(0,0,W,H);
@@ -4979,7 +5003,7 @@ function doAscend(){ const g=jellyGain(); if(!canAscend()) return; const sky=S.r
   const R=S.run||freshRun(), sum={time:S.playTime-(R.t0||0),earned:S.earnedRun,peak:R.peak||G.base,best:S.runBest,taps:R.taps||0,merges:R.merges||0,goldens:R.goldens||0,bosses:R.bosses||0,g:(R.g||[]).concat([G.base]),jelly:g,sky,jn:RL().jelly,slime:RL().slime,n:ascTotal()+1};
   const keep=['earnedAll','earnedRealm','taps','crits','merges','pets','goldens','rushes','offline','perks','ach','maxSpecies','skyMax','jelly','jellyEarned','settings','playTime','created','bestGps',
     'level','xp','tenPow','tut','freeEggs','arts','bossNext','bossKills','bossEscapes','hollow','world','realm','ascensions','skyAsc','starfalls','stardust','stardustAll','cst','conj','grands','seenTabs','gems','items','bpNew','cos','login','goals','wheel','season',
-    'shinyDex','lore','loreNew','trials','steward','shop','kname','req','slEvo','slName','slPets','mast','bestCombo','slGiftT','fb','friends'];
+    'shinyDex','lore','loreNew','trials','steward','shop','kname','req','slEvo','slName','slPets','mast','bestCombo','slGiftT','fb','friends','frSeen'];
   const k={}; keep.forEach(x=>k[x]=S[x]); k.jelly+=g; k.jellyEarned+=g; if(sky) k.skyAsc++; else k.ascensions++;
   S=Object.assign(fresh(),k); S.run=freshRun(); S.trial=ui.pendingTrial?{k:ui.pendingTrial,t0:S.playTime}:null; ui.pendingTrial=null; S.req.L=0; S.req.next=S.playTime+300;
   if(!meadowEco()){ const r=prk('start'); if(r){ S.fac[0]=10*r; S.fac[1]=5*r; } } else if(S.tut.slHatched){ S.sl.lv=slStart(); slEvoCheck(true); } S.amLvl=Math.max(S.amLvl,[0,1,3,5][prk('merger')]); S.hatchLvl=Math.max(S.hatchLvl,[0,3,5,7][prk('rhatch')]); if(S.hollow.sh.merger) S.amLvl=Math.max(S.amLvl,3);
@@ -5085,7 +5109,7 @@ function uiTick(){
   setBadge('pen',(penAff&&ui.sheet.hidden)||eggAff?'!':0); setBadge('upg',q.filter(u=>S.goo>=u.cost).length);
   setBadge('fac',researchOpen()&&FACT.filter((_,i)=>{ if(!facUnlocked(i)||!S.fac[i]) return false; const u=UPMAP['f'+i+'_'+tierOf(i)]; return u&&u.unlock()&&S.goo>=u.cost; }).length?'★':facAff?'!':0);
   { const it=ascItems(); if(tab==='asc') S.ascSeen=it; setBadge('asc',it.some(x=>!S.ascSeen.includes(x))?'!':0); }
-  setBadge('col',S.arts.slice(0,5).filter(n=>n>=3).length);
+  setBadge('col',S.arts.slice(0,5).filter(n=>n>=3).length+Object.keys(FB.reqs||{}).length);
   if(S.realm==='sky'){ const free=S.orr.rings.reduce((a,ring,r)=>a+(ringOpen(r)?ring.filter(v=>!v).length:0),0); setBadge('orr',free&&S.board.some(v=>v)?free:0); }
   // the Pen upgrades panel is introduced once the first upgrade (the Hatchery) is affordable
   ui.rush.hidden=!unlocked('wobble');
@@ -5143,7 +5167,7 @@ function openSettings(){ const s=S.settings, sky=S.realm==='sky';
   '<div class="btnrow"><button class="btn" id="saveNow">Save now</button><button class="btn ghost" id="expBtn">Export save</button><button class="btn ghost" id="impBtn">Import save</button></div>'+
   '<div id="ioBox" hidden><textarea id="ioText" rows="4" spellcheck="false" aria-label="Save code"></textarea><div class="btnrow"><button class="btn ghost" id="ioCopy">Copy</button><button class="btn" id="ioLoad">Load this save</button></div></div>'+
   '<div class="btnrow"><button class="btn danger" id="resetBtn">Reset everything</button></div></section>'+
-  '<p class="note" id="verTxt">Slime Empire 3.6.1 · saves automatically every 10 seconds.</p>'+
+  '<p class="note" id="verTxt">Slime Empire 3.6.2 · saves automatically every 10 seconds.</p>'+
   '<section class="set" id="devBox" hidden><h3>Test tools</h3><p class="note">For testing only. These skip normal progress. Numbers can be typed like 1e15, 2.5M or 40B.</p>'+
   '<div class="devgrid">'+din('dvGoo','Goo','1e15','Add')+din('dvLv','Level','50','Set')+din('dvXp','XP','1000','Add')+din('dvAsc','Ascensions','10','Set')+din('dvJelly',RL().jelly,'500','Add')+din('dvDust','Stardust','25','Add')+din('dvEmb','Embers','5000','Add')+din('dvScl','Scales','50','Add')+'</div>'+
   '<div class="srow"><span>Time speed</span><div class="seg" id="devSpd">'+[1,10,100].map(v=>'<button data-v="'+v+'" aria-pressed="'+(devSpeed===v)+'">×'+v+'</button>').join('')+'</div></div>'+
@@ -5261,7 +5285,7 @@ function logic(dt){
   if(ui.modal.hidden&&ui.coach.hidden&&ui.sheet.hidden&&!ST.warp&&researchOpen()){ mentorNext-=dt; if(mentorNext<=0){ mentorNext=rand(70,120); if(!B&&!INTRO.q.length) say(tipText()); } }
   saveAcc+=dt; if(saveAcc>10){ saveAcc=0; saveLocal(); }
   achAcc+=dt; if(achAcc>1){ achAcc=0; checkAch(); syncHoppers(); reqLogic(); trialCheck(); ascGoalTick(); while(S.earnedAll>=Math.pow(10,S.tenPow+1)){ S.tenPow++; gainXP(15*S.tenPow); } }
-  cloudAcc+=dt; if(cloudAcc>60){ cloudAcc=0; cloudSave(); fbPush(); if(document.getElementById('frList')&&S.fb&&S.fb.ok) fbRefresh(); }
+  cloudAcc+=dt; if(cloudAcc>60){ cloudAcc=0; cloudSave(); fbPush(); const frOpen=!!document.getElementById('frList'); if(frOpen&&S.fb&&S.fb.ok) fbRefresh(); if(frOpen||++FB.inboxN%2===0) fbInbox(); }
 }
 function frame(ts){
   if(S.settings.eco&&lastT&&ts-lastT<30){ requestAnimationFrame(frame); return; }
@@ -5307,7 +5331,7 @@ function start(hotData){
   if(S.hollow.waking&&!S.hollow.tia) setTimeout(()=>{ closeModal(); setWorld('hollow'); ST.chamber=true; ui.heat.hidden=true; playTiaCine(); },800);
   uiTick(); requestAnimationFrame(frame);
   cloudInit();
-  setTimeout(()=>fbPush(true),5000);
+  setTimeout(()=>{ fbPush(true); fbInbox(); },5000);
 }
 const hot=window.claude&&window.claude.hot;
 try{ if(hot&&typeof hot.snapshot==='function') hot.snapshot(()=>({save:S?serialize():null})); }catch(e){}
