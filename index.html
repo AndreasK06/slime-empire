@@ -12,7 +12,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<meta name="build" content="3.4.3">
+<meta name="build" content="3.4.5">
 <script>
 // install as an app: works offline and opens full screen from the home screen
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
@@ -643,6 +643,7 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
 .nextcard .nx-i{font-size:20px;flex:none;min-width:24px;text-align:center}
 .nextcard .nx-t small{display:block;font:10px/1 var(--f-display);letter-spacing:1px;color:var(--gold);margin-bottom:2px}
 .sotdrow{margin:5px 0 0;padding:3px 10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;border-radius:10px;background:rgba(255,212,63,.1);border:2px solid rgba(255,212,63,.35);font-size:12.5px;color:#ffe9a0;text-align:center}
+.relbtn{font-size:12px;padding:3px 10px;margin-left:6px;vertical-align:middle}
 .cell.shiny{background:radial-gradient(circle at 50% 68%,#5a4aa8 0%,#2e2470 72%);box-shadow:inset 0 0 0 2px #fff3a0,0 0 14px rgba(255,240,160,.55)}
 .cell.shiny img{filter:saturate(1.35) brightness(1.08) drop-shadow(0 0 6px rgba(255,255,255,.7))}
 .cell.shiny::after{content:"✨";position:absolute;right:2px;top:0;font-size:14px;animation:twink 1.6s ease-in-out infinite;pointer-events:none}
@@ -3183,7 +3184,7 @@ function buildOrrUps(){ ui.orrUps.innerHTML=ORR_UPS.map(p=>'<div class="pu card"
 function renderOrrUps(){ if(!ui.ou) return; ui.ou.forEach(x=>{ const p=x.p, l=orrUp(p.k), mx=l>=p.max, lock=p.need&&!orrUp(p.need); x.row.hidden=!!lock; x.lv.textContent=l&&p.max>1?' Lv.'+l:''; x.d.textContent=mx?(p.max>1?'Maxed out!':'Owned. '+p.desc(l)):p.desc(l);
   if(mx){ x.b.textContent=p.max>1?'MAX':'Owned'; x.b.classList.add('off'); } else { const c=p.cost(l); x.b.textContent=fmt(c); x.b.classList.toggle('off',S.goo<c); } }); }
 function openSlot(r,k){ const L=S.orr.rings[r][k], n=penSize(), now=nowT(), items=[];
-  for(let i=0;i<n;i++){ const v=S.board[i]; if(v&&!(hatching[i]>now)) items.push({i,L:v}); } items.sort((a,b)=>b.L-a.L);
+  for(let i=0;i<n;i++){ const v=S.board[i]; if(v&&!S.shiny[i]&&!(hatching[i]>now)) items.push({i,L:v}); } items.sort((a,b)=>b.L-a.L);
   let h='<h2 class="mh">'+RING_NAME[r]+(L?' · Lv.'+L+' '+SPECIES[L-1].n:'')+'</h2>';
   if(L) h+='<p>This planet makes <b>'+fmt(slimeProd(L)*1.25*M.pen*M.all*G.mult,true)+' goo/s</b>. Pick a star jelly from the Nebula to swap it in, or one of the <b>same level</b> to merge them right here.</p><div class="btnrow"><button class="btn ghost" id="slotBack">Send back to the Nebula</button></div>';
   else h+='<p>Pick a star jelly from your Nebula. Planets make 25% more goo than jellies in the Nebula, and bigger planets make stronger Conjunctions.</p>';
@@ -3814,8 +3815,8 @@ function drawHaunted(c,w,h,t,n){ // jack-o'-lanterns along the meadow, tombstone
 /* ================= Merge all ================= */
 const MA_CD=[60,45,30,20];
 function mergeAllOnce(){ if(!S.maLvl) return; const now=nowT(); if(now<(S.maNext||0)){ nope(ui.mergeAllBtn); return; } const by={}, n=penSize();
-  for(let i=0;i<n;i++){ const L=S.board[i]; if(!L||L>=MAXL||hatching[i]>now) continue; (by[L]=by[L]||[]).push(i); }
-  let m=0; for(const L of Object.keys(by).map(Number).sort((a,b)=>a-b)){ const cells=by[L]; for(let j=0;j+1<cells.length;j+=2){ mergeCells(cells[j],cells[j+1]); m++; } }
+  for(let i=0;i<n;i++){ const L=S.board[i]; if(!L||L>=MAXL||hatching[i]>now) continue; const key=L+(S.shiny[i]?'s':''); (by[key]=by[key]||[]).push(i); }
+  let m=0; for(const key of Object.keys(by).sort((a,b)=>parseInt(a)-parseInt(b))){ const cells=by[key]; for(let j=0;j+1<cells.length;j+=2){ mergeCells(cells[j],cells[j+1]); m++; } }
   if(!m){ nope(ui.mergeAllBtn); toast('<span class="ti">⚡</span><span>No matching pairs to merge right now.</span>'); return; }
   S.maNext=now+MA_CD[S.maLvl-1]*1000; computeG(); sfx('rush'); uiTick(); }
 
@@ -3982,11 +3983,15 @@ function updateNext(){ const h=nextHint(), key=h?h.txt:''; if(key===ui.nextKey) 
 function nextClick(e){ const go=e.currentTarget.dataset.go; sfx('click'); if(go==='req') openRequest(); else if(go==='lvl') openChronicle(); else if(go&&ui.tabMap[go]) setTab(go); }
 
 /* ================= Royal Requests: the King asks for a slime ================= */
-function penHas(L){ const n=penSize(), now=nowT(); let pick=-1; for(let i=0;i<n;i++) if(S.board[i]===L&&!(hatching[i]>now)){ if(!S.shiny[i]) return i; if(pick<0) pick=i; } return pick; }
+// the King never asks for a shiny: those stay in the pen
+function penHas(L){ const n=penSize(), now=nowT(); for(let i=0;i<n;i++) if(S.board[i]===L&&!S.shiny[i]&&!(hatching[i]>now)) return i; return -1; }
 function reqLogic(){ if(!unlocked('req')||S.world!=='meadow') return; const R=S.req;
   if(!R.L){ if(S.playTime>=R.next&&!bossQuiet()) newRequest(); return; }
   if(S.playTime>R.until){ R.L=0; R.next=S.playTime+rand(180,360); toast('<span class="ti">👑</span><span>The '+RL().king+' gave up waiting. A new request will come soon.</span>'); } }
-function newRequest(){ const top=Math.max(2,S.runBest), L=Math.max(2,Math.min(MAXL-1,top-1-Math.floor(Math.random()*2))), r=Math.random(), loreLeft=LORE.filter(x=>x.ch==='meadow'&&!S.lore[x.id]);
+// the King never asks for your best slime in the pen (it usually makes most of your goo): always one or two levels below it
+function penTop(){ let t=0; const n=penSize(); for(let i=0;i<n;i++) if(S.board[i]&&!S.shiny[i]) t=Math.max(t,S.board[i]); return t; }
+function newRequest(){ const top=penTop(); if(top<3){ S.req.next=S.playTime+60; return; }
+  const L=Math.max(2,Math.min(MAXL-1,top-1-Math.floor(Math.random()*2))), r=Math.random(), loreLeft=LORE.filter(x=>x.ch==='meadow'&&!S.lore[x.id]);
   let rew; if(r<.1&&loreLeft.length) rew={k:'lore',id:loreLeft[0].id}; else if(r<.35) rew={k:'gems',n:L>=top-1?3:2}; else if(r<.55) rew={k:'item',id:pick(['frenzy','eggcrate','bell','warp30'])}; else rew={k:'goo',s:900+300*(L-top+2)};
   S.req.L=L; S.req.rew=rew; S.req.until=S.playTime+1200; sfx('discover');
   if(!S.tut.req){ S.tut.req=1; intro('req1',()=>coach([{rect:()=>{ const h=ST.reqHit; if(!h||!ST.cv) return null; const sr=ST.cv.getBoundingClientRect(); return {left:sr.left+h.x-h.r,top:sr.top+h.y-h.r,width:h.r*2,height:h.r*2}; },text:'A <b>Royal Request</b>! The '+RL().king+' wants a <b>Lv.'+L+' '+RL().slime+'</b>. Tap the bubble to see his reward, and give it to him from your '+RL().pen.toLowerCase()+'. New requests come every few minutes.'}]),9); }
@@ -4006,7 +4011,7 @@ const SHINY_P=.01;
 function shinyCount(){ return Object.keys(S.shinyDex||{}).length; }
 function noteShiny(L){ if(!S.shinyDex[L]){ S.shinyDex[L]=1; recalc(); } }
 function rollShiny(i){ if(!unlocked('shiny')||(Math.random()>=SHINY_P&&!ui.devShiny)) return; ui.devShiny=0; S.shiny[i]=1; const L=S.board[i]; setTimeout(()=>{ if(!S.shiny[i]) return; noteShiny(S.board[i]||L); sfx('mythic'); renderBoard(true);
-  if(!S.tut.shiny){ S.tut.shiny=1; coach([{el:()=>ui.board.children[i],text:'A <b>shiny</b> '+RL().slime+'! Shinies are rare (about 1 in 100 eggs) and make <b>twice the goo</b>. Merge two shinies to keep it shiny. Each new shiny size goes in the Collection for <b>+1% goo</b> forever.'}]); }
+  if(!S.tut.shiny){ S.tut.shiny=1; coach([{el:()=>ui.board.children[i],text:'A <b>shiny</b> '+RL().slime+'! Shinies are rare (about 1 in 100 eggs) and make <b>twice the goo</b>. They only merge with another shiny of the same level, so they stay safe in your pen, even from the robot. Each new shiny size goes in the Collection for <b>+1% goo</b> forever. If one is ever in the way, tap it to release it.'}]); }
   else toast('<img src="'+SPIMG[S.board[i]||L]+'" alt=""><span><b>A shiny '+RL().slime+'!</b><br>×2 goo · merge two shinies to keep it shiny</span>','disc'); },700); }
 
 /* ================= Slime of the Day ================= */
@@ -4096,7 +4101,8 @@ function grantLore(id,quiet){ const L=LORE.find(x=>x.id===id); if(!L||S.lore[id]
 function loreDrop(ch,chance){ if(Math.random()>=chance) return; const L=LORE.find(x=>x.ch===ch&&!S.lore[x.id]); if(L) setTimeout(()=>grantLore(L.id),900); }
 
 /* ================= the run summary, shown after every ascension ================= */
-function runTrack(dt){ const R=S.run; if(!R) return; R.peak=Math.max(R.peak||0,G.base); R.acc=(R.acc||0)+dt; if(R.acc>=30){ R.acc=0; R.g.push(G.base); if(R.g.length>240) R.g=R.g.filter((_,i)=>i%2===0); } }
+// the run tracker is made whenever it is missing (a fresh reset, an imported save), so the run summary never comes up empty
+function runTrack(dt){ const R=S.run||(S.run=freshRun()); R.peak=Math.max(R.peak||0,G.base); R.acc=(R.acc||0)+dt; if(R.acc>=30){ R.acc=0; R.g.push(G.base); if(R.g.length>240) R.g=R.g.filter((_,i)=>i%2===0); } }
 function freshRun(){ return {t0:S?S.playTime:0,peak:0,bosses:0,goldens:0,merges:0,taps:0,g:[],acc:0}; }
 function showRunSummary(sum){ const rows=[['⏱️','Time',fmtTime(sum.time)],['💧','Goo made',fmt(sum.earned)],['📈','Best goo/s',fmt(sum.peak,true)],['🐣','Best '+sum.slime,'Lv.'+sum.best],['👆','Taps',fmt(sum.taps)],['🔗','Merges',fmt(sum.merges)],['🌟','Golden',fmt(sum.goldens)],['🥊','Minibosses',fmt(sum.bosses)]];
   openModal('<h2 class="mh">'+(sum.sky?'🌙':'👑')+' Run summary</h2><p>Ascension #'+sum.n+' brought <b>+'+fmt(sum.jelly)+' '+sum.jn+'</b>. Here is how that run went:</p><div class="runsum">'+rows.map(r=>'<div><span>'+r[0]+'</span><small>'+r[1]+'</small><b>'+r[2]+'</b></div>').join('')+'</div>'+
@@ -4226,6 +4232,12 @@ function buildUI(){
   ui.shopCons.onclick=ui.shopPerm.onclick=e=>{ const b=e.target.closest('[data-k]'); if(b) buyShop(b.dataset.k,b); };
   ui.buyMode.innerHTML=[[1,'×1'],[10,'×10'],['next','Next ×2'],['max','Max']].map(m=>'<button data-m="'+m[0]+'" aria-pressed="'+(m[0]===buyMode)+'">'+m[1]+'</button>').join('');
   ui.buyMode.onclick=e=>{ const b=e.target.closest('button'); if(!b) return; const v=b.dataset.m; buyMode=v==='max'||v==='next'?v:+v; for(const x of ui.buyMode.children) x.setAttribute('aria-pressed',x===b); sfx('click'); uiTick(); };
+  // releasing a shiny that is in the way (tap twice): it hops off and leaves a little goo as thanks
+  ui.penInfo.addEventListener('click',e=>{ const b=e.target.closest('.relbtn'); if(!b) return; const i=+b.dataset.rel, L=S.board[i]; if(!L||!S.shiny[i]){ b.remove(); return; }
+    if(!b.dataset.sure){ b.dataset.sure=1; b.textContent='Tap again to release'; sfx('click'); return; }
+    computeG(); const g=G.base*120; S.board[i]=0; S.shiny[i]=0; hatching[i]=0; earn(g); clearSel(); renderBoard(); computeG(); sfx('discover');
+    ui.penInfo.textContent='Drag a '+RL().slime+' onto a matching one to merge them into a stronger '+RL().slime+'.';
+    toast('<span class="ti">✨</span><span><b>The shiny '+SPECIES[L-1].n+' hopped away happily.</b><br>It left you '+fmtRough(g)+' goo, and it stays in your Collection.</span>','gold'); uiTick(); });
   ui.facList.onclick=e=>{ const s=e.target.closest('.star-btn'); if(s){ buyStar(+s.dataset.s,s); return; } const b=e.target.closest('.buy'); if(b) buyFac(+b.dataset.i,b); };
   ui.upgQueue.onclick=e=>{ const b=e.target.closest('.upg'); if(b) buyUpg(b.dataset.id,b); };
   ui.perkGrid.onclick=e=>{ const b=e.target.closest('.upg'); if(b) buyPerk(b.dataset.id,b); };
@@ -4335,20 +4347,24 @@ function setupTouchTaps(){
 let drag=null, sel=null;
 // on a phone the pen scrolls like the rest of the page: a slime is picked up after a short hold (or a sideways move),
 // and a quick tap selects it instead. Tap a matching slime to merge, or an empty space to move it there.
+// a shiny only merges with another shiny of the same level (and a normal slime only with a normal one), so shinies stay in the pen
+const sameKind=(i,j)=>!S.shiny[i]===!S.shiny[j];
+function shinyNope(){ sfx('no'); toast('<span class="ti">✨</span><span>Shiny '+RL().slimes+' only merge with another <b>shiny</b> of the same level.</span>'); }
 function clearSel(){ if(!sel) return; for(const c of ui.board.children) c.classList.remove('sel','match'); sel=null; }
 function selectCell(i){ clearSel(); const L=S.board[i], c=ui.board.children[i]; if(!L||!c) return; sel={i,L}; c.classList.add('sel');
-  if(L<MAXL) for(const o of ui.board.children) if(o!==c&&S.board[+o.dataset.i]===L&&!(hatching[+o.dataset.i]>nowT())) o.classList.add('match'); }
+  if(L<MAXL) for(const o of ui.board.children) if(o!==c&&S.board[+o.dataset.i]===L&&sameKind(i,+o.dataset.i)&&!(hatching[+o.dataset.i]>nowT())) o.classList.add('match'); }
 function tapCell(i){ const L=S.board[i], now=nowT();
   if(sel&&S.board[sel.i]!==sel.L) clearSel();
   if(!sel){ if(L&&!(hatching[i]>now)){ selectCell(i); tapPen(i); } return; }
   const from=sel.i; if(from===i){ clearSel(); tapPen(i); return; }
   if(!L){ clearSel(); dropCell(from,i); return; }
   if(hatching[i]>now) return;
-  if(L===sel.L&&L<MAXL){ clearSel(); if(!S.tut.tapmerge){ S.tut.tapmerge=1; } mergeCells(from,i); computeG(); uiTick(); return; }
+  if(L===sel.L&&L<MAXL&&sameKind(from,i)){ clearSel(); if(!S.tut.tapmerge){ S.tut.tapmerge=1; } mergeCells(from,i); computeG(); uiTick(); return; }
+  if(L===sel.L&&L<MAXL) shinyNope();
   selectCell(i); tapPen(i); }
 // is there a matching slime right next to this one in the direction the finger is moving (up, down or diagonal)?
 function partnerToward(d,dx,dy){ const n=penSize(), col=d.i%4, row=dy>0?1:-1, side=Math.abs(dx)>Math.abs(dy)*.4?Math.sign(dx):0, now=nowT();
-  for(const c of side?[0,side]:[0]){ const cc=col+c, j=d.i+row*4+c; if(cc<0||cc>3||j<0||j>=n) continue; if(S.board[j]===d.L&&d.L<MAXL&&!(hatching[j]>now)) return true; } return false; }
+  for(const c of side?[0,side]:[0]){ const cc=col+c, j=d.i+row*4+c; if(cc<0||cc>3||j<0||j>=n) continue; if(S.board[j]===d.L&&d.L<MAXL&&sameKind(d.i,j)&&!(hatching[j]>now)) return true; } return false; }
 function setupDrag(){
   const board=ui.board, HOLD=130;
   const arm=d=>{ if(drag!==d||d.armed) return; d.armed=true; clearSel(); d.cell.classList.add('lift'); };
@@ -4379,13 +4395,13 @@ function setupDrag(){
 }
 function dropCell(i,j){ if(i===j) return; const a=S.board[i], b=S.board[j], sa=S.shiny[i], sb=S.shiny[j];
   if(!b){ S.board[j]=a; S.board[i]=0; hatching[j]=0; S.shiny[j]=sa; S.shiny[i]=0; }
-  else if(a===b&&a<MAXL){ mergeCells(i,j); computeG(); uiTick(); return; }
-  else if(a===b){ toast('<span class="ti">👑</span><span>The '+SPECIES[MAXL-1].n+' is already the strongest '+RL().slime+'!</span>'); return; }
-  else { S.board[j]=a; S.board[i]=b; hatching[j]=0; S.shiny[j]=sa; S.shiny[i]=sb; }
+  else if(a===b&&a<MAXL&&!sa===!sb){ mergeCells(i,j); computeG(); uiTick(); return; }
+  else if(a===b&&a>=MAXL){ toast('<span class="ti">👑</span><span>The '+SPECIES[MAXL-1].n+' is already the strongest '+RL().slime+'!</span>'); return; }
+  else { if(a===b) shinyNope(); S.board[j]=a; S.board[i]=b; hatching[j]=0; S.shiny[j]=sa; S.shiny[i]=sb; }
   sfx('click'); renderBoard(); }
 function twinPop(i){ if(tab!=='pen'||S.world==='hollow') return; setTimeout(()=>{ const c=ui.board.children[i]; if(!c) return; const cr=c.getBoundingClientRect(), ar=ui.app.getBoundingClientRect(); popText(cr.left-ar.left+cr.width/2,cr.top-ar.top,'Twins!'); },250); }
 // the first minutes, one step at a time: hatch an egg, meet your first slime, then merge two (factories come with the first Lv.5 slime)
-function findPair(){ const seen={}, now=nowT(); for(let i=0;i<penSize();i++){ const L=S.board[i]; if(!L||L>=MAXL||hatching[i]>now) continue; if(seen[L]!=null) return [seen[L],i]; seen[L]=i; } return null; }
+function findPair(){ const seen={}, now=nowT(); for(let i=0;i<penSize();i++){ const L=S.board[i]; if(!L||L>=MAXL||hatching[i]>now) continue; const key=L+(S.shiny[i]?'s':''); if(seen[key]!=null) return [seen[key],i]; seen[key]=i; } return null; }
 function pairRect(pr){ const a=ui.board.children[pr[0]], b=ui.board.children[pr[1]]; if(!a||!b) return null; const ra=a.getBoundingClientRect(), rb=b.getBoundingClientRect(), l=Math.min(ra.left,rb.left), t=Math.min(ra.top,rb.top); return {left:l,top:t,width:Math.max(ra.right,rb.right)-l,height:Math.max(ra.bottom,rb.bottom)-t}; }
 function introCoach(){ if(coachQ||!ui.modal.hidden||S.realm!=='meadow'||ascTotal()>0||S.world!=='meadow') return;
   if(!S.tut.egg&&S.goo>=eggCost()&&!S.board.some(v=>v)&&!S.merges){ S.tut.egg=1; intro('egg',()=>coach([{el:'#eggBtn',text:'You have enough goo! <b>Hatch an egg</b> to get your first slime. Slimes in the pen make goo all by themselves.'}]),9); return; }
@@ -4396,7 +4412,7 @@ function introCoach(){ if(coachQ||!ui.modal.hidden||S.realm!=='meadow'||ascTotal
       {el:'#board',text:'And the best part: two slimes of the <b>same level</b> can <b>merge</b> into a bigger one that makes about <b>three times</b> more goo. Hatch another egg and try it!'}]),9); return; } }
   if(!S.tut.merge&&!S.merges){ const pr=findPair(); if(pr){ S.tut.merge=1; intro('merge',()=>{ const p2=findPair()||pr; coach([{rect:()=>pairRect(p2),text:'Two matching slimes! <b>Tap one, then the other</b> to merge them into a bigger slime. You can also hold one and drag it. Each size up makes about three times more goo.'}]); },9); } } }
 function tapPen(i){ const L=S.board[i]; if(!L) return; S.pets++; const sd=sotdL(); const c=ui.board.children[i]; if(c){ c.classList.remove('wiggle'); void c.offsetWidth; c.classList.add('wiggle'); }
-  ui.penInfo.innerHTML='<b style="color:#fff">'+(S.shiny[i]?'✨ Shiny ':'')+'Lv.'+L+' '+SPECIES[L-1].n+'</b> makes '+fmt(slimeProd(L)*(S.shiny[i]?2:1)*(L===sd?2:1)*M.pen*(1+M.feeding*feedK()*G.totalFac)*M.all*G.mult*wxPen(),true)+' goo/s'+(L===sd?' · ⭐ Slime of the Day ×2':'')+(L<MAXL?' · merge two to get a '+SPECIES[L].n:''); hl(ui.penInfo);
+  ui.penInfo.innerHTML='<b style="color:#fff">'+(S.shiny[i]?'✨ Shiny ':'')+'Lv.'+L+' '+SPECIES[L-1].n+'</b> makes '+fmt(slimeProd(L)*(S.shiny[i]?2:1)*(L===sd?2:1)*M.pen*(1+M.feeding*feedK()*G.totalFac)*M.all*G.mult*wxPen(),true)+' goo/s'+(L===sd?' · ⭐ Slime of the Day ×2':'')+(L<MAXL?(S.shiny[i]?' · merge with another shiny to get a shiny '+SPECIES[L].n:' · merge two to get a '+SPECIES[L].n):'')+(S.shiny[i]?' <button class="btn ghost relbtn" data-rel="'+i+'">Release</button>':''); hl(ui.penInfo);
   sfx('egg'); }
 
 /* factories */
@@ -4620,7 +4636,7 @@ function openSettings(){ const s=S.settings, sky=S.realm==='sky';
   '<div class="btnrow"><button class="btn" id="saveNow">Save now</button><button class="btn ghost" id="expBtn">Export save</button><button class="btn ghost" id="impBtn">Import save</button></div>'+
   '<div id="ioBox" hidden><textarea id="ioText" rows="4" spellcheck="false" aria-label="Save code"></textarea><div class="btnrow"><button class="btn ghost" id="ioCopy">Copy</button><button class="btn" id="ioLoad">Load this save</button></div></div>'+
   '<div class="btnrow"><button class="btn danger" id="resetBtn">Reset everything</button></div></section>'+
-  '<p class="note" id="verTxt">Slime Empire 3.4.3 · saves automatically every 10 seconds.</p>'+
+  '<p class="note" id="verTxt">Slime Empire 3.4.5 · saves automatically every 10 seconds.</p>'+
   '<section class="set" id="devBox" hidden><h3>Test tools</h3><p class="note">For testing only. These skip normal progress. Numbers can be typed like 1e15, 2.5M or 40B.</p>'+
   '<div class="devgrid">'+din('dvGoo','Goo','1e15','Add')+din('dvLv','Level','50','Set')+din('dvXp','XP','1000','Add')+din('dvAsc','Ascensions','10','Set')+din('dvJelly',RL().jelly,'500','Add')+din('dvDust','Stardust','25','Add')+din('dvEmb','Embers','5000','Add')+din('dvScl','Scales','50','Add')+'</div>'+
   '<div class="srow"><span>Time speed</span><div class="seg" id="devSpd">'+[1,10,100].map(v=>'<button data-v="'+v+'" aria-pressed="'+(devSpeed===v)+'">×'+v+'</button>').join('')+'</div></div>'+
@@ -4730,7 +4746,7 @@ function logic(dt){
   if(S.hatchLvl>0&&!trialOn('drought')&&!trialOn('hands')){ S.hatchProg+=dt/hatchInt(); if(S.hatchProg>=1){ if(spawnEgg(effEgg(),true,0)){ S.hatchProg-=1; if(S.twinLvl&&Math.random()<.1*S.twinLvl&&emptyCells().length){ const e=emptyCells()[0]; spawnEgg(effEgg(),true,150); twinPop(e); } } else S.hatchProg=1; } }
   // the robot charges up, then waits fully charged and merges the moment a matching pair exists
   if(S.amLvl>0&&S.amOn&&!drag){ S.amProg=Math.min(1,S.amProg+dt/amInt()); if(S.amProg>=1){ const n=penSize(), seen={};
-    for(let i=0;i<n;i++){ const L=S.board[i]; if(!L||L>=MAXL||hatching[i]>now) continue; if(seen[L]!=null){ mergeCells(i,seen[L],true); S.amProg=0; break; } seen[L]=i; } } }
+    for(let i=0;i<n;i++){ const L=S.board[i]; if(!L||L>=MAXL||hatching[i]>now) continue; const key=L+(S.shiny[i]?'s':''); if(seen[key]!=null){ mergeCells(i,seen[key],true); S.amProg=0; break; } seen[key]=i; } } }
   // golden slimes wait for their introduction, so the first minutes stay simple
   if(!goldenOn&&S.world==='meadow'&&!B&&!CINE&&(S.goldens>0||unlocked('golden'))){ goldenNext-=dt*wxGold(); if(goldenNext<=0) spawnGolden(); }
   bossLogic(dt); hollowLogic(dt); wispLogic(dt); orrLogic(dt); tiaLogic(dt); pumpkinLogic(dt); weatherLogic(dt); cometLogic(dt); runTrack(dt); stewardLogic(dt);
