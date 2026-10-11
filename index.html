@@ -12,7 +12,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<meta name="build" content="3.5">
+<meta name="build" content="3.5.1">
 <script>
 // install as an app: works offline and opens full screen from the home screen
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
@@ -1205,7 +1205,7 @@ function skinOk(i){ const k=SKINS[i]; if(k.cos) return !!(S.cos&&S.cos.owned[k.c
 
 /* realm words: the same systems wear different names after Starfall */
 const REALM={
- meadow:{king:'King',kingFull:'the King',pen:'Pen',penUp:'Pen upgrades',slime:'slime',slimes:'slimes',egg:'Hatch egg',fac:'Goo factories',rush:'Wobble',rushName:'Wobble Rush',golden:'golden slime',jelly:'Royal Jelly',perks:'Royal perks',pedia:'Slimepedia',brand:'Slime<br>Empire'},
+ meadow:{king:'King',kingFull:'the King',pen:'Pen',penUp:'Pen upgrades',slime:'slime',slimes:'slimes',egg:'Hatch egg',fac:'Slimeling',rush:'Wobble',rushName:'Wobble Rush',golden:'golden slime',jelly:'Royal Jelly',perks:'Royal perks',pedia:'Slimepedia',brand:'Slime<br>Empire'},
  sky:{king:'Star King',kingFull:'the Star King',pen:'Nebula',penUp:'Nebula upgrades',slime:'star jelly',slimes:'star jellies',egg:'Hatch star egg',fac:'Celestial bodies',rush:'Supernova',rushName:'Supernova',golden:'shooting star',jelly:'Moon Jelly',perks:'Lunar perks',pedia:'Starpedia',brand:'Star<br>Empire'}
 };
 const RL=()=>REALM[S.realm]||REALM.meadow;
@@ -1300,7 +1300,7 @@ const CHRON=[
  {lv:75,t:'Starfall',hint:'Some nights the stars seem to whisper the King\'s name…',txt:'Once the Slime God is born and an Elder dragon guards the Hollow, the King can finally answer the stars. Starfall lifts him out of the meadow and into the Celestial Realm, where planets dance, comets race and constellations wait to be drawn.',un:'Starfall, once you made the Slime God and raised an Elder dragon'},
  {lv:100,t:'Among the Stars',hint:'At night, the stars arrange themselves into the shape of a crown.',txt:SOON}
 ];
-const GLOOP_TIPS=['Golden slimes are rare. When one shows up, tap it before it fades!','Feed your Slimeling! Every level makes all your slimes stronger.','Tap fast to fill the Wobble meter. A Rush boosts <b>everything</b>.','Every level gives +1% goo. Tap your level to read the Chronicle.','Each new kind of slime boosts goo by 3%, forever.','Merge slimes to unlock new factories and raise their caps.','Look for the gold <b>BEST VALUE</b> tag when you are not sure what to buy.','The ★ button on a factory row doubles that factory.'];
+const GLOOP_TIPS=['Golden slimes are rare. When one shows up, tap it before it fades!','Feed your Slimeling! Every level makes all your slimes stronger.','Tap fast to fill the Wobble meter. A Rush boosts <b>everything</b>.','Every level gives +1% goo. Tap your level to read the Chronicle.','Each new kind of slime boosts goo by 3%, forever.','Every ascension breaks a <b>Crown Seal</b>, so your slimes can grow one size bigger.','Look for the gold <b>BEST VALUE</b> tag when you are not sure what to buy.','Every 10 levels your Slimeling evolves and learns a skill it keeps forever.','Tap your Slimeling on the meadow. It loves a little pat!'];
 const SKY_TIPS=['Line up planets in the <b>Orrery</b> for Conjunctions.','Put your biggest star jellies on different rings. Bigger planets make stronger beams.','A <b>Grand Alignment</b> needs planets on three rings in a row. It gives Stardust!','Spend Stardust on <b>Constellations</b> in the Ascend tab.','Shooting stars streak across the sky. Tap one before it is gone!','Tap fast to charge a <b>Supernova</b>.'];
 const SPIRIT_TIPS=['Keep the flame in the <b>golden zone</b>. Too hot and it flares out.','Feed your hatchlings embers to grow them.','Different elements in the nest make every dragon stronger.','Long expeditions with old dragons bring back the most scales.','Drakes and older can join the Dragon Patrol and roast the King for goo.','Shadow wisps drift through the dark. Catch them for embers.','The Deep hides old relics. They tell the story of this place.','Long expeditions with old dragons sometimes find a <b>Dragon Heart</b>. Three of them can open the sealed door.','Something enormous sleeps behind the sealed door. Every dragon here can feel it.'];
 
@@ -3033,6 +3033,8 @@ function tipText(){
   if(S.realm==='sky'){
     if(S.board.some(v=>v)&&S.orr.rings.some((ring,r)=>ringOpen(r)&&ring.some(v=>!v))) return 'An Orrery ring has an empty slot. Put a star jelly there in the <b>Orrery</b> tab!';
     if(CONST.some(k=>k.stars.some((_,i)=>cstAvail(k,i))&&S.stardust>=cstCost(cstCount(k)))) return 'You have Stardust for a new star. Light it in <b>Constellations</b> (Ascend tab).'; }
+  if(S.realm!=='sky'&&slOn()&&unlocked('fac')&&!S.sl.lv) return 'A little egg is waiting in the <b>Slimeling</b> tab. Go hatch it!';
+  if(S.realm!=='sky'&&slOn()&&S.sl.lv&&S.goo>=slCost(1)*3) return 'Your '+slName()+' looks hungry! Feed it in the <b>Slimeling</b> tab.';
   for(let i=0;i<FACT.length;i++) if(facUnlocked(i)&&S.fac[i]>=facCap(i)) return 'Your '+FACT[i].plural+' hit the cap of '+facCap(i)+'. Merge a bigger '+R.slime+' to raise it!';
   if(researchOpen()&&upgQueue().slice(0,3).some(u=>S.goo>=u.cost)) return 'You can afford new <b>Research</b>. Check the 🔬 tab!';
   if(penUpsOpen()&&PENUPS.some(p=>(!p.show||p.show())&&p.lvl()<p.max&&S.goo>=p.cost())) return 'A pen upgrade is ready! Tap <b>🏡 Upgrades</b> under the '+R.pen+'.';
@@ -4331,7 +4333,7 @@ function drawMoonPhase(c,x,y,r,p){ c.save(); c.fillStyle='#3a3462'; c.beginPath(
 const LORE=[
  {id:'m1',ch:'meadow',n:'The First Request',t:'The very first thing the King ever asked for was a friend. Grandpa Gloop says the meadow has been full of slimes ever since.'},
  {id:'m2',ch:'meadow',n:'Why Slimes Hum',t:'Listen closely at night and you can hear the pen humming. It is the same tune every time. Nobody remembers who taught it to them.'},
- {id:'m3',ch:'meadow',n:'The Goo Puddle',t:'Every factory in the kingdom started as a single puddle. The first one is still there, behind the castle. It is very proud of itself.'},
+ {id:'m3',ch:'meadow',n:'The Goo Puddle',t:'Every slime in the kingdom started as a single puddle. The very first one is still there, behind the castle. It is very proud of itself.'},
  {id:'m4',ch:'meadow',n:'Grandpa Gloop\'s Hat',t:'The hat is older than Gloop. Gloop is older than the castle. The castle is older than anyone wants to talk about.'},
  {id:'m5',ch:'meadow',n:'Golden Slimes',t:'Golden slimes are not a different kind of slime. They are ordinary slimes having an extraordinarily good day.'},
  {id:'m6',ch:'meadow',n:'The Crown',t:'The crown was found at the bottom of the very first puddle. It fit the King perfectly, which is suspicious, because he was a droplet at the time.'},
@@ -4340,7 +4342,7 @@ const LORE=[
  {id:'g3',ch:'guests',n:'The Goo Thief Guild',t:'Every miniboss carries a little card. It says: "Member, Guild of Goo Thieves. Please return to owner if found squished."'},
  {id:'g4',ch:'guests',n:'Artifacts',t:'The Artifacts are not treasure the minibosses brought. They are things they stole from other kings, in other meadows, long ago.'},
  {id:'g5',ch:'guests',n:'A Truce, Almost',t:'Once, a miniboss and the King shared a cup of goo tea. It went well until the miniboss tried to steal the cup.'},
- {id:'c1',ch:'court',n:'The Trial of Hands',t:'The first King to rule without factories built everything by hand. His hands were very tired. He did not have hands.'},
+ {id:'c1',ch:'court',n:'The Trial of Hands',t:'The first King to rule without a little friend at his side built everything by hand. His hands were very tired. He did not have hands.'},
  {id:'c2',ch:'court',n:'The Trial of the Small Pen',t:'"A small pen teaches big patience," says the old royal motto. Nobody liked the old royal motto.'},
  {id:'c3',ch:'court',n:'The Trial of Silence',t:'A King who cannot squeeze out goo must trust his kingdom to do it for him. That, the elders say, is what a crown is for.'},
  {id:'c4',ch:'court',n:'The Trial of the Empty Nest',t:'In the year without eggs, the slimes learned to treasure every single one. They still name their eggs, just in case.'},
@@ -4962,7 +4964,7 @@ function openSettings(){ const s=S.settings, sky=S.realm==='sky';
   '<div class="btnrow"><button class="btn" id="saveNow">Save now</button><button class="btn ghost" id="expBtn">Export save</button><button class="btn ghost" id="impBtn">Import save</button></div>'+
   '<div id="ioBox" hidden><textarea id="ioText" rows="4" spellcheck="false" aria-label="Save code"></textarea><div class="btnrow"><button class="btn ghost" id="ioCopy">Copy</button><button class="btn" id="ioLoad">Load this save</button></div></div>'+
   '<div class="btnrow"><button class="btn danger" id="resetBtn">Reset everything</button></div></section>'+
-  '<p class="note" id="verTxt">Slime Empire 3.5 · saves automatically every 10 seconds.</p>'+
+  '<p class="note" id="verTxt">Slime Empire 3.5.1 · saves automatically every 10 seconds.</p>'+
   '<section class="set" id="devBox" hidden><h3>Test tools</h3><p class="note">For testing only. These skip normal progress. Numbers can be typed like 1e15, 2.5M or 40B.</p>'+
   '<div class="devgrid">'+din('dvGoo','Goo','1e15','Add')+din('dvLv','Level','50','Set')+din('dvXp','XP','1000','Add')+din('dvAsc','Ascensions','10','Set')+din('dvJelly',RL().jelly,'500','Add')+din('dvDust','Stardust','25','Add')+din('dvEmb','Embers','5000','Add')+din('dvScl','Scales','50','Add')+'</div>'+
   '<div class="srow"><span>Time speed</span><div class="seg" id="devSpd">'+[1,10,100].map(v=>'<button data-v="'+v+'" aria-pressed="'+(devSpeed===v)+'">×'+v+'</button>').join('')+'</div></div>'+
