@@ -12,7 +12,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<meta name="build" content="5.0.1">
+<meta name="build" content="5.0.2">
 <script>
 // install as an app: works offline and opens full screen from the home screen
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
@@ -72,6 +72,15 @@ button{font-family:inherit;color:inherit}
 .chip-jelly{font:15px var(--f-display);color:var(--pink);background:rgba(7,5,20,.7);border:2px solid var(--pink);border-radius:999px;padding:3px 10px;white-space:nowrap}
 .chip-scale{color:#ff9a3c;border-color:#ff9a3c}
 .chip-dust{color:#bfe9ff;border-color:#7fe8ff}
+.ascb{width:40px;height:42px;padding:0;border:0;background:none;cursor:pointer;flex:none;-webkit-tap-highlight-color:transparent}
+.ascb canvas{width:40px;height:42px;display:block}
+.ascb[hidden]{display:none}
+#rush.rt1 #rushFill{animation-duration:.35s;box-shadow:0 0 10px #fff,inset 0 2px 0 rgba(255,255,255,.5)}
+#rush.rt2 #rushFill{background:linear-gradient(90deg,#fff6c8,#ffd43f,#ff9a3c,#ffd43f,#fff6c8);background-size:200% 100%;animation-duration:.5s;box-shadow:0 0 12px #ffd43f}
+#app.sky #rush.rt1 #rushFill{background:linear-gradient(90deg,#ffffff,#bff3ff,#7fe8ff,#ffffff);background-size:200% 100%}
+#app.sky #rush.rt2 #rushFill{background:linear-gradient(90deg,#ffffff,#d8a6ff,#ff8ad8,#7fe8ff,#ffffff);background-size:200% 100%;box-shadow:0 0 12px #d8a6ff}
+#rush.rt1 .rl,#rush.rt2 .rl{color:#fff6c8}
+.buff.rt1,.buff.rt2{border-color:#ffd43f;box-shadow:0 0 10px rgba(255,212,63,.6)}
 .icon-btn{width:44px;height:44px;border-radius:50%;border:2px solid var(--ink);background:linear-gradient(180deg,#4a3c94,#2c2463);box-shadow:0 3px 0 var(--ink),inset 0 2px 0 var(--shine);font-size:21px;display:grid;place-items:center;cursor:pointer;padding:0}
 .icon-btn:active{transform:translateY(2px);box-shadow:0 1px 0 var(--ink)}
 
@@ -919,6 +928,7 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
       <div id="jellyChip" class="chip-jelly" hidden title="Royal Jelly">👑 <span id="jellyAmt">0</span></div>
       <div id="scaleChip" class="chip-jelly chip-scale" hidden title="Dragon Scales">🐉 <span id="scaleAmt">0</span></div>
       <div id="dustChip" class="chip-jelly chip-dust" hidden title="Stardust">✨ <span id="dustAmt">0</span></div>
+      <button id="ascBadge" class="ascb" hidden aria-label="Your ascensions. Opens the Crown Road"><canvas id="abCv" width="84" height="88"></canvas></button>
       <button id="lvlBtn" class="lvl" aria-label="Your level. Opens the Chronicle"><span class="lv-n" id="lvlTxt">Lv 1</span><span class="lv-bar"><i id="lvlBar"></i></span></button>
       <button id="btnSettings" class="icon-btn" aria-label="Settings">⚙️</button>
     </div>
@@ -1418,6 +1428,7 @@ A('fv','Growing Up','Your Slimeling evolves for the first time.','🌱',()=>S.sl
 A('fs','All Grown Up','Your Slimeling evolves three times.','🎓',()=>S.slEvo>=3||S.fac[11]>0);
 A('slp','Head Pats','Pet your Slimeling 100 times.','🤗',()=>S.slPets>=100);
 A('cmb','Chain Reaction','Reach a ×10 merge combo.','🔗',()=>S.bestCombo>=10);
+A('rush4','Over the Rainbow','See all four rare Rushes: Rainbow Rush, Crown Rush, Hypernova and Quasar.','🌈',()=>!!(S.tut&&S.tut.rt_m1&&S.tut.rt_m2&&S.tut.rt_s1&&S.tut.rt_s2));
 A('mst','Master Merger','Earn 30 mastery stars.','⭐',()=>mastTotal()>=30);
 [[1,'Better Together','🔗'],[100,'Merge Maniac','⛓️'],[1000,'Merge Master','🧩']].forEach((a,i)=>A('m'+i,a[1],'Merge slimes '+a[0]+(a[0]>1?' times.':' time.'),a[2],()=>S.merges>=a[0]));
 [[5,'Slime Scholar','🐣'],[10,'Slime Professor','🦄'],[15,'Slime Sage','🐉'],[20,'Slime Creator','👼'],[25,'Slime Legend','🏺'],[30,'Slime God','🌈']].forEach((a,i)=>A('s'+i,a[1],'Create a Lv.'+a[0]+' slime.',a[2],()=>Math.max(S.maxSpecies,S.skyMax)>=a[0]));
@@ -1764,7 +1775,7 @@ function computeG(){
   const pal=meadowEco()?Math.min(MB.palsMax,1+M.penPals*Math.sqrt(power)):1+M.penPals*Math.sqrt(power); G.power=power; let tf=0;
   const fon=false; for(let i=0;i<FACT.length;i++){ const v=S.fac[i]&&fon?FACT[i].prod*S.fac[i]*facMult(i)*pal*M.all*(M.trialFac||1):0; G.fac[i]=v; tf+=v; }
   G.slm=slPen(); G.pen=penRaw*M.pen*(1+M.feeding*feedK()*totalFac)*G.slm*M.all*wxPen(); G.penRaw=penRaw; G.facTot=tf; G.base=tf+G.pen; G.pal=pal;
-  G.mult=(rushActive()?M.rushPow:1)*buffMult('frenzy')*buffMult('potion')*buffMult('star')*buffMult('boost2')*(kingAwake()?AWAKE_MULT:1); G.total=G.base*G.mult; G.totalFac=totalFac; G.slimes=slimes;
+  G.mult=(rushActive()?rushPowNow():1)*buffMult('frenzy')*buffMult('potion')*buffMult('star')*buffMult('boost2')*(kingAwake()?AWAKE_MULT:1); G.total=G.base*G.mult; G.totalFac=totalFac; G.slimes=slimes;
 }
 function facEach(i){ return FACT[i].prod*facMult(i)*(G.pal||1)*M.all; }
 // what buying n more of factory i really adds to goo/s right now: milestones, Factory Feeding and active boosts included
@@ -1775,7 +1786,7 @@ function upgGain(u,noBoost){ const e=u.e, m=noBoost?1:(G.mult||1); if(e.fac!=nul
 // every tap is worth at least 10% of your goo/s, so tapping matters all game
 function tapBase(){ return M.tap*M.all+(.1+M.tapPct)*G.base; }
 // a Rush and Tap Mania do not multiply each other: taps use whichever is bigger
-function tapBoost(){ return Math.max(rushActive()?M.rushPow:1,buffMult('mania')); }
+function tapBoost(){ return Math.max(rushActive()?rushPowNow():1,buffMult('mania')); }
 function tapValue(){ return tapBase()*tapBoost()*streakMult(); }
 // active play: the King stays awake (×1.5 goo) for a minute after you tap or merge; steady tapping builds a streak
 const AWAKE_MULT=1.5, AWAKE_SEC=60, STREAK=[0,12,35,70,120];
@@ -3019,12 +3030,13 @@ function drawMeadow(c,w,h,t,dt){
   drawSlimeling(c,k,t,dt);
   drawPatrol(c,k,t,dt,pats,true);
   if(rush){ c.save(); c.translate(k.cx,k.by-k.h*.5); c.rotate(t*.6); const R=Math.max(w,h); for(let i=0;i<12;i++){ c.fillStyle=i%2?'rgba(255,210,63,.18)':'rgba(255,111,181,.16)'; c.beginPath(); c.moveTo(0,0); c.arc(0,0,R,i*TAU/12,(i+.5)*TAU/12); c.closePath(); c.fill(); } c.restore(); }
+  drawRushTier(c,k,w,h,t,false);
   if(buffMult('frenzy')>1){ const fg=c.createRadialGradient(k.cx,k.by-k.h*.5,k.h*.3,k.cx,k.by-k.h*.5,k.h*1.4); fg.addColorStop(0,'rgba(255,210,63,.45)'); fg.addColorStop(1,'rgba(255,210,63,0)'); c.fillStyle=fg; c.fillRect(0,0,w,h); if(Math.random()<dt*8) addSparks(k.cx+rand(-k.w*.6,k.w*.6),k.by-rand(0,k.h*1.2),1,'#FFD23F'); }
   c.fillStyle='rgba(10,4,25,.3)'; c.beginPath(); c.ellipse(k.cx,k.by+k.h*.06,k.w*.66,k.h*.1,0,0,TAU); c.fill();
   c.fillStyle='#ff6fb5'; c.strokeStyle=INK; c.lineWidth=2.5; c.beginPath(); c.ellipse(k.cx,k.by+k.h*.04,k.w*.6,k.h*.11,0,0,TAU); c.fill(); c.stroke(); c.fillStyle='#ff9fd0'; c.beginPath(); c.ellipse(k.cx,k.by+k.h*.02,k.w*.52,k.h*.06,0,0,TAU); c.fill();
   c.fillStyle='#ffd43f'; for(const s of [-1,1]){ c.beginPath(); c.arc(k.cx+s*k.w*.58,k.by+k.h*.08,k.w*.035,0,TAU); c.fill(); }
   if(B) drawBossScene(c,k,t,dt); else drawKing(c,k,t,dt,rush);
-  drawPatrol(c,k,t,dt,pats,false); drawTiaKing(c,k,w,h,t,dt); drawReqBubble(c,k,t); drawWeatherFront(c,w,h,t,dt);
+  drawPatrol(c,k,t,dt,pats,false); drawTiaKing(c,k,w,h,t,dt); drawReqBubble(c,k,t); drawWeatherFront(c,w,h,t,dt); drawRushTier(c,k,w,h,t,true);
 }
 
 /* the Celestial Realm */
@@ -3094,12 +3106,13 @@ function drawSky(c,w,h,t,dt){
   if(rush){ c.save(); c.translate(k.cx,k.by-k.h*.5); c.rotate(t*.5); const R=Math.max(w,h); for(let i=0;i<16;i++){ c.fillStyle=i%2?'rgba(255,255,255,.13)':'rgba(127,232,255,.14)'; c.beginPath(); c.moveTo(0,0); c.arc(0,0,R,i*TAU/16,(i+.5)*TAU/16); c.closePath(); c.fill(); } c.restore(); }
   if(ST.nova){ ST.nova.t+=dt; const nt=ST.nova.t; if(nt>1.2) ST.nova=null; else { c.save(); c.strokeStyle='rgba(255,255,255,'+(1-nt/1.2)+')'; c.lineWidth=10*(1-nt/1.2)+2; c.beginPath(); c.arc(k.cx,k.by-k.h*.5,nt*Math.max(w,h)*.9,0,TAU); c.stroke(); c.restore(); } }
   if(buffMult('frenzy')>1||buffMult('star')>1){ const fg=c.createRadialGradient(k.cx,k.by-k.h*.5,k.h*.3,k.cx,k.by-k.h*.5,k.h*1.5); fg.addColorStop(0,'rgba(191,243,255,.35)'); fg.addColorStop(1,'rgba(191,243,255,0)'); c.fillStyle=fg; c.fillRect(0,0,w,h); }
+  drawRushTier(c,k,w,h,t,false);
   // the King's shadow on the island and a faint landing ring of starlight
   const kb=Math.sin(t*1.3)*4, sh=1-kb/40; c.fillStyle='rgba(5,3,20,.32)'; c.beginPath(); c.ellipse(k.cx,I.y,k.w*.44*sh,I.ry*.62*sh,0,0,TAU); c.fill();
   c.save(); c.globalAlpha=.4+.2*Math.sin(t*2); c.strokeStyle='#bff3ff'; c.lineWidth=1.5; c.beginPath(); c.ellipse(k.cx,I.y,k.w*.6,I.ry*.9,0,0,TAU); c.stroke(); c.restore();
   drawSlimeling(c,k,t,dt); drawStatue(c,t);
   if(B) drawBossScene(c,k,t,dt); else drawKing(c,k,t,dt,rush);
-  drawOrrery(c,k,t,true); drawConjFx(c,k,dt); drawPatrol(c,k,t,dt,pats,false); drawTiaKing(c,k,w,h,t,dt); drawComet(c,t); drawReqBubble(c,k,t);
+  drawOrrery(c,k,t,true); drawConjFx(c,k,dt); drawPatrol(c,k,t,dt,pats,false); drawTiaKing(c,k,w,h,t,dt); drawComet(c,t); drawReqBubble(c,k,t); drawRushTier(c,k,w,h,t,true);
 }
 
 function drawTrans(c,w,h,dt){
@@ -3159,13 +3172,13 @@ function flyGoo(x,y,n,cls){ if(eco()||RM||!S.settings.particles||!ui.gooIcon) re
     let fin=false; const done=()=>{ if(fin) return; fin=true; d.remove(); flyN--; pulseIcon(); }; a.onfinish=done; a.oncancel=done; setTimeout(done,1500); } }
 let pulseAt=0;
 function pulseIcon(){ const now=nowT(); if(now-pulseAt<120) return; pulseAt=now; const g=ui.gooIcon; g.classList.remove('pulse'); void g.offsetWidth; g.classList.add('pulse'); }
-function startRush(){ const dur=RUSH_SEC*M.rushDur, sky=S.realm==='sky'; goalAdd('rush'); S.rushUntil=nowT()+dur*1000; S.rush=100; S.rushes++; gainXP(100);
+function startRush(){ const tier=S.rushes>=5||ui.devRush?rollRushTier():0, sky=S.realm==='sky', dur=Math.max(RUSH_SEC*M.rushDur,tier?RUSH_T[tier].sec:0); goalAdd('rush'); S.rushUntil=nowT()+dur*1000; S.rushDurNow=dur; S.rushTier=tier; S.rushSpecUntil=tier?nowT()+RUSH_T[tier].sec*1000:0; S.rush=100; S.rushes++; gainXP(100);
   if(sky){ sfx('nova'); ST.nova={t:0}; ST.flash=.55; ST.flashCol='#e6fbff'; } else sfx('rush');
-  ST.shake=Math.max(ST.shake,9); toast('<span class="ti">'+(sky?'💥':'🌈')+'</span><span><b>'+RL().rushName.toUpperCase()+'!</b> Everything ×'+M.rushPow+' for '+Math.round(dur)+'s</span>','rush'); }
+  ST.shake=Math.max(ST.shake,9); if(tier){ rushTierStart(tier,dur); return; } toast('<span class="ti">'+(sky?'💥':'🌈')+'</span><span><b>'+RL().rushName.toUpperCase()+'!</b> Everything ×'+M.rushPow+' for '+Math.round(dur)+'s</span>','rush'); }
 function addBuff(k,name,m,sec){ S.buffs=S.buffs.filter(b=>b.k!==k); S.buffs.push({k,name,m,until:nowT()+sec*1000}); }
 function emptyCells(){ const r=[], n=penSize(); for(let i=0;i<n;i++) if(!S.board[i]) r.push(i); return r; }
 const hatching={}; const popSet=new Set();
-function spawnEgg(level,free,delay){ const e=emptyCells(); if(!e.length) return false; const i=e[0]; const sp=surpriseRoll(); if(sp==='gold') level=Math.max(level,Math.min(level+2,topL())); else if(sp==='myst') level=clamp(level+Math.floor(rand(-1,4)),1,Math.max(level,topL()));
+function spawnEgg(level,free,delay){ const e=emptyCells(); if(!e.length) return false; const i=e[0]; if(rushTier()) level=Math.max(level,Math.min(level+1,topL()-1)); const sp=surpriseRoll(); if(sp==='gold') level=Math.max(level,Math.min(level+2,topL())); else if(sp==='myst') level=clamp(level+Math.floor(rand(-1,4)),1,Math.max(level,topL()));
   S.board[i]=level; S.shiny[i]=0; if(S.gemc) S.gemc[i]=sp==='gem'?1:0; rollShiny(i); hatching[i]=nowT()+600+(delay||0); renderBoard(); if(sp) surpriseFx(i,sp,level); if(S.world!=='hollow'&&(!free||tab==='pen')) sfx('egg'); discover(level); return true; }
 function buyEgg(){ if(!emptyCells().length){ toast('<span class="ti">🏡</span><span>The '+RL().pen.toLowerCase()+' is full. Merge '+RL().slimes+' to make room!</span>'); nope(ui.eggBtn); return; }
   if(S.bonusEggs>0){ S.bonusEggs--; spawnEgg(Math.min(topL()-1,effEgg()+2),false,0); goalAdd('hatch'); uiTick(); return; }
@@ -4553,8 +4566,9 @@ function pevStart(k){ PEV.on=k; PEV.until=nowT()+(k==='rain'?20000:30000); sfx('
     toast('<span class="ti">💤</span><span><b>Sleepy Pen!</b><br>A few '+RL().slimes+' dozed off. Tap them in the '+RL().pen.toLowerCase()+' to wake them for a burst of '+curName()+'!</span>','gold'); } }
 function pevEnd(){ PEV.on=null; PEV.rain=[]; if(PEV.sleep.size){ PEV.sleep.clear(); renderBoard(); } }
 function drawRain(c,t,dt){ if(!PEV.rain.length) return; const sky=S.realm==='sky'; for(let i=PEV.rain.length-1;i>=0;i--){ const e=PEV.rain[i]; e.y+=e.vy*dt; if(e.y>ST.h+30){ PEV.rain.splice(i,1); continue; }
-  c.save(); c.translate(e.x,e.y); c.rotate(Math.sin(t*3+e.ph)*.3); const g=c.createRadialGradient(0,0,0,0,0,e.r*1.8); g.addColorStop(0,'rgba(255,246,200,.45)'); g.addColorStop(1,'rgba(255,246,200,0)'); c.fillStyle=g; c.fillRect(-e.r*1.8,-e.r*1.8,e.r*3.6,e.r*3.6); (sky?drawStarEgg:drawEgg)(c,0,0,e.r*1.2,e.r*1.5); c.restore(); } }
+  c.save(); c.translate(e.x,e.y); c.rotate(Math.sin(t*3+e.ph)*.3); const g=c.createRadialGradient(0,0,0,0,0,e.r*1.8); g.addColorStop(0,'rgba(255,246,200,.45)'); g.addColorStop(1,'rgba(255,246,200,0)'); c.fillStyle=g; c.fillRect(-e.r*1.8,-e.r*1.8,e.r*3.6,e.r*3.6); if(e.g) drawRushDrop(c,e.r,sky); else (sky?drawStarEgg:drawEgg)(c,0,0,e.r*1.2,e.r*1.5); c.restore(); } }
 function rainTap(x,y){ for(let i=0;i<PEV.rain.length;i++){ const e=PEV.rain[i]; if(Math.hypot(x-e.x,y-e.y)<e.r*1.7){ PEV.rain.splice(i,1); gainXP(5);
+    if(e.g){ computeG(); const v=G.total*3+5; earn(v); addFloat(x,y-20,'+'+fmt(v),S.realm==='sky'?'#e6c8ff':'#ffd43f',24); sfx('coin'); addSparks(x,y,12,S.realm==='sky'?'#e6c8ff':'#ffd43f'); return true; }
     if(spawnEgg(effEgg(),true,0)){ addFloat(x,y-20,'🥚 Caught!','#fff6c8',22); sfx('egg'); } else { computeG(); const v=G.base*15+5; earn(v); addFloat(x,y-20,'+'+fmt(v),'#98f25a',22); sfx('coin'); } addSparks(x,y,10,'#fff6c8'); return true; } } return false; }
 // a gem or a nap moves with its slime when you drag it to another cell
 function cellMove(i,j,swap){ const g=S.gemc; if(g){ const t=g[j]; g[j]=g[i]; g[i]=swap?t:0; } if(PEV.sleep.size){ const a=PEV.sleep.has(i), b=PEV.sleep.has(j); PEV.sleep.delete(i); PEV.sleep.delete(j); if(a) PEV.sleep.add(j); if(b&&swap) PEV.sleep.add(i); } }
@@ -4599,6 +4613,75 @@ function openHall(p,back){ const d=p?{me:false,name:p.name||'A kingdom',lvl:+p.l
     h+='<h3 class="sec" style="font-size:16px">The King\'s journey · '+pages.length+' pages</h3>'+(pages.length?pages.map(([kind,s])=>'<details class="jpage"><summary>'+(kind==='star'?'⭐ ':'🌙 ')+s.n+'</summary>'+storyHtml(kind,s.k)+'</details>').join(''):'<p class="note">Every star and moon you light adds a page to the King\'s story.</p>'); }
   if(back) h+='<div class="btnrow" style="justify-content:center"><button class="btn ghost" id="hallBack">← Back to friends</button></div>';
   openModal(h); ui.modalBody.onclick=e=>{ if(e.target.closest('#hallBack')){ sfx('click'); openFriends(); } }; }
+
+/* ================= 5.0.2: rare Rushes ================= */
+// now and then a Wobble Rush (or Supernova) is a rare one. Its special part always comes first (40 or 45 s);
+// any extra Rush time from perks and decrees after that is a normal Rush. 8 plain Rushes in a row guarantee a rare one
+const RUSH_T=[null,
+ {n:['Rainbow Rush','Hypernova'],ico:['🌈','💫'],sec:40,m:1.5,p:1/6,col:['#ff8ad8','#bff3ff']},
+ {n:['Crown Rush','Quasar'],ico:['👑','🌌'],sec:45,m:2.5,p:1/40,col:['#ffd43f','#d8a6ff']}];
+const RUSH_PITY=8, RFX={t0:0,acc:0};
+function rollRushTier(){ let t=0; if(ui.devRush){ t=ui.devRush; ui.devRush=0; } else { const r=Math.random(); t=r<RUSH_T[2].p?2:r<RUSH_T[2].p+RUSH_T[1].p?1:0; if(!t&&(S.rushPity||0)>=RUSH_PITY) t=1; } S.rushPity=t?0:(S.rushPity||0)+1; return t; }
+function rushTier(){ return rushActive()&&nowT()<(S.rushSpecUntil||0)?(S.rushTier||0):0; }
+const rushPowNow=()=>M.rushPow*[1,1.5,2.5][rushTier()];
+const rushPowTxt=()=>String(Math.round(rushPowNow()*10)/10);
+function rushTierStart(tier,dur){ const sky=S.realm==='sky', T=RUSH_T[tier], i=sky?1:0, key='rt_'+(sky?'s':'m')+tier, first=!S.tut[key]; S.tut[key]=1;
+  ST.banner={txt:T.n[i].toUpperCase()+'!',col:T.col[i],life:0,max:2.6}; ST.flash=.75; ST.flashCol=T.col[i]; ST.shake=Math.max(ST.shake,tier===2?16:12); RFX.t0=nowT(); RFX.acc=0;
+  sfx(tier===2?(sky?'starfall':'mythic'):'discover');
+  const what=curName()+' ×'+rushPowTxt()+' for '+T.sec+'s, and '+(sky?'star eggs':'eggs')+' hatch 1 size bigger'+(tier===2?(sky?'. Shooting stars rain down: tap them!':'. Golden drops rain down: tap them!'):'.')+(dur>T.sec+.5?' Then a normal '+RL().rushName+' for the rest.':'');
+  toast('<span class="ti">'+T.ico[i]+'</span><span><b>'+T.n[i].toUpperCase()+'!</b> '+what+(first?'<br><i>'+(tier===2?'Very rare: about 1 '+RL().rushName+' in 40!':'About 1 '+RL().rushName+' in 6 is a '+T.n[i]+'.')+'</i>':'')+'</span>','gold'); }
+// a Crown Rush rains golden drops, a Quasar rains shooting stars (both ride on the pen events' falling-egg code)
+function rushFxLogic(dt){ if(rushTier()!==2||S.world!=='meadow'||!ST.w) return; RFX.acc+=dt; if(RFX.acc>1.1){ RFX.acc=0; PEV.rain.push({x:rand(ST.w*.08,ST.w*.92),y:-24,vy:rand(70,110),r:Math.max(13,ST.h*.045),ph:Math.random()*6,g:1}); } }
+function drawRushDrop(c,r,sky){ if(sky){ const g=c.createLinearGradient(0,-r*3.2,0,0); g.addColorStop(0,'rgba(216,166,255,0)'); g.addColorStop(1,'rgba(230,200,255,.9)'); c.strokeStyle=g; c.lineWidth=r*.5; c.lineCap='round'; c.beginPath(); c.moveTo(0,-r*3.2); c.lineTo(0,0); c.stroke(); c.fillStyle='#fff'; star4(c,0,0,r*.95); c.fillStyle='#e6c8ff'; star4(c,0,0,r*.45); return; }
+  const g=c.createRadialGradient(-r*.3,-r*.2,r*.1,0,0,r*1.1); g.addColorStop(0,'#fff6c8'); g.addColorStop(.5,'#ffd43f'); g.addColorStop(1,'#e09a10'); c.fillStyle=g; c.strokeStyle=INK; c.lineWidth=2;
+  c.beginPath(); c.moveTo(0,-r*1.15); c.bezierCurveTo(r*.95,-r*.1,r*.85,r*.85,0,r*.85); c.bezierCurveTo(-r*.85,r*.85,-r*.95,-r*.1,0,-r*1.15); c.fill(); c.stroke();
+  c.fillStyle='rgba(255,255,255,.75)'; c.beginPath(); c.ellipse(-r*.28,r*.08,r*.14,r*.26,-.4,0,TAU); c.fill(); }
+// the look of a rare Rush: behind the King (front=false) and over the whole stage (front=true)
+function drawRushTier(c,k,w,h,t,front){ const rt=rushTier(); if(!rt||S.world!=='meadow') return; const sky=S.realm==='sky', cx=k.cx, cy=k.by-k.h*.5, R=Math.hypot(w,h), el=(nowT()-RFX.t0)/1000, ease=Math.min(1,el/.6);
+  if(!front){
+    if(!sky&&rt===1){ c.save(); c.translate(cx,cy); c.rotate(-t*.45); for(let i=0;i<14;i++){ const a=i*TAU/14; c.fillStyle='hsla('+Math.round((i*360/14+t*90)%360)+',95%,65%,'+(.17*ease)+')'; c.beginPath(); c.moveTo(0,0); c.arc(0,0,R,a,a+TAU/28); c.closePath(); c.fill(); } c.restore();
+      c.save(); for(let i=0;i<3;i++){ const rr=k.h*(.75+i*.22)+Math.sin(t*3+i)*4; c.strokeStyle='hsla('+Math.round((t*140+i*120)%360)+',95%,70%,'+(.5*ease)+')'; c.lineWidth=5-i; c.beginPath(); c.ellipse(cx,cy+k.h*.08,rr*1.15,rr*.8,0,0,TAU); c.stroke(); } c.restore(); }
+    else if(!sky){ c.save(); const gl=c.createRadialGradient(cx,cy,k.h*.2,cx,cy,k.h*2); gl.addColorStop(0,'rgba(255,220,90,'+(.55*ease)+')'); gl.addColorStop(1,'rgba(255,220,90,0)'); c.fillStyle=gl; c.fillRect(0,0,w,h);
+      c.translate(cx,cy); c.rotate(t*.18); for(let i=0;i<10;i++){ c.rotate(TAU/10); const bg=c.createLinearGradient(0,0,R,0); bg.addColorStop(0,'rgba(255,246,200,'+(.55*ease)+')'); bg.addColorStop(1,'rgba(255,212,63,0)'); c.fillStyle=bg; c.beginPath(); c.moveTo(0,-4); c.lineTo(R,-R*.05); c.lineTo(R,R*.05); c.lineTo(0,4); c.closePath(); c.fill(); } c.restore(); }
+    else if(rt===1){ c.save(); const gl=c.createRadialGradient(cx,cy,k.h*.2,cx,cy,k.h*1.8); gl.addColorStop(0,'rgba(230,251,255,'+(.5*ease)+')'); gl.addColorStop(1,'rgba(127,232,255,0)'); c.fillStyle=gl; c.fillRect(0,0,w,h);
+      for(let j=0;j<3;j++){ const p=((el/.9)+j/3)%1; c.strokeStyle='rgba(191,243,255,'+((1-p)*.7*ease)+')'; c.lineWidth=1+4*(1-p); c.beginPath(); c.ellipse(cx,cy,k.w*.45+p*R*.45,(k.w*.45+p*R*.45)*.42,0,0,TAU); c.stroke(); } c.restore(); }
+    else { c.save(); const gl=c.createRadialGradient(cx,cy,k.h*.1,cx,cy,k.h*2.2); gl.addColorStop(0,'rgba(255,230,255,'+(.5*ease)+')'); gl.addColorStop(.4,'rgba(168,110,255,'+(.25*ease)+')'); gl.addColorStop(1,'rgba(90,40,180,0)'); c.fillStyle=gl; c.fillRect(0,0,w,h);
+      for(let arm=0;arm<2;arm++) for(let i=0;i<70;i++){ const a=i*.17+arm*Math.PI+t*.7, rr=k.h*.3+i*R*.0075, q=1-i/70; c.globalAlpha=.75*q*ease; c.fillStyle='hsl('+Math.round(260+i*1.4)+',95%,'+Math.round(70+q*20)+'%)'; c.beginPath(); c.arc(cx+Math.cos(a)*rr*1.3,cy+Math.sin(a)*rr*.5,1+q*2.6,0,TAU); c.fill(); }
+      c.globalAlpha=ease*(.55+.25*Math.sin(t*9)); for(const s of [-1,1]){ const jg=c.createLinearGradient(cx,cy,cx,cy+s*h); jg.addColorStop(0,'rgba(255,255,255,.9)'); jg.addColorStop(1,'rgba(216,166,255,0)'); c.fillStyle=jg; c.beginPath(); c.moveTo(cx-k.w*.06,cy); c.lineTo(cx+k.w*.06,cy); c.lineTo(cx+k.w*.015,cy+s*h); c.lineTo(cx-k.w*.015,cy+s*h); c.closePath(); c.fill(); } c.restore(); }
+    return; }
+  // over the stage: a glowing frame in the Rush's colors, and sparkles around the King
+  c.save(); const pa=(.55+.3*Math.sin(t*5))*ease; let col;
+  if(!sky&&rt===1){ col=c.createLinearGradient(0,0,w,h); for(let i=0;i<=6;i++) col.addColorStop(i/6,'hsl('+Math.round((i*60+t*120)%360)+',95%,65%)'); }
+  else col=sky?(rt===1?'#bff3ff':'#d8a6ff'):'#ffd43f';
+  c.globalAlpha=pa; c.strokeStyle=col; c.lineWidth=10; c.strokeRect(5,5,w-10,h-10); c.globalAlpha=pa*.4; c.lineWidth=24; c.strokeRect(12,12,w-24,h-24); c.restore();
+  if(S.settings.particles&&Math.random()<.35){ const a=Math.random()*TAU, rr=k.w*(.5+Math.random()*.4); ST.parts.push({x:cx+Math.cos(a)*rr,y:cy+Math.sin(a)*rr*.7,vx:rand(-20,20),vy:rand(-70,-30),r:rand(1.6,3.2),col:!sky&&rt===1?'hsl('+Math.round(Math.random()*360)+',95%,70%)':sky?(rt===1?'#e6fbff':'#e6c8ff'):'#fff3a8',life:0,max:rand(.7,1.3),g:-20,glow:true}); } }
+
+/* ================= 5.0.2: the ascension badge (a waxing moon among the stars) ================= */
+// meadow: a medal that climbs bronze, silver, gold, ruby, amethyst, then an animated rainbow crown at 12.
+// sky: a moon that fills a little more with every Eclipse, full at Eclipse 8
+const AB_TIERS=[[2,['#f6c08a','#b8692a','#5e3210']],[5,['#ffffff','#c9d3e0','#5f6d82']],[8,['#fff3a8','#ffd43f','#9a6a08']],[10,['#ffc0cb','#ff4f6d','#7a0e26']],[11,['#e6c8ff','#a66bff','#3f1a7a']]];
+function drawAscBadge(t){ const cv=ui.abCv; if(!cv||ui.ascBadge.hidden) return; const sky=S.realm==='sky', n=sky?S.skyAsc:S.ascensions, top=sky?n>=SKY_ECL:n>=MEADOW_ASC, key=(sky?'s':'m')+n;
+  if(!top&&key===ui.abKey) return; ui.abKey=key;
+  const c=cv.getContext('2d'), W=cv.width, H=cv.height, x=W/2, y=H*.44, r=W*.42; c.clearRect(0,0,W,H); c.save();
+  if(sky){ const f=Math.min(n,SKY_ECL)/SKY_ECL, rm=r*.78;
+    if(top){ const hg=c.createRadialGradient(x,y,rm*.8,x,y,r*1.15); hg.addColorStop(0,'rgba(255,246,200,'+(.55+.25*Math.sin(t*3))+')'); hg.addColorStop(1,'rgba(255,246,200,0)'); c.fillStyle=hg; c.fillRect(0,0,W,H); }
+    c.fillStyle='#121a4a'; c.strokeStyle=top?'#fff6c8':'#7f9cff'; c.lineWidth=3; c.beginPath(); c.arc(x,y,r,0,TAU); c.fill(); c.stroke();
+    c.fillStyle='rgba(230,240,255,.7)'; for(const [sx,sy] of [[-.62,-.5],[.66,-.42],[-.7,.38],[.6,.55],[.1,-.82]]) c.fillRect(x+sx*r,y+sy*r,2,2);
+    c.fillStyle='#29306a'; c.beginPath(); c.arc(x,y,rm,0,TAU); c.fill();
+    if(f>0){ const lg=c.createLinearGradient(x-rm,y-rm,x+rm,y+rm); lg.addColorStop(0,'#ffffff'); lg.addColorStop(1,'#cfd8ff'); c.fillStyle=lg; const kx=Math.cos(f*Math.PI);
+      c.beginPath(); c.arc(x,y,rm,-Math.PI/2,Math.PI/2); c.closePath(); c.fill();
+      if(kx>0){ c.fillStyle='#29306a'; c.beginPath(); c.ellipse(x,y,rm*kx,rm,0,0,TAU); c.fill(); } else { c.beginPath(); c.ellipse(x,y,rm*-kx,rm,0,0,TAU); c.fill(); }
+      c.fillStyle='rgba(120,135,220,.35)'; for(const [px,py,pr] of [[.3,-.2,.16],[.42,.32,.11],[-.1,.45,.09]]){ if(f<.5&&px<0) continue; c.beginPath(); c.arc(x+px*rm,y+py*rm,pr*rm,0,TAU); c.fill(); } } }
+  else { const tr=AB_TIERS.find(a=>n<=a[0]), cols=tr?tr[1]:null;
+    if(top){ c.shadowColor='#fff3a8'; c.shadowBlur=12+6*Math.sin(t*4); for(let i=0;i<24;i++){ c.strokeStyle='hsl('+Math.round((i*15+t*140)%360)+',95%,62%)'; c.lineWidth=r*.3; c.beginPath(); c.arc(x,y,r*.85,i*TAU/24,(i+1.15)*TAU/24); c.stroke(); } c.shadowBlur=0; }
+    else { const g=c.createLinearGradient(x,y-r,x,y+r); g.addColorStop(0,cols[0]); g.addColorStop(.55,cols[1]); g.addColorStop(1,cols[2]); c.fillStyle=g; c.beginPath(); c.arc(x,y,r,0,TAU); c.fill(); }
+    c.strokeStyle='#0a0618'; c.lineWidth=3; c.beginPath(); c.arc(x,y,r,0,TAU); c.stroke();
+    const ig=c.createRadialGradient(x,y-r*.3,r*.1,x,y,r*.7); ig.addColorStop(0,'#4a3c94'); ig.addColorStop(1,'#1c1640'); c.fillStyle=ig; c.beginPath(); c.arc(x,y,r*.68,0,TAU); c.fill();
+    // a little crown on top of the inner disc
+    const cw=r*.75, cb=y-r*.12, ch=r*.34; c.fillStyle=top?'#fff3a8':cols[0]; c.strokeStyle='#0a0618'; c.lineWidth=2; c.beginPath(); c.moveTo(x-cw/2,cb); c.lineTo(x-cw/2,cb-ch*.55); c.lineTo(x-cw/4,cb-ch*.25); c.lineTo(x,cb-ch); c.lineTo(x+cw/4,cb-ch*.25); c.lineTo(x+cw/2,cb-ch*.55); c.lineTo(x+cw/2,cb); c.closePath(); c.fill(); c.stroke(); }
+  c.font='30px "Lilita One","Arial Rounded MT Bold",sans-serif'; c.textAlign='center'; c.textBaseline='middle'; c.lineJoin='round'; c.lineWidth=7; c.strokeStyle='#0a0618'; const ny=sky?H*.86:y+r*.3; c.strokeText(String(n),x,ny); c.fillStyle=top?'#fff3a8':'#ffffff'; c.fillText(String(n),x,ny); c.restore(); }
+function openAscBadge(){ sfx('click'); if(S.world!=='meadow'||!ui.tabMap||!ui.tabMap.asc){ toast('<span class="ti">'+(S.realm==='sky'?'🌙':'👑')+'</span><span>'+(S.realm==='sky'?'Eclipses: <b>'+S.skyAsc+'/'+SKY_ECL+'</b>. The Moon Road is in the Eclipse tab.':'Ascensions: <b>'+S.ascensions+'/'+MEADOW_ASC+'</b>. The Crown Road is in the Ascend tab.')+'</span>'); return; }
+  setTab('asc'); setTimeout(()=>{ if(ui.crownBox&&!ui.crownBox.hidden) ui.crownBox.scrollIntoView({block:'center',behavior:'smooth'}); },60); }
 
 /* ================= introductions: one new thing at a time ================= */
 // new features and tips wait their turn, with breathing room between them (most of all in the first 15 minutes)
@@ -5754,6 +5837,7 @@ function buildUI(){
   // 5.0.1: the Orrery tab has two views: the rings, and the Night Sky (constellations) that its Stardust lights
   ui.orrMain=$('#orrMain'); ui.orrSub='orr'; ui.orrDot=$('#orrDot');
   $('#orrSeg').onclick=e=>{ const b=e.target.closest('[data-o]'); if(!b||b.dataset.o===ui.orrSub) return; sfx('click'); ui.orrSub=b.dataset.o; for(const x of $('#orrSeg').children) x.setAttribute('aria-pressed',x.dataset.o===ui.orrSub); ui.orrKey=null; ui.cstKey=null; CS.sel=null; uiTick(); };
+  ui.ascBadge=$('#ascBadge'); ui.abCv=$('#abCv'); ui.ascBadge.onclick=openAscBadge;
   ui.mapBtn.onclick=()=>openMap(); $('#rmClose').onclick=()=>{ sfx('click'); closeMap(); }; $('#rmHall').onclick=()=>{ sfx('click'); closeMap(); openHall(); }; RMAP.cv.addEventListener('pointerdown',mapTap);
   ui.rmCard.onclick=e=>{ const b=e.target.closest('#rmGo'); if(!b) return; sfx('click'); if(b.dataset.go==='starfall'){ closeMap(); askStarfall(); } else travelTo(b.dataset.go); };
   window.addEventListener('resize',()=>{ if(RMAP.on) mapResize(); });
@@ -6129,7 +6213,7 @@ function uiTick(){
   if(S.world==='rift'){ if(ui.buffHtml!==''){ ui.buffHtml=''; ui.buffs.innerHTML=''; } ui.rush.hidden=true; const Rr=S.rift; setBadge('rup',tab!=='rup'&&RUPS.some(p=>rup(p.k)<p.max&&Rr.shards>=p.cost(rup(p.k)))?'!':0); setBadge('squad',tab!=='squad'&&Rr.stuck?'!':0); return; }
   // buffs
   const now=nowT(); let bh='';
-  if(rushActive()) bh+='<div class="buff rush">'+R.rushName+' ×'+M.rushPow+'<span>'+Math.ceil((S.rushUntil-now)/1000)+'s</span></div>';
+  if(rushActive()){ const rt=rushTier(), ri=S.realm==='sky'?1:0; bh+=rt?'<div class="buff rush rt'+rt+'">'+RUSH_T[rt].ico[ri]+' '+RUSH_T[rt].n[ri]+' ×'+rushPowTxt()+'<span>'+Math.ceil((S.rushSpecUntil-now)/1000)+'s</span></div>':'<div class="buff rush">'+R.rushName+' ×'+M.rushPow+'<span>'+Math.ceil((S.rushUntil-now)/1000)+'s</span></div>'; }
   if(S.trial){ const T=TRIALS.find(x=>x.k===S.trial.k); if(T) bh+='<div class="buff trial">'+T.ico+' Trial: '+T.n+'</div>'; }
   if(wxOn()&&WXD[WX.k].fx) bh+='<div class="buff wx">'+WXD[WX.k].ico+' '+WXD[WX.k].n+' · '+WXD[WX.k].fx+'</div>';
   if(unlocked('awake')){ const rem=AWAKE_SEC-(now-lastTapAt)/1000, nm=S.realm==='sky'?'Star King':'King'; if(rem>0) bh+='<div class="buff awake">'+nm+' awake ×'+AWAKE_MULT+(rem<15?'<span>'+Math.ceil(rem)+'s</span>':'')+'</div>'; else if(S.taps>=15) bh+='<div class="buff sleep">💤 '+nm+' asleep · tap to wake</div>'; }
@@ -6146,6 +6230,7 @@ function uiTick(){
   setBadge('fac',researchOpen()&&FACT.filter((_,i)=>{ if(!facUnlocked(i)||!S.fac[i]) return false; const u=UPMAP['f'+i+'_'+tierOf(i)]; return u&&u.unlock()&&S.goo>=u.cost; }).length?'★':facAff?'!':0);
   { const it=ascItems(); if(tab==='asc') S.ascSeen=it; setBadge('asc',it.some(x=>!S.ascSeen.includes(x))?'!':0); }
   setBadge('col',S.arts.slice(0,5).filter(n=>n>=3).length+Object.keys(FB.reqs||{}).length+giftCount());
+  { const sh=S.realm==='sky'?S.starfalls>0:S.ascensions>0; if(ui.ascBadge.hidden===sh){ ui.ascBadge.hidden=!sh; ui.abKey=null; } ui.ascBadge.setAttribute('aria-label',S.realm==='sky'?'Eclipses: '+S.skyAsc+'. Opens the Moon Road':'Ascensions: '+S.ascensions+'. Opens the Crown Road'); }
   if(S.realm==='sky'){ const free=S.orr.rings.reduce((a,ring,r)=>a+(ringOpen(r)?ring.filter(v=>!v).length:0),0); const cr=cstReady(); setBadge('orr',cr&&S.stardustAll>(S.tut.cstSeen||0)&&!(tab==='orr'&&ui.orrSub==='sky')?'!':free&&S.board.some(v=>v)?free:0); if(ui.orrDot) ui.orrDot.hidden=!cr; }
   // the Pen upgrades panel is introduced once the first upgrade (the Hatchery) is affordable
   ui.rush.hidden=!unlocked('wobble');
@@ -6204,12 +6289,12 @@ function openSettings(){ const s=S.settings, sky=S.realm==='sky';
   '<div class="btnrow"><button class="btn" id="saveNow">Save now</button><button class="btn ghost" id="expBtn">Export save</button><button class="btn ghost" id="impBtn">Import save</button></div>'+
   '<div id="ioBox" hidden><textarea id="ioText" rows="4" spellcheck="false" aria-label="Save code"></textarea><div class="btnrow"><button class="btn ghost" id="ioCopy">Copy</button><button class="btn" id="ioLoad">Load this save</button></div></div>'+
   '<div class="btnrow"><button class="btn danger" id="resetBtn">Reset everything</button></div></section>'+
-  '<p class="note" id="verTxt">Slime Empire 5.0.1 · saves automatically every 10 seconds.</p>'+
+  '<p class="note" id="verTxt">Slime Empire 5.0.2 · saves automatically every 10 seconds.</p>'+
   '<section class="set" id="devBox" hidden><h3>Test tools</h3><p class="note">For testing only. These skip normal progress. Numbers can be typed like 1e15, 2.5M or 40B.</p>'+
   '<div class="devgrid">'+din('dvGoo','Goo','1e15','Add')+din('dvLv','Level','50','Set')+din('dvXp','XP','1000','Add')+din('dvAsc','Ascensions','10','Set')+din('dvJelly',RL().jelly,'500','Add')+din('dvDust','Stardust','25','Add')+din('dvEmb','Embers','5000','Add')+din('dvScl','Scales','50','Add')+'</div>'+
   '<div class="srow"><span>Time speed</span><div class="seg" id="devSpd">'+[1,10,100].map(v=>'<button data-v="'+v+'" aria-pressed="'+(devSpeed===v)+'">×'+v+'</button>').join('')+'</div></div>'+
   '<div class="srow"><span>Meadow time</span><div class="seg" id="devDay">'+[['','Auto'],['.02','Dawn'],['.25','Day'],['.52','Dusk'],['.75','Night']].map(v=>'<button data-v="'+v[0]+'" aria-pressed="'+(String(dayFix==null?'':dayFix)===v[0])+'">'+v[1]+'</button>').join('')+'</div></div>'+
-  '<div class="btnrow">'+[['lv50','Jump to Lv 50'],['sfready','Ready for Starfall'],['sfnow','Starfall now'],['boss','Spawn miniboss'],['gold','Spawn golden / shooting star'],['fillorr','Fill the Orrery'],['conj','Force Conjunction'],['grand','Force Grand Alignment'],['arts','+3 of each Artifact'],['exps','Finish expeditions'],['grow','Grow all dragons'],['heart','+1 Dragon Heart'],['tia','Awaken Tiamatra now'],['tiasleep','Put Tiamatra back to sleep'],['gems','+100 Gems'],['candy','+120 Candy'],['newday','Start a new day'],['away','Simulate 2 h away'],['pumpkin','Spawn pumpkin'],['items','+1 of every item'],['cos','Unlock all cosmetics'],['research','Open Research now'],['unlockall','Unlock every feature'],['shiny','Next egg shiny'],['req','Royal Request now'],['comet','Comet now'],['wx','Change the weather'],['month','Preview next month\'s event'],['asc3','Set 3 ascensions'],['trialwin','Win current trial'],['lore','+1 lore card'],['wipe','Full reset']].map(d=>'<button class="btn ghost" data-dev="'+d[0]+'">'+d[1]+'</button>').join('')+'</div></section>');
+  '<div class="btnrow">'+[['lv50','Jump to Lv 50'],['sfready','Ready for Starfall'],['sfnow','Starfall now'],['boss','Spawn miniboss'],['gold','Spawn golden / shooting star'],['fillorr','Fill the Orrery'],['conj','Force Conjunction'],['grand','Force Grand Alignment'],['arts','+3 of each Artifact'],['exps','Finish expeditions'],['grow','Grow all dragons'],['heart','+1 Dragon Heart'],['tia','Awaken Tiamatra now'],['tiasleep','Put Tiamatra back to sleep'],['gems','+100 Gems'],['candy','+120 Candy'],['newday','Start a new day'],['away','Simulate 2 h away'],['pumpkin','Spawn pumpkin'],['items','+1 of every item'],['cos','Unlock all cosmetics'],['research','Open Research now'],['unlockall','Unlock every feature'],['shiny','Next egg shiny'],['req','Royal Request now'],['comet','Comet now'],['wx','Change the weather'],['month','Preview next month\'s event'],['asc3','Set 3 ascensions'],['rushR','Next Rush: Rainbow / Hypernova'],['rushC','Next Rush: Crown / Quasar'],['riftreset','Reset the Rift'],['skyreset','Reset the stars (back to Starfall)'],['trialwin','Win current trial'],['lore','+1 lore card'],['wipe','Full reset']].map(d=>'<button class="btn ghost" data-dev="'+d[0]+'">'+d[1]+'</button>').join('')+'</div></section>');
   let taps=0; $('#verTxt').onclick=()=>{ if(++taps>=7){ $('#devBox').hidden=false; toast('<span class="ti">🛠️</span><span>Test tools unlocked</span>'); } };
   $('#devBox').onclick=e=>{ const b=e.target.closest('[data-dev]'), d=e.target.closest('[data-din]'); if(b){ devAction(b.dataset.dev); sfx('click'); } else if(d){ const inp=$('#'+d.dataset.din), v=parseNum(inp.value); if(!isFinite(v)){ nope(d); toast('<span class="ti">⚠️</span><span>Type a number, like 1e15 or 2.5M</span>'); return; } devInput(d.dataset.din,v); sfx('buy'); inp.value=''; } };
   const vol=(id,out,key)=>{ const i=$(id); i.oninput=()=>{ S.settings[key]=i.value/100; $(out).textContent=i.value+'%'; audioUnlock(); applyVolumes(); }; i.onchange=()=>{ if(key==='sfx') sfx('tap'); saveLocal(); }; };
@@ -6246,7 +6331,7 @@ function devInput(id,v){ const Hh=S.hollow;
   computeG(); ui.nestKey=ui.expKey=ui.shopKey=null; uiTick(); }
 function devAction(k){ const Hh=S.hollow;
   if(k==='lv50'){ setLevel(Math.max(S.level,HOLLOW_LV)); onLevelUp(HOLLOW_LV); closeModal(); }
-  else if(k==='sfready'){ S.ascensions=Math.max(S.ascensions,STARFALL_ASC); setLevel(Math.max(S.level,STARFALL_LV)); S.jellyEarned=Math.max(S.jellyEarned,200); recalc(); toast('<span class="ti">🌠</span><span>Starfall is ready in the Ascend tab.</span>'); }
+  else if(k==='sfready'){ S.ascensions=Math.max(S.ascensions,STARFALL_ASC); setLevel(Math.max(S.level,STARFALL_LV)); S.jellyEarned=Math.max(S.jellyEarned,200); if(!S.stars) S.stars={}; for(const s of STAR7) if(!S.stars[s.k]) S.stars[s.k]=nowT(); recalc(); toast('<span class="ti">🌠</span><span>All Seven Stars are lit. Starfall is ready on the Realm Map.</span>'); }
   else if(k==='sfnow'){ closeModal(); if(S.world==='hollow') setWorld('meadow'); S.ascensions=Math.max(S.ascensions,STARFALL_ASC); setLevel(Math.max(S.level,STARFALL_LV)); S.realm='meadow'; S.tut.sky=0; playStarfall(); return; }
   else if(k==='boss'){ if(S.level<BOSS_LV) setLevel(BOSS_LV); closeModal(); if(S.world!=='meadow') setWorld('meadow'); B=null; ui.devBoss=(ui.devBoss==null?0:ui.devBoss+1); spawnBoss(ui.devBoss); }
   else if(k==='gold'){ closeModal(); if(S.world==='meadow') spawnGolden(); }
@@ -6269,6 +6354,11 @@ function devAction(k){ const Hh=S.hollow;
   else if(k==='research'){ S.tut.u_research=1; S.tut.penups=1; S.tut.u_penups=1; }
   else if(k==='unlockall'){ ['wobble','fac','awake','streak','weather','golden','col','shiny','login','wheel','goals','ev','shop','req','boss','asc','combo','decree','mastery'].forEach(x=>{ S.tut['u_'+x]=1; S.tut['i_u_'+x]=1; }); S.tut.facbuy=S.tut.facdone=S.tut.achq=1; S.tut.mile=1; S.tut.mileT=-999; S.tut.penups=1; levelSync(); ui.tabKey=null; }
   else if(k==='shiny'){ ui.devShiny=1; toast('The next egg will be shiny.'); }
+  else if(k==='rushR'||k==='rushC'){ ui.devRush=k==='rushR'?1:2; if(!rushActive()) S.rush=Math.max(S.rush,95); toast('<span class="ti">'+(k==='rushR'?'🌈':'👑')+'</span><span>The next '+RL().rushName+' will be a '+RUSH_T[ui.devRush].n[S.realm==='sky'?1:0]+'. Tap the '+RL().king+' a few times!</span>'); }
+  else if(k==='riftreset'){ const v=S.rift&&S.rift.visited; if(S.world==='rift') setWorld('meadow'); S.rift=freshRift(); S.rift.visited=!!v; recalc(); computeG(); toast('<span class="ti">🕳️</span><span>The Rift is reset: depth 1, no shards, no upgrades and no crystals.</span>'); }
+  else if(k==='skyreset'){ if(!S.starfalls){ toast('<span class="ti">🌌</span><span>Reach Starfall first.</span>'); return; } closeModal(); if(S.world!=='meadow') setWorld('meadow'); if(S.realm==='sky') switchRealm('meadow'); if(S.dims) delete S.dims.sky;
+    const d=starfallDust(); Object.assign(S,{skyAsc:0,skyMax:0,skyEvo:0,stardust:d,stardustAll:d,cst:{},grands:0,moons:{},rift:freshRift()}); delete S.cos.owned.sk_staremperor; switchRealm('sky'); recalc(); computeG(); uiTick();
+    toast('<span class="ti">🌌</span><span>The stars are reset to just after Starfall, with '+d+' ✨ Stardust. Your meadow is untouched.</span>'); return; }
   else if(k==='req'){ S.tut.u_req=1; S.req.L=0; newRequest(); closeModal(); }
   else if(k==='comet'){ if(S.realm!=='sky'){ toast('Comets fly in the Celestial Realm. Use Starfall first.'); return; } CMT.next=0; closeModal(); }
   else if(k==='wx'){ S.tut.u_weather=1; WX.left=0; closeModal(); }
@@ -6311,14 +6401,14 @@ function logic(dt){
   if(S.buffs.length) S.buffs=S.buffs.filter(b=>b.until>now);
   computeG(); earn(G.total*dt); if(G.base>S.bestGps) S.bestGps=G.base;
   { const ra=rushActive(); if(ST.rushWas&&!ra&&prk('encore')&&Math.random()<1/3){ S.rush=50; toast('<span class="ti">🔁</span><span><b>Encore!</b> The '+RL().rush+' meter is already half full.</span>','rush'); } ST.rushWas=ra; }
-  if(rushActive()) S.rush=100*(S.rushUntil-now)/(RUSH_SEC*1000*M.rushDur); else if(S.rush>0&&now-lastTapAt>1500) S.rush=Math.max(0,S.rush-dt*2.5*RUSH_FILL);
+  if(rushActive()) S.rush=100*(S.rushUntil-now)/(1000*(S.rushDurNow||RUSH_SEC*M.rushDur)); else if(S.rush>0&&now-lastTapAt>1500) S.rush=Math.max(0,S.rush-dt*2.5*RUSH_FILL);
   if(S.hatchLvl>0&&!trialOn('drought')&&!trialOn('hands')){ S.hatchProg+=dt/hatchInt(); if(S.hatchProg>=1){ if(spawnEgg(eggLv(),true,0)){ S.hatchProg-=1; if(S.twinLvl&&Math.random()<.1*S.twinLvl&&emptyCells().length){ const e=emptyCells()[0]; spawnEgg(eggLv(),true,150); twinPop(e); } } else S.hatchProg=1; } }
   // the robot charges up, then waits fully charged and merges the moment a matching pair exists
   if(S.amLvl>0&&S.amOn&&!drag){ S.amProg=Math.min(1,S.amProg+dt/amInt()); if(S.amProg>=1){ const n=penSize(), seen={};
     for(let i=0;i<n;i++){ const L=S.board[i]; if(!L||L>=topL()||hatching[i]>now) continue; const key=L+(S.shiny[i]?'s':''); if(seen[key]!=null){ mergeCells(i,seen[key],true); S.amProg=0; break; } seen[key]=i; } } }
   // golden slimes wait for their introduction, so the first minutes stay simple
   if(!goldenOn&&S.world==='meadow'&&!B&&!CINE&&(S.goldens>0||unlocked('golden'))){ goldenNext-=dt*wxGold(); if(goldenNext<=0) spawnGolden(); }
-  bossLogic(dt); hollowLogic(dt); riftLogic(dt); pevLogic(dt); wispLogic(dt); orrLogic(dt); tiaLogic(dt); pumpkinLogic(dt); weatherLogic(dt); cometLogic(dt); runTrack(dt); stewardLogic(dt);
+  bossLogic(dt); hollowLogic(dt); riftLogic(dt); pevLogic(dt); rushFxLogic(dt); wispLogic(dt); orrLogic(dt); tiaLogic(dt); pumpkinLogic(dt); weatherLogic(dt); cometLogic(dt); runTrack(dt); stewardLogic(dt);
 
   if(ui.modal.hidden&&ui.coach.hidden&&ui.sheet.hidden&&!ST.warp&&researchOpen()){ mentorNext-=dt; if(mentorNext<=0){ mentorNext=rand(70,120); if(!B&&!INTRO.q.length) say(tipText()); } }
   saveAcc+=dt; if(saveAcc>10){ saveAcc=0; saveLocal(); }
@@ -6336,12 +6426,13 @@ function frame(ts){
   if(hudV==null||hol!==ui.hudHol||!isFinite(hudV)||target<hudV){ hudV=target; ui.hudHol=hol; } else { hudV+=(target-hudV)*Math.min(1,dt*10); if(target-hudV<=Math.max(.5,target*2e-4)) hudV=target; }
   const h=hol?fmtE(hudV):fmt(hudV,false,true); if(h!==lastHud){ lastHud=h; ui.gooAmt.textContent=h; }
   ui.rushFill.style.width=clamp(S.rush,0,100)+'%'; ui.rush.classList.toggle('on',rushActive());
+  { const rt=rushTier(), lb=rt?RUSH_T[rt].n[S.realm==='sky'?1:0]:RL().rush; if(ui.rushLabel.textContent!==lb) ui.rushLabel.textContent=lb; ui.rush.classList.toggle('rt1',rt===1); ui.rush.classList.toggle('rt2',rt===2); }
   if(hol){ const Hh=S.hollow, z=zone(), cool=nowT()<Hh.coolUntil; ui.heatFill.style.width=Hh.heat+'%'; ui.heatMark.style.left=Hh.heat+'%'; ui.heatZone.style.left=z[0]+'%'; ui.heatZone.style.width=(z[1]-z[0])+'%';
     ui.heat.classList.toggle('gold',!cool&&Hh.heat>=z[0]&&Hh.heat<=z[1]); ui.heat.classList.toggle('cool',cool); }
   if(B&&!hol&&B.phase!=='dead'){ ui.bossBar.hidden=false; setTxt(ui.bossName,B.n); setTxt(ui.bossTime,B.phase==='fight'?Math.max(0,Math.ceil(B.time))+'s':''); const sh=B.shield>0; ui.bossHp.classList.toggle('shield',sh); ui.bossHp.style.width=(sh?B.shield/12*100:clamp(B.hp/B.max,0,1)*100)+'%'; }
   else if(!ui.bossBar.hidden) ui.bossBar.hidden=true;
   if(tab==='pen'){ ui.hatchBar.style.width=(clamp(S.hatchProg,0,1)*100)+'%'; ui.amBar.style.width=(S.amOn?clamp(S.amProg,0,1)*100:0)+'%'; }
-  try{ if(tab==='orr'&&S.realm==='sky'){ if(ui.orrSub==='sky') drawCst(ts/1000); else drawOrrPanel(ts/1000); } drawMapBtn(ts/1000); }catch(e){ console.error(e); }
+  try{ if(tab==='orr'&&S.realm==='sky'){ if(ui.orrSub==='sky') drawCst(ts/1000); else drawOrrPanel(ts/1000); } drawMapBtn(ts/1000); drawAscBadge(ts/1000); }catch(e){ console.error(e); }
   uiAcc+=dt; if(uiAcc>.25){ uiAcc=0; try{ uiTick(); }catch(e){ console.error(e); } }
   requestAnimationFrame(frame);
 }
