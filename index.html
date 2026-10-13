@@ -596,8 +596,8 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
 .tbr-h b{font:15px var(--f-display);font-weight:400;color:#fff}
 .tbr-h small{margin-left:auto}
 .tbr-n{display:flex;align-items:center}
-.tl{flex:1;min-width:6px;height:3px;background:#3d3480;border-radius:2px}
-.tl.on{background:var(--gold)}
+.trl{flex:1;min-width:6px;height:3px;background:#3d3480;border-radius:2px}
+.trl.on{background:var(--gold)}
 .tn{position:relative;flex:none;width:46px;height:46px;border-radius:50%;border:2px solid #4a3a8a;background:#1c1640;display:grid;place-items:center;cursor:pointer;padding:0;font-size:21px}
 .tn em{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);font:9px/1 var(--f-body);font-style:normal;color:var(--gold);letter-spacing:-1px;white-space:nowrap;background:#0d0a24;padding:1px 3px;border-radius:6px}
 .tn.cap{border-radius:12px;width:50px}
@@ -862,12 +862,12 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
 .hallsky{display:flex;justify-content:center;gap:6px;font-size:24px;margin:4px 0}
 .hallsky span{filter:grayscale(1) brightness(.45)}
 .hallsky span.on{filter:drop-shadow(0 0 6px rgba(255,220,120,.8))}
-.peds{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:10px 0}
-.ped{background:linear-gradient(#2a1f55,#1a1238);border:2px solid #4a3a8a;border-radius:14px;padding:8px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
-.ped .pi{height:48px;display:flex;align-items:center;justify-content:center;font-size:34px}
-.ped .pi img{height:48px}
-.ped b{font-size:13px}.ped small{font-size:11px;color:var(--muted)}
-.ped.off{opacity:.45}
+.hpeds{display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:8px;margin:10px 0}
+.hped{background:linear-gradient(#2a1f55,#1a1238);border:2px solid #4a3a8a;border-radius:14px;padding:8px 6px;text-align:center;display:flex;flex-direction:column;align-items:center;gap:2px}
+.hped .pi{height:48px;display:flex;align-items:center;justify-content:center;font-size:34px}
+.hped .pi img{height:48px}
+.hped b{font-size:13px}.hped small{font-size:11px;color:var(--muted)}
+.hped.off{opacity:.45}
 .jpage{background:rgba(255,255,255,.05);border-radius:12px;padding:6px 10px;margin:6px 0}
 .jpage summary{cursor:pointer;font-weight:800}
 .rm-top .rmhall{pointer-events:auto;margin-left:auto;margin-right:10px;padding:6px 12px;font-size:15px}
@@ -4412,7 +4412,7 @@ function renderTree(){ const R=RL(), T=treeOf(), RN=['I','II','III'], sel=ui.tre
     return '<div class="tbr"><div class="tbr-h"><span>'+b.ico+'</span><b>'+b.n+'</b><small>'+own+'/'+b.nodes.length+'</small></div><div class="tbr-n">'+b.nodes.map((id,i)=>{ const p=perkById(id), r=prk(id), nx=perkNext(p), open=treePrevOk(id), cap=p.max===1&&!p.endless;
       const st=!nx?'max':!open||(r===0&&!nx.open)?'lock':S.jelly>=nx.cost&&nx.open?'can':r?'own':'cant';
       const pips=p.endless?(r?'<em>'+r+'</em>':''):cap?'':'<em>'+[0,1,2].map(j=>j<r?'●':'○').join('')+'</em>';
-      return (i?'<i class="tl'+(prk(b.nodes[i-1])?' on':'')+'"></i>':'')+'<button class="tn '+st+(cap||p.endless?' cap':'')+(sel===id?' sel':'')+'" data-tn="'+id+'" aria-label="'+perkName(p)+'"><span>'+(st==='lock'&&r===0?'🔒':p.ico)+'</span>'+pips+'</button>'; }).join('')+'</div></div>'; }).join('')+'</div>';
+      return (i?'<i class="trl'+(prk(b.nodes[i-1])?' on':'')+'"></i>':'')+'<button class="tn '+st+(cap||p.endless?' cap':'')+(sel===id?' sel':'')+'" data-tn="'+id+'" aria-label="'+perkName(p)+'"><span>'+(st==='lock'&&r===0?'🔒':p.ico)+'</span>'+pips+'</button>'; }).join('')+'</div></div>'; }).join('')+'</div>';
   if(sel){ const p=perkById(sel), r=prk(sel), nx=perkNext(p), open=treePrevOk(sel), prev=(()=>{ for(const b of T){ const i=b.nodes.indexOf(sel); if(i>0) return perkById(b.nodes[i-1]); } return null; })();
     const lvl=p.endless?(r?' · Lv.'+r:''):(p.max===1?'':r?' · Rank '+RN[r-1]:'');
     const cur=r?perkDesc(p,p.endless?0:r-1):'', nd=nx?(p.endless?'+5% per level · now +'+(5*r)+'%':perkDesc(p,nx.r)):'';
@@ -4569,9 +4569,9 @@ function albumHtml(){ const rows=[['meadow','🌳 The meadow',SL_EVO,S.slEvo||0]
 function hallMe(){ return {me:true,name:S.kname||'My Kingdom',lvl:S.level,ms:starsN(),sm:moonsN(),sf:S.starfalls||0,best:S.maxSpecies,sky:S.skyMax,tia:S.hollow.tia?1:0,bk:bookCount(),rf:(S.rift&&S.rift.best)||0,guard:(S.rift&&S.rift.guard)||0,pza:(S.pz&&S.pz.all)||0,combo:S.bestCombo||0,asc:S.ascensions,skyAsc:S.skyAsc,cry:(S.rift&&S.rift.cry)||0,forms:(S.slEvo||0)+(S.skyEvo||0)}; }
 function openHall(p,back){ const d=p?{me:false,name:p.name||'A kingdom',lvl:+p.lvl||1,ms:+p.ms||0,sm:+p.sm||0,sf:+p.sf||0,best:+p.best||1,tia:+p.tia||0,bk:+p.bk||0,rf:+p.rf||0,pza:+p.pza||0,asc:+p.asc||0}:hallMe();
   const stars='<div class="hallsky">'+[0,1,2,3,4,5,6].map(i=>'<span class="'+(i<d.ms?'on':'')+'">⭐</span>').join('')+'</div>'+(d.sf?'<div class="hallsky moon">'+[0,1,2,3,4,5,6,7].map(i=>'<span class="'+(i<d.sm?'on':'')+'">🌙</span>').join('')+'</div>':'');
-  const ped=(img,t,v,on)=>'<div class="ped'+(on?'':' off')+'"><div class="pi">'+img+'</div><b>'+t+'</b><small>'+v+'</small></div>';
+  const ped=(img,t,v,on)=>'<div class="hped'+(on?'':' off')+'"><div class="pi">'+img+'</div><b>'+t+'</b><small>'+v+'</small></div>';
   const best=Math.max(1,Math.min(MEADOW_SPECIES.length,d.best));
-  let h='<h2 class="mh">🏛️ '+(d.me?'Kingdom Hall':esc(d.name)+'\'s Hall')+'</h2><p class="note" style="margin-top:-4px">'+(d.me?esc(d.name)+' · ':'')+'Level '+d.lvl+' · '+d.asc+' ascension'+(d.asc===1?'':'s')+(d.sf?' · beyond the stars':'')+'</p>'+stars+'<div class="peds">'+
+  let h='<h2 class="mh">🏛️ '+(d.me?'Kingdom Hall':esc(d.name)+'\'s Hall')+'</h2><p class="note" style="margin-top:-4px">'+(d.me?esc(d.name)+' · ':'')+'Level '+d.lvl+' · '+d.asc+' ascension'+(d.asc===1?'':'s')+(d.sf?' · beyond the stars':'')+'</p>'+stars+'<div class="hpeds">'+
     ped('<img src="'+IMG.meadow.img[best]+'" alt="">','Biggest slime','Lv.'+best+' '+MEADOW_SPECIES[best-1].n,true)+
     ped('<span>🐉</span>','Tiamatra',d.tia?'Awake':'Still asleep',!!d.tia)+
     ped('<span>📖</span>','Dragon Book',d.bk+'/16 kinds',d.bk>0)+
