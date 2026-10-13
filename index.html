@@ -12,7 +12,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<meta name="build" content="5.0">
+<meta name="build" content="5.0.1">
 <script>
 // install as an app: works offline and opens full screen from the home screen
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
@@ -140,6 +140,9 @@ h3.sec span{flex:none}
 .row-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px}
 .row-head h3.sec{margin:0;flex:1;min-width:150px}
 .seg{display:flex;background:var(--ink);border-radius:11px;padding:3px;gap:3px;flex-wrap:wrap;box-shadow:inset 0 1px 0 var(--edge)}
+.orrseg{margin:0 0 10px}
+.segdot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--gold);margin-left:6px;vertical-align:middle;box-shadow:0 0 6px var(--gold)}
+.segdot[hidden]{display:none}
 .seg button{flex:1;border:0;border-radius:8px;padding:6px 10px;background:transparent;color:var(--muted);font:700 13px var(--f-body);cursor:pointer;white-space:nowrap}
 .seg button[aria-pressed="true"]{background:linear-gradient(180deg,#3b3083,#2a2263);color:#fff;box-shadow:inset 0 -3px 0 var(--goo)}
 .card{background:linear-gradient(180deg,#251e55,var(--plum-700));border:2px solid var(--ink);border-radius:var(--r-card);box-shadow:inset 0 1px 0 var(--edge)}
@@ -949,7 +952,8 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
           <p class="hint" id="penInfo">Drag a slime onto a matching one to merge them into a stronger slime.</p>
         </div>
         <div class="view" id="view-orr" hidden>
-          <div class="orr-wrap">
+          <div class="seg orrseg" id="orrSeg"><button data-o="orr" aria-pressed="true">🪐 Orrery</button><button data-o="sky" aria-pressed="false">✨ Night Sky<i class="segdot" id="orrDot" hidden></i></button></div>
+          <div class="orr-wrap" id="orrMain">
             <h3 class="sec">The Orrery</h3>
             <p class="hint" style="text-align:left;margin-top:0">Place Star Jellies on the rings around the Star King. When planets on different rings line up, a <b style="color:#bff3ff">Conjunction</b> fires a beam of starlight. Three in a row is a <b style="color:var(--gold)">Grand Alignment</b>.</p>
             <div class="orr-view"><canvas id="orrCanvas"></canvas></div>
@@ -958,6 +962,12 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
             <div class="list" id="ringList"></div>
             <h3 class="sec">Orrery upgrades</h3>
             <div class="penups" id="orrUps"></div>
+          </div>
+          <div id="cstSec" hidden>
+            <h3 class="sec">The Night Sky <span id="cstDust" style="color:var(--muted);font-size:15px"></span></h3>
+            <p class="hint" style="text-align:left;margin-top:0">Every <b>Grand Alignment</b> in the Orrery gives <b>Stardust</b>. Spend it here to light stars, connect-the-dots style: drag a line from a lit star to a glowing neighbour, or tap a glowing star and press Light. Finished constellations shine in the sky behind the Star King.</p>
+            <div class="cst-wrap" id="cstWrap"><canvas id="cstCanvas"></canvas></div>
+            <div class="cst-info card" id="cstInfo"></div>
           </div>
         </div>
         <div class="view" id="view-fac" hidden>
@@ -1008,12 +1018,6 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
             <div class="req" id="sfReq"></div>
             <p id="sfGain"></p>
             <button class="btn star" id="sfBtn">Begin Starfall</button>
-          </div>
-          <div id="cstSec" hidden>
-            <h3 class="sec">Constellations <span id="cstDust" style="color:var(--muted);font-size:15px"></span></h3>
-            <p class="hint" style="text-align:left;margin-top:0">Spend Stardust to light stars, connect-the-dots style. Drag a line from a lit star to a glowing neighbour, or tap a glowing star and press Light. Every star helps, and a finished shape gives a big bonus.</p>
-            <div class="cst-wrap" id="cstWrap"><canvas id="cstCanvas"></canvas></div>
-            <div class="cst-info card" id="cstInfo"></div>
           </div>
           <div id="trialBox"></div>
           <h3 class="sec" id="perkTitle">Royal perks</h3>
@@ -1547,7 +1551,7 @@ const CHRON=[
  {lv:100,t:'Among the Stars',hint:'At night, the stars arrange themselves into the shape of a crown.',txt:SOON}
 ];
 const GLOOP_TIPS=['The <b>Realm Map</b> in the corner shows every realm, and what each one needs.','When your <b>jelly jar</b> is full, it is time to ascend!','Every ascension adds a building to your kingdom. Look at the hills!','Golden slimes are rare. When one shows up, tap it before it fades!','Feed your Slimeling! Every level makes all your slimes stronger.','Tap fast to fill the Wobble meter. A Rush boosts <b>everything</b>.','Every level gives +1% goo. Tap your level to read the Chronicle.','Each new kind of slime boosts goo by 3%, forever.','Every ascension breaks a <b>Crown Seal</b>, so your slimes can grow one size bigger.','Look for the gold <b>BEST VALUE</b> tag when you are not sure what to buy.','Every 10 levels your Slimeling evolves and learns a skill it keeps forever.','Pat your Slimeling on the meadow. It loves it, and sometimes finds you a gift!'];
-const SKY_TIPS=['Your <b>Slimeling</b> came along: feed it stargoo!','<b>Void Crystals</b> from the Rift make all stargoo stronger.','Two Slime Gods in the meadow make a <b>Star Seed</b>: free Stardust!','Bigger star jellies make your <b>Rift squad</b> hit harder.','Line up planets in the <b>Orrery</b> for Conjunctions.','Put your biggest star jellies on different rings. Bigger planets make stronger beams.','A <b>Grand Alignment</b> needs planets on three rings in a row. It gives Stardust!','Spend Stardust on <b>Constellations</b> in the Ascend tab.','Shooting stars streak across the sky. Tap one before it is gone!','Tap fast to charge a <b>Supernova</b>.'];
+const SKY_TIPS=['Your <b>Slimeling</b> came along: feed it stargoo!','<b>Void Crystals</b> from the Rift make all stargoo stronger.','Two Slime Gods in the meadow make a <b>Star Seed</b>: free Stardust!','Bigger star jellies make your <b>Rift squad</b> hit harder.','Line up planets in the <b>Orrery</b> for Conjunctions.','Put your biggest star jellies on different rings. Bigger planets make stronger beams.','A <b>Grand Alignment</b> needs planets on three rings in a row. It gives Stardust!','Spend Stardust in the <b>✨ Night Sky</b>, inside the Orrery tab.','Shooting stars streak across the sky. Tap one before it is gone!','Tap fast to charge a <b>Supernova</b>.'];
 const SPIRIT_TIPS=['Keep the flame in the <b>golden zone</b>. Too hot and it flares out.','Feed your hatchlings embers to grow them.','Different elements in the nest make every dragon stronger.','Long expeditions with old dragons bring back the most scales.','Drakes and older can join the Dragon Patrol and roast the King for goo.','Shadow wisps drift through the dark. Catch them for embers.','The Deep hides old relics. They tell the story of this place.','Long expeditions with old dragons sometimes find a <b>Dragon Heart</b>. Three of them can open the sealed door.','Something enormous sleeps behind the sealed door. Every dragon here can feel it.'];
 
 /* ---- the Orrery ---- */
@@ -3053,7 +3057,7 @@ function drawSky(c,w,h,t,dt){
   if(ST.neb) c.drawImage(ST.neb,0,0,w,h);
   ST.sl.forEach((layer,li)=>{ if(eco()&&li===0) return; for(const s of layer){ const x=((s.x-t*s.v)%w+w)%w, a=.35+.65*Math.abs(Math.sin(t*s.sp+s.ph)); c.globalAlpha=a; c.fillStyle=li===2?'#e6fbff':'#ffffff';
     if(li===2){ star4(c,x,s.y,s.r*2.2); } else c.fillRect(x,s.y,s.r,s.r); } }); c.globalAlpha=1;
-  drawSkyMoons(c,w,h,t);
+  drawSkyCst(c,w,h,t); drawSkyMoons(c,w,h,t);
   // a ringed planet and a little moon
   const px=w*.14, py=h*.2, pr=Math.min(w,h)*.085;
   c.save(); c.strokeStyle='rgba(255,214,170,.6)'; c.lineWidth=pr*.18; c.beginPath(); c.ellipse(px,py,pr*1.9,pr*.45,-.3,Math.PI*1.04,Math.PI*1.96); c.stroke();
@@ -3388,7 +3392,7 @@ function tipText(){
   if(S.freeEggs>0&&emptyCells().length) return 'You have <b>'+S.freeEggs+' free eggs</b>. Hatch them in the '+R.pen+'!';
   if(S.realm==='sky'){
     if(S.board.some(v=>v)&&S.orr.rings.some((ring,r)=>ringOpen(r)&&ring.some(v=>!v))) return 'An Orrery ring has an empty slot. Put a star jelly there in the <b>Orrery</b> tab!';
-    if(CONST.some(k=>k.stars.some((_,i)=>cstAvail(k,i))&&S.stardust>=cstCost(cstCount(k),k))) return 'You have Stardust for a new star. Light it in <b>Constellations</b> (Ascend tab).'; }
+    if(CONST.some(k=>k.stars.some((_,i)=>cstAvail(k,i))&&S.stardust>=cstCost(cstCount(k),k))) return 'You have Stardust for a new star. Light it in the <b>✨ Night Sky</b> (Orrery tab).'; }
   if(S.realm!=='sky'&&slOn()&&unlocked('fac')&&!S.sl.lv) return 'A little egg is waiting in the <b>Slimeling</b> tab. Go hatch it!';
   if(S.realm!=='sky'&&slOn()&&S.sl.lv&&S.goo>=slCost(1)*3) return 'Your '+slName()+' looks hungry! Feed it in the <b>Slimeling</b> tab.';
   for(let i=0;i<FACT.length;i++) if(facUnlocked(i)&&S.fac[i]>=facCap(i)) return 'Your '+FACT[i].plural+' hit the cap of '+facCap(i)+'. Merge a bigger '+R.slime+' to raise it!';
@@ -4505,6 +4509,12 @@ function drawMoonArc(c,x0,y0,w,h,t,newI,big){ MOON8.forEach((s,i)=>{ const u=i/7
     c.fillStyle=lit?'#eef4ff':'rgba(180,190,255,.25)'; c.beginPath(); c.arc(x,yy,r,0,TAU); c.fill(); c.fillStyle=lit?'#05031a':'rgba(5,3,26,.6)'; c.beginPath(); c.arc(x+r*.45,yy-r*.2,r*.85,0,TAU); c.fill(); }); }
 // the Seven Stars and Eight Moons in the sky of each realm
 function drawMeadowStars(c,w,h,t,n){ if(!S.stars) return; const k=kingGeom(), top=Math.max(8,h*.04), bh=Math.min(h*.16,k.by-k.h-top-6); if(bh<20) return; c.save(); c.globalAlpha=.45+.55*n; drawStarCrown(c,w*.3,top,w*.4,bh,t,-1,Math.max(.5,Math.min(1,w/700))); c.restore(); }
+// 5.0.1: finished constellations shine in the sky behind the Star King, and lit stars of unfinished ones glimmer
+function drawSkyCst(c,w,h,t){ if(!S.cst) return; const X=x=>w*(.05+x*.9), Y=y=>h*(.03+y/1.05*.6); c.save(); c.lineCap='round';
+  for(const k of CONST){ const m=cstMask(k); if(!m) continue; const done=cstDone(k), tw=.75+.25*Math.sin(t*1.3+k.stars[0][0]*9);
+    if(done){ c.strokeStyle=k.col; c.globalAlpha=.28*tw; c.lineWidth=1.6; c.beginPath(); for(const [a,b] of k.edges){ c.moveTo(X(k.stars[a][0]),Y(k.stars[a][1])); c.lineTo(X(k.stars[b][0]),Y(k.stars[b][1])); } c.stroke(); }
+    for(let i=0;i<k.stars.length;i++){ if(!(m>>i&1)) continue; c.globalAlpha=(done?.85:.4)*(.7+.3*Math.sin(t*2.1+i*1.7+k.stars[i][1]*7)); c.fillStyle=done?k.col:'#e6fbff'; star4(c,X(k.stars[i][0]),Y(k.stars[i][1]),done?3.4:2); } }
+  c.restore(); }
 function drawSkyMoons(c,w,h,t){ if(!S.moons) return; c.save(); c.globalAlpha=.85; drawMoonArc(c,w*.3,h*.03,w*.4,h*.12,t,-1,Math.max(.45,Math.min(.9,w/800))); c.restore(); }
 function starsListHtml(kind){ const L=kind==='star'?STAR7:MOON8, lit=kind==='star'?starLit:moonLit;
   return '<div class="rm-req">'+L.map(s=>{ const ok=lit(s.k), p=ok?[1,1]:s.prog(); return '<div class="'+(ok?'ok':'')+'"><span>'+(ok?(kind==='star'?'⭐ ':'🌙 '):s.ico+' ')+'<b>'+s.n+'</b>'+(ok?'':'<small>'+s.d+'</small>')+'</span><div class="bar"><i style="width:'+(clamp(p[0]/Math.max(1,p[1]),0,1)*100).toFixed(1)+'%"></i></div></div>'; }).join('')+'</div>'; }
@@ -5741,6 +5751,9 @@ function buildUI(){
   ui.riftHero.onclick=e=>{ if(e.target.closest('#riftChal')){ sfx('click'); riftChallenge(); renderRift(true); } };
   ui.jarRow=$('#jarRow'); ui.jarTxt=$('#jarTxt'); ui.jarBar=$('#jarBar');
   ui.mapBtn=$('#mapBtn'); ui.mapCv=$('#mapCv'); ui.rmap=$('#rmap'); ui.rmCard=$('#rmCard'); RMAP.cv=$('#rmCanvas'); RMAP.c=RMAP.cv.getContext('2d');
+  // 5.0.1: the Orrery tab has two views: the rings, and the Night Sky (constellations) that its Stardust lights
+  ui.orrMain=$('#orrMain'); ui.orrSub='orr'; ui.orrDot=$('#orrDot');
+  $('#orrSeg').onclick=e=>{ const b=e.target.closest('[data-o]'); if(!b||b.dataset.o===ui.orrSub) return; sfx('click'); ui.orrSub=b.dataset.o; for(const x of $('#orrSeg').children) x.setAttribute('aria-pressed',x.dataset.o===ui.orrSub); ui.orrKey=null; ui.cstKey=null; CS.sel=null; uiTick(); };
   ui.mapBtn.onclick=()=>openMap(); $('#rmClose').onclick=()=>{ sfx('click'); closeMap(); }; $('#rmHall').onclick=()=>{ sfx('click'); closeMap(); openHall(); }; RMAP.cv.addEventListener('pointerdown',mapTap);
   ui.rmCard.onclick=e=>{ const b=e.target.closest('#rmGo'); if(!b) return; sfx('click'); if(b.dataset.go==='starfall'){ closeMap(); askStarfall(); } else travelTo(b.dataset.go); };
   window.addEventListener('resize',()=>{ if(RMAP.on) mapResize(); });
@@ -6029,7 +6042,9 @@ function doAscend(){ const g=jellyGain(); if(!canAscend()) return; const sky=S.r
   sum.xp=xp; setTimeout(()=>showRunSummary(sum),1200); setTimeout(()=>fbPush(true),3000);
   saveLocal(); cloudSave(); uiTick(); }
 // what the Ascend tab has to offer; its "!" only shows for things that are new since you last looked
-function ascItems(){ const it=[]; if(canAscend()) it.push('asc'+ascTotal()); if(jarFull()) it.push('jar'+ascTotal()); if(canStarfall()) it.push('sf'); for(const p of PERKS){ const nx=perkNext(p); if(nx&&nx.open&&S.jelly>=nx.cost) it.push('p'+p.id+nx.r); } if(S.stardust>0&&CONST.some(k=>k.stars.some((_,i)=>cstAvail(k,i))&&S.stardust>=cstCost(cstCount(k),k))) it.push('d'+Math.floor(S.stardustAll)); return it; }
+function ascItems(){ const it=[]; if(canAscend()) it.push('asc'+ascTotal()); if(jarFull()) it.push('jar'+ascTotal()); if(canStarfall()) it.push('sf'); for(const p of PERKS){ const nx=perkNext(p); if(nx&&nx.open&&S.jelly>=nx.cost) it.push('p'+p.id+nx.r); } return it; }
+// a star you can afford to light in the Night Sky
+const cstReady=()=>S.stardust>0&&CONST.some(k=>k.stars.some((_,i)=>cstAvail(k,i))&&S.stardust>=cstCost(cstCount(k),k));
 // the Crown Road: every meadow ascension breaks a seal (one bigger slime) and some steps open something new
 // the Moon Road: what each ascension among the stars opens
 function renderMoonRoad(box){ box.hidden=false; const a=S.skyAsc, key='sky|'+a+'|'+S.skyMax+'|'+topL(); if(ui.crownKey===key) return; ui.crownKey=key;
@@ -6058,9 +6073,7 @@ function renderAsc(){ const sky=S.realm==='sky', R=RL(), g=jellyGain(), cur=jell
   const sfShow=!sky&&!S.starfalls&&(S.ascensions>=1||S.level>=STARFALL_LV); ui.starfallBox.hidden=!sfShow;
   if(sfShow){ const sk=starsN()+'|'+STAR7.map(s=>s.prog().join('/')).join(','); if(sk!==ui.sfKey){ ui.sfKey=sk; setTxt(ui.sfReq,'<b class="sf7">The Seven Stars · '+starsN()+'/7</b>'+starsListHtml('star'),true); }
     setTxt(ui.sfGain,(canStarfall()?'Starfall now and bring <b style="color:#fff">':'If you could fall now, you would bring <b style="color:#fff">')+starfallDust()+' ✨ Stardust</b>. Each one is worth +25% stargoo, forever.',true); ui.sfBtn.classList.toggle('off',!canStarfall()); }
-  const cs=S.starfalls>0||S.stardustAll>0; ui.cstSec.hidden=!cs; if(cs) setTxt(ui.cstDust,'· '+fmt(S.stardust)+' ✨ to spend');
   if(perkKey()!==ui.perkKey) renderPerks();
-  if(cs&&CS.sel){ const key=S.stardust+'|'+JSON.stringify(S.cst); if(key!==ui.cstKey){ ui.cstKey=key; renderCstInfo(); } }
   const tk=JSON.stringify([S.trial,S.trials,trialsOpen()]); if(tk!==ui.trialKey){ ui.trialKey=tk; ui.trialBox.innerHTML=trialsHtml(); hl(ui.trialBox); } }
 
 /* trophies */
@@ -6133,7 +6146,7 @@ function uiTick(){
   setBadge('fac',researchOpen()&&FACT.filter((_,i)=>{ if(!facUnlocked(i)||!S.fac[i]) return false; const u=UPMAP['f'+i+'_'+tierOf(i)]; return u&&u.unlock()&&S.goo>=u.cost; }).length?'★':facAff?'!':0);
   { const it=ascItems(); if(tab==='asc') S.ascSeen=it; setBadge('asc',it.some(x=>!S.ascSeen.includes(x))?'!':0); }
   setBadge('col',S.arts.slice(0,5).filter(n=>n>=3).length+Object.keys(FB.reqs||{}).length+giftCount());
-  if(S.realm==='sky'){ const free=S.orr.rings.reduce((a,ring,r)=>a+(ringOpen(r)?ring.filter(v=>!v).length:0),0); setBadge('orr',free&&S.board.some(v=>v)?free:0); }
+  if(S.realm==='sky'){ const free=S.orr.rings.reduce((a,ring,r)=>a+(ringOpen(r)?ring.filter(v=>!v).length:0),0); const cr=cstReady(); setBadge('orr',cr&&S.stardustAll>(S.tut.cstSeen||0)&&!(tab==='orr'&&ui.orrSub==='sky')?'!':free&&S.board.some(v=>v)?free:0); if(ui.orrDot) ui.orrDot.hidden=!cr; }
   // the Pen upgrades panel is introduced once the first upgrade (the Hatchery) is affordable
   ui.rush.hidden=!unlocked('wobble');
 
@@ -6154,7 +6167,9 @@ function uiTick(){
     if(!S.tut.star&&researchOpen()){ const sb=[...ui.facList.querySelectorAll('.star-btn:not([hidden]):not(.off):not(.lock)')][0]; if(sb){ S.tut.star=1; intro('star',()=>coach([{el:()=>ui.facList.querySelector('.star-btn:not([hidden])'),text:'A <b>★ upgrade</b> is ready! It doubles this '+(S.realm==='sky'?'celestial body':'factory')+'\'s output. New stars unlock as you own more of it.'}]),2); } } }
   else if(tab==='upg') renderUpg(false,best);
   else if(tab==='asc') renderAsc();
-  else if(tab==='orr') renderOrr(false);
+  else if(tab==='orr'){ const ns=ui.orrSub==='sky'; ui.orrMain.hidden=ns; ui.cstSec.hidden=!ns;
+    if(ns){ S.tut.cstSeen=S.stardustAll; setTxt(ui.cstDust,'· '+fmt(S.stardust)+' ✨ to spend'); const key=S.stardust+'|'+JSON.stringify(S.cst); if(key!==ui.cstKey){ ui.cstKey=key; renderCstInfo(); } }
+    else renderOrr(false); }
   else if(tab==='col'&&(nowT()-ui.troAt>2000||ui.fuseKey!==S.arts.join())) renderCol();
 }
 function setBadge(id,v){ const t=ui.tabMap&&ui.tabMap[id]; if(!t) return; const b=t.querySelector('.badge');
@@ -6189,7 +6204,7 @@ function openSettings(){ const s=S.settings, sky=S.realm==='sky';
   '<div class="btnrow"><button class="btn" id="saveNow">Save now</button><button class="btn ghost" id="expBtn">Export save</button><button class="btn ghost" id="impBtn">Import save</button></div>'+
   '<div id="ioBox" hidden><textarea id="ioText" rows="4" spellcheck="false" aria-label="Save code"></textarea><div class="btnrow"><button class="btn ghost" id="ioCopy">Copy</button><button class="btn" id="ioLoad">Load this save</button></div></div>'+
   '<div class="btnrow"><button class="btn danger" id="resetBtn">Reset everything</button></div></section>'+
-  '<p class="note" id="verTxt">Slime Empire 5.0 · saves automatically every 10 seconds.</p>'+
+  '<p class="note" id="verTxt">Slime Empire 5.0.1 · saves automatically every 10 seconds.</p>'+
   '<section class="set" id="devBox" hidden><h3>Test tools</h3><p class="note">For testing only. These skip normal progress. Numbers can be typed like 1e15, 2.5M or 40B.</p>'+
   '<div class="devgrid">'+din('dvGoo','Goo','1e15','Add')+din('dvLv','Level','50','Set')+din('dvXp','XP','1000','Add')+din('dvAsc','Ascensions','10','Set')+din('dvJelly',RL().jelly,'500','Add')+din('dvDust','Stardust','25','Add')+din('dvEmb','Embers','5000','Add')+din('dvScl','Scales','50','Add')+'</div>'+
   '<div class="srow"><span>Time speed</span><div class="seg" id="devSpd">'+[1,10,100].map(v=>'<button data-v="'+v+'" aria-pressed="'+(devSpeed===v)+'">×'+v+'</button>').join('')+'</div></div>'+
@@ -6326,7 +6341,7 @@ function frame(ts){
   if(B&&!hol&&B.phase!=='dead'){ ui.bossBar.hidden=false; setTxt(ui.bossName,B.n); setTxt(ui.bossTime,B.phase==='fight'?Math.max(0,Math.ceil(B.time))+'s':''); const sh=B.shield>0; ui.bossHp.classList.toggle('shield',sh); ui.bossHp.style.width=(sh?B.shield/12*100:clamp(B.hp/B.max,0,1)*100)+'%'; }
   else if(!ui.bossBar.hidden) ui.bossBar.hidden=true;
   if(tab==='pen'){ ui.hatchBar.style.width=(clamp(S.hatchProg,0,1)*100)+'%'; ui.amBar.style.width=(S.amOn?clamp(S.amProg,0,1)*100:0)+'%'; }
-  try{ if(tab==='orr'&&S.realm==='sky') drawOrrPanel(ts/1000); else if(tab==='asc'&&!ui.cstSec.hidden) drawCst(ts/1000); drawMapBtn(ts/1000); }catch(e){ console.error(e); }
+  try{ if(tab==='orr'&&S.realm==='sky'){ if(ui.orrSub==='sky') drawCst(ts/1000); else drawOrrPanel(ts/1000); } drawMapBtn(ts/1000); }catch(e){ console.error(e); }
   uiAcc+=dt; if(uiAcc>.25){ uiAcc=0; try{ uiTick(); }catch(e){ console.error(e); } }
   requestAnimationFrame(frame);
 }
