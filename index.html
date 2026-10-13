@@ -607,7 +607,9 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
 .tn.lock,.tn.cant{opacity:.6}
 .tn.sel{outline:3px solid #fff;outline-offset:2px}
 @keyframes tnPulse{50%{box-shadow:0 0 14px rgba(255,212,63,.6)}}
-.tinfo{margin-top:10px;padding:10px 12px}
+#perkGrid{display:block}
+.tnote{margin:0 0 8px}
+.tinfo{margin:0;padding:10px 12px;border-color:var(--gold)}
 .ti-h{display:flex;gap:10px;align-items:center}
 .ti-h>span{font-size:28px}
 .ti-h b{display:block;font:17px var(--f-display);font-weight:400;color:#fff}
@@ -4408,11 +4410,11 @@ function treeProg(r){ const pk=perksOf(r); let a=0,b=0; for(const br of TREES[r]
 const perkName=p=>S.realm==='sky'&&p.sn?p.sn:p.name;
 function renderTree(){ const R=RL(), T=treeOf(), RN=['I','II','III'], sel=ui.treeSel, pr=treeProg(S.realm==='sky'?'sky':'meadow');
   setTxt(ui.perkTitle,(S.realm==='sky'?'🌙 The Lunar Tree':'👑 The Crown Tree')+' <span style="color:var(--muted);font-size:15px">· '+pr[0]+'/'+pr[1]+'</span>',true);
-  let h='<div class="tree">'+T.map(b=>{ const own=b.nodes.filter(id=>prk(id)>0).length;
+  let h='<p class="note tnote">Tap a node to see what it does. Each branch grows to the right, and its last node is a <b>capstone</b>. Finishing the whole tree '+(S.realm==='sky'?'lights one of the <b>Eight Moons</b>.':'lights one of the <b>Seven Stars</b>.')+'</p><div class="tree">'+T.map(b=>{ const own=b.nodes.filter(id=>prk(id)>0).length;
     return '<div class="tbr"><div class="tbr-h"><span>'+b.ico+'</span><b>'+b.n+'</b><small>'+own+'/'+b.nodes.length+'</small></div><div class="tbr-n">'+b.nodes.map((id,i)=>{ const p=perkById(id), r=prk(id), nx=perkNext(p), open=treePrevOk(id), cap=p.max===1&&!p.endless;
       const st=!nx?'max':!open||(r===0&&!nx.open)?'lock':S.jelly>=nx.cost&&nx.open?'can':r?'own':'cant';
       const pips=p.endless?(r?'<em>'+r+'</em>':''):cap?'':'<em>'+[0,1,2].map(j=>j<r?'●':'○').join('')+'</em>';
-      return (i?'<i class="trl'+(prk(b.nodes[i-1])?' on':'')+'"></i>':'')+'<button class="tn '+st+(cap||p.endless?' cap':'')+(sel===id?' sel':'')+'" data-tn="'+id+'" aria-label="'+perkName(p)+'"><span>'+(st==='lock'&&r===0?'🔒':p.ico)+'</span>'+pips+'</button>'; }).join('')+'</div></div>'; }).join('')+'</div>';
+      return (i?'<i class="trl'+(prk(b.nodes[i-1])?' on':'')+'"></i>':'')+'<button class="tn '+st+(cap||p.endless?' cap':'')+(sel===id?' sel':'')+'" data-tn="'+id+'" aria-label="'+perkName(p)+'"><span>'+(st==='lock'&&r===0?'🔒':p.ico)+'</span>'+pips+'</button>'; }).join('')+'</div></div>'+(sel&&b.nodes.includes(sel)?'%%TINFO%%':''); }).join('')+'</div>';
   if(sel){ const p=perkById(sel), r=prk(sel), nx=perkNext(p), open=treePrevOk(sel), prev=(()=>{ for(const b of T){ const i=b.nodes.indexOf(sel); if(i>0) return perkById(b.nodes[i-1]); } return null; })();
     const lvl=p.endless?(r?' · Lv.'+r:''):(p.max===1?'':r?' · Rank '+RN[r-1]:'');
     const cur=r?perkDesc(p,p.endless?0:r-1):'', nd=nx?(p.endless?'+5% per level · now +'+(5*r)+'%':perkDesc(p,nx.r)):'';
@@ -4421,9 +4423,10 @@ function renderTree(){ const R=RL(), T=treeOf(), RN=['I','II','III'], sel=ui.tre
     else if(!open) act='<span class="tlock">🔒 Get <b>'+perkName(prev)+'</b> first</span>';
     else if(!nx.open) act='<span class="tlock">🔒 '+(r?'Rank '+RN[nx.r]:'Opens')+' at '+(S.realm==='sky'?Math.max(1,{4:2,5:3,6:1,7:3,8:4,9:5,10:7,12:8}[nx.need]||Math.ceil(nx.need/2))+' Eclipse'+'s':nx.need+' ascensions')+'</span>';
     else act='<button class="btn'+(S.jelly>=nx.cost?' gold':' off')+'" id="treeBuy">'+(r?'Upgrade':'Get')+' · '+fmt(nx.cost)+' '+R.jelly+'</button>';
-    h+='<div class="tinfo card"><div class="ti-h"><span>'+p.ico+'</span><div><b>'+perkName(p)+lvl+'</b>'+(r&&!p.endless&&nx?'<small>Now: '+cur+'</small>':'')+'</div></div><p>'+(nx?(r&&!p.endless?'<b>Next:</b> ':'')+nd:cur)+'</p>'+act+'</div>'; }
-  else h+='<p class="note">Tap a node to see what it does. Each branch grows upward, and its top node is a <b>capstone</b>. Finishing the whole tree '+(S.realm==='sky'?'lights one of the <b>Eight Moons</b>.':'lights one of the <b>Seven Stars</b>.')+'</p>';
-  ui.perkGrid.innerHTML=h; hl(ui.perkGrid); }
+    const info='<div class="tinfo card"><div class="ti-h"><span>'+p.ico+'</span><div><b>'+perkName(p)+lvl+'</b>'+(r&&!p.endless&&nx?'<small>Now: '+cur+'</small>':'')+'</div></div><p>'+(nx?(r&&!p.endless?'<b>Next:</b> ':'')+nd:cur)+'</p>'+act+'</div>'; h=h.replace('%%TINFO%%',()=>info); }
+  ui.perkGrid.innerHTML=h; hl(ui.perkGrid);
+  // after a tap, make sure the card under the branch (with its Get button) is on screen
+  if(sel&&ui.treeJump){ ui.treeJump=0; const c=ui.perkGrid.querySelector('.tinfo'); if(c&&ui.views){ const vr=ui.views.getBoundingClientRect(), cr=c.getBoundingClientRect(); if(cr.bottom>vr.bottom-8) ui.views.scrollTop+=cr.bottom-vr.bottom+16; } } }
 
 /* ================= 5.0: the Seven Stars (and the Eight Moons) ================= */
 // finishing the meadow lights seven stars above it, one by one. When all seven shine, the King can answer them: Starfall.
@@ -5742,7 +5745,7 @@ function buildUI(){
   ui.slFeed.onclick=()=>{ if(!S.sl.lv) hatchSl(); else feedSl(1,ui.slFeed); }; ui.slMax.onclick=()=>feedSl('evo',ui.slMax); ui.slRen.onclick=()=>{ sfx('click'); renameSl(); };
   ui.facList.onclick=e=>{ const s=e.target.closest('.star-btn'); if(s){ buyStar(+s.dataset.s,s); return; } const b=e.target.closest('.buy'); if(b) buyFac(+b.dataset.i,b); };
   ui.upgQueue.onclick=e=>{ const b=e.target.closest('.upg'); if(b) buyUpg(b.dataset.id,b); };
-  ui.perkGrid.onclick=e=>{ const n=e.target.closest('[data-tn]'); if(n){ sfx('click'); ui.treeSel=ui.treeSel===n.dataset.tn?null:n.dataset.tn; renderPerks(); return; } const b=e.target.closest('#treeBuy'); if(b&&ui.treeSel) buyPerk(ui.treeSel,b); };
+  ui.perkGrid.onclick=e=>{ const n=e.target.closest('[data-tn]'); if(n){ sfx('click'); ui.treeSel=ui.treeSel===n.dataset.tn?null:n.dataset.tn; ui.treeJump=1; renderPerks(); return; } const b=e.target.closest('#treeBuy'); if(b&&ui.treeSel) buyPerk(ui.treeSel,b); };
   ui.ringList.onclick=e=>{ const b=e.target.closest('.slot[data-r]'); if(b){ sfx('click'); openSlot(+b.dataset.r,+b.dataset.k); } };
   ui.ascBtn.onclick=askAscend; ui.sfBtn.onclick=askStarfall; ui.orrBest.onclick=()=>{ audioUnlock(); equipBest(); };
   ui.eggBtn.onclick=()=>{ audioUnlock(); buyEgg(); };
