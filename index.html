@@ -1611,6 +1611,8 @@ function parseSave(raw){
   if(!o.sl||typeof o.sl!=='object'||Array.isArray(o.sl)) o.sl={lv:0}; o.sl.lv=Math.max(0,o.sl.lv|0); o.slEvo=clamp(o.slEvo|0,0,SL_EVO.length); o.skyEvo=clamp(o.skyEvo|0,0,SL_EVO_SKY.length); if(typeof o.slName!=='string') o.slName='';
   o.shiny=new Array(BOARD_MAX).fill(0); if(Array.isArray(d.shiny)) d.shiny.slice(0,BOARD_MAX).forEach((v,i)=>{ o.shiny[i]=v&&o.board[i]?1:0; });
   o.gemc=new Array(BOARD_MAX).fill(0); if(Array.isArray(d.gemc)) d.gemc.slice(0,BOARD_MAX).forEach((v,i)=>{ o.gemc[i]=v&&o.board[i]?1:0; });
+  // 5.0: the Swift Compass is retired (it made Dragon Hearts too easy); each one left in a backpack becomes 10 Gems
+  { let n=0; const cv=b=>{ if(b&&typeof b==='object'){ n+=Math.max(0,Math.floor(+b.compass||0)); delete b.compass; } }; cv(o.items); if(d.itemsR&&typeof d.itemsR==='object') for(const r in d.itemsR) cv(d.itemsR[r]); if(n>0){ o.gems=(+o.gems||0)+10*n; o.tut.compassGone=(o.tut.compassGone||0)+n; } }
   { const R={}; if(d.itemsR&&typeof d.itemsR==='object') for(const r of ['meadow','sky']){ const b=d.itemsR[r]; if(b&&typeof b==='object'){ R[r]={}; for(const k in b) if(ITEMS[k]&&+b[k]>0) R[r][k]=Math.floor(+b[k]); } } o.itemsR=R; }
   if(o.trial&&(typeof o.trial!=='object'||!o.trial.k)) o.trial=null; if(!o.run||typeof o.run!=='object'||!Array.isArray(o.run.g)) o.run=null;
   o.arts=[0,1,2,3,4,5].map(i=>Math.max(0,(Array.isArray(d.arts)&&+d.arts[i])||0));
@@ -4643,6 +4645,7 @@ function unlockTick(){ const L=S.level, pt=S.playTime, vet=ascTotal()>0||S.realm
   U('shiny',unlocked('col'));
   U('steward',L>=STEWARD_LV||crownAt(4));
   if(trialsOpen()&&!S.tut.trialsTip){ S.tut.trialsTip=1; intro('trials',()=>coach([{el:()=>ui.tabMap.asc||ui.tabs,text:'Three ascensions! The <b>Trials of the Crown</b> are open in the Ascend tab: runs with a twist, each with a permanent reward and a jewel for the crown.'}]),2); }
+  if(S.tut.compassGone>0) intro('compassGone',()=>{ const n=S.tut.compassGone; delete S.tut.compassGone; toast('<span class="ti">🧭</span><span><b>The Swift Compass is retired.</b><br>You got '+(10*n)+' 💎 Gems back for '+(n>1?'your '+n+' compasses':'your compass')+'.</span>','gold'); },3);
   if(S.tut.new50===1) intro('new50',()=>{ S.tut.new50=2; S.tut.new40=2; S.tut.new36=2; S.tut.new35=2; S.tut.new34=2; S.tut.new33=2; S.tut.new32=2; delete S.tut.refund35;
     openModal('<h2 class="mh">✨ New in Slime Empire 5.0</h2><ul class="howto">'+(S.tut.sky40?'<li><span>🌌</span><b>The stars were rebuilt.</b> They have their own <b>stargoo</b> now, and your meadow is back on the map.</li>':'')+
       (S.tut.sf50?'<li><span>⭐</span>You already passed Starfall, so your <b>Seven Stars</b> are lit. The <b>Meadow King</b> color and a <b>Slime God statue</b> on your sky island are yours.</li>':'<li><span>⭐</span><b>The Seven Stars</b> lead to Starfall. Light all seven stars of the crown (look up in the meadow!) and the sky opens.</li>')+
@@ -4764,7 +4767,7 @@ const ITEMS={
  eggcrate:{ico:'📦',n:'Egg Crate',sn:'Eggs',d:'10 eggs that hatch 2 levels higher.',use:()=>{ S.bonusEggs=(S.bonusEggs||0)+10; return '10 bonus eggs are waiting in the '+RL().pen; }},
  bell:{ico:'🔔',n:'Golden Bell',d:'A golden slime (or shooting star) appears right away.',use:()=>{ if(S.world!=='meadow') return {fail:'Use it in the King\'s world.'}; if(goldenOn) return {fail:'One is already here!'}; spawnGolden(); return 'Something shiny appeared!'; }},
  bait:{ico:'🎣',n:'Boss Bait',d:'A miniboss appears right away (Lv 13+).',use:()=>{ if(S.level<BOSS_LV) return {fail:'Minibosses come at Lv '+BOSS_LV+'.'}; if(S.world!=='meadow') return {fail:'Use it in the King\'s world.'}; if(B) return {fail:'A miniboss is already here!'}; spawnBoss(); return 'A miniboss smells the bait…'; }},
- compass:{ico:'🧭',n:'Swift Compass',d:'Every running expedition finishes now.',use:()=>{ const ex=S.hollow.exps.filter(e=>e.end>nowT()); if(!ex.length) return {fail:'No expeditions are running.'}; ex.forEach(e=>{ e.end=nowT(); }); return ex.length+' expedition'+(ex.length>1?'s':'')+' came back!'; }},
+
  chest:{ico:'🎁',n:'Artifact Chest',d:'3 random Artifacts.',use:()=>{ const g=[rollArtifact(),rollArtifact(),rollArtifact()]; g.forEach(t=>S.arts[t]++); recalc(); if(g.includes(5)) mythicAnnounce(); return 'Artifacts: '+g.map(t=>RARITY[t].n).join(', '); }},
  cookie:{ico:'🍪',n:'Friendship Cookie',sn:'Cookie',d:()=>'Fills the '+RL().rushName+' meter right away.',use:()=>{ if(S.world!=='meadow') return {fail:'Use it in the King\'s world.'}; if(rushActive()) return {fail:'One is already going!'}; S.rush=100; startRush(); return 'Yum! '+RL().rushName+'!'; }},
  gegg:{ico:'🥚',n:'Gift Egg',sn:'Gift Egg',d:'An egg that hatches 3 sizes bigger than your eggs do.',use:()=>{ if(S.world!=='meadow') return {fail:'Use it in the King\'s world.'}; if(!emptyCells().length) return {fail:'Your '+RL().pen.toLowerCase()+' is full!'}; spawnEgg(Math.min(topL()-1,effEgg()+3),false,0); return 'A big egg hatched in your '+RL().pen.toLowerCase()+'!'; }},
@@ -5059,9 +5062,9 @@ function evById(id){ const y=+String(id).slice(0,4), m=+String(id).slice(5,7)-1;
 let EVC=null, EVDEV=null; // EVDEV: a month picked in the test tools
 function season(){ const d=today()||localDay(Date.now()); let y=+d.slice(0,4), m=+d.slice(5,7)-1; if(EVDEV!=null) m=EVDEV; const id=y+'-'+pad2(m+1); if(!EVC||EVC.id!==id) EVC=evFor(y,m); return EVC; }
 // the Royal Road: the same rhythm every month, with the month's own looks and lore card in fixed places
-const RR_T=['warp30','boost2','eggcrate','g15','frenzy2','hatP','bell2','warp2h2','lore','chest2','boost2','skin','warp2h','eggcrate3','hatF','g25','compass','warp8h','bait2','theme',
+const RR_T=['warp30','boost2','eggcrate','g15','frenzy2','hatP','bell2','warp2h2','lore','chest2','boost2','skin','warp2h','eggcrate3','hatF','g25','chest','warp8h','bait2','theme',
   'chest','boost23','g15','skin2','frenzy3','warp8h2','eggcrate2','rchest2','g20','hatG'];
-const RR_IT={warp30:['warp30',1],boost2:['boost2',1],eggcrate:['eggcrate',1],frenzy2:['frenzy',2],bell2:['bell',2],warp2h2:['warp2h',2],chest2:['chest',2],warp2h:['warp2h',1],eggcrate3:['eggcrate',3],compass:['compass',1],warp8h:['warp8h',1],bait2:['bait',2],chest:['chest',1],boost23:['boost2',3],frenzy3:['frenzy',3],warp8h2:['warp8h',2],eggcrate2:['eggcrate',2],rchest2:['rchest',2]};
+const RR_IT={warp30:['warp30',1],boost2:['boost2',1],eggcrate:['eggcrate',1],frenzy2:['frenzy',2],bell2:['bell',2],warp2h2:['warp2h',2],chest2:['chest',2],warp2h:['warp2h',1],eggcrate3:['eggcrate',3],warp8h:['warp8h',1],bait2:['bait',2],chest:['chest',1],boost23:['boost2',3],frenzy3:['frenzy',3],warp8h2:['warp8h',2],eggcrate2:['eggcrate',2],rchest2:['rchest',2]};
 const RRC={};
 function rrOf(se){ if(RRC[se.k]) return RRC[se.k]; return RRC[se.k]=RR_T.map(t=>{ if(t[0]==='g'&&/^g\d+$/.test(t)) return {k:'gems',n:+t.slice(1)}; if(t==='lore') return {k:'lore',id:'ev_'+se.k}; if(se.cos[t]) return {k:'cos',id:se.cos[t]}; const it=RR_IT[t]; return {k:'item',id:it[0],n:it[1]}; }); }
 function seasonState(){ const se=season(); if(!se) return null;
@@ -5353,7 +5356,7 @@ function rollShiny(i){ if(!unlocked('shiny')||(Math.random()>=SHINY_P*[1,1.5,2,3
 /* ================= Slime of the Day ================= */
 function sotdL(){ if(!unlocked('goals')) return 0; const d=today(); if(!d) return 0; const key=d+'|'+S.runBest+'|'+S.realm; if(ui.sotdK===key) return ui.sotdV; const top=Math.min(MAXL,Math.max(3,S.runBest)), lo=Math.max(1,top-6), r=seeded('sotd'+d); ui.sotdK=key; ui.sotdV=lo+Math.floor(r()*(top-lo+1)); return ui.sotdV; }
 /* ================= Gem shop and the Royal Spin ================= */
-const SHOP_OFFERS=[{id:'frenzy',n:2,p:10},{id:'eggcrate',n:1,p:8},{id:'warp2h',n:1,p:15},{id:'bell',n:2,p:8},{id:'boost2',n:1,p:12},{id:'chest',n:1,p:15},{id:'rchest',n:1,p:40},{id:'warp8h',n:1,p:35},{id:'warp30',n:2,p:8},{id:'bait',n:2,p:8,ok:()=>unlocked('boss')},{id:'compass',n:1,p:10,ok:()=>S.level>=HOLLOW_LV}];
+const SHOP_OFFERS=[{id:'frenzy',n:2,p:10},{id:'eggcrate',n:1,p:8},{id:'warp2h',n:1,p:15},{id:'bell',n:2,p:8},{id:'boost2',n:1,p:12},{id:'chest',n:1,p:15},{id:'rchest',n:1,p:40},{id:'warp8h',n:1,p:35},{id:'warp30',n:2,p:8},{id:'bait',n:2,p:8,ok:()=>unlocked('boss')}];
 const ROYAL_SPIN=25, ROYAL_MAX=5;
 function shopToday(){ const d=today()||'x', r=seeded('shop'+d), pool=SHOP_OFFERS.filter(o=>!o.ok||o.ok()), out=[]; while(out.length<3&&pool.length) out.push(pool.splice(Math.floor(r()*pool.length),1)[0]); if(S.shop.day!==d){ S.shop.day=d; S.shop.bought={}; } return out; }
 function shopHtml(){ const offers=shopToday(), now=new Date(nowT()), mid=new Date(now); mid.setHours(24,0,0,0); const looks=Object.keys(COS).filter(k=>COS[k].shop);
