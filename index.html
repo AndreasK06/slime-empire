@@ -12,7 +12,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<meta name="build" content="8.0">
+<meta name="build" content="8.0.1">
 <script>
 // install as an app: works offline and opens full screen from the home screen
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
@@ -375,7 +375,7 @@ h3.sec span{flex:none}
 .slsk.locked{opacity:.6}
 .rh-btns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
 .frbtns{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
-.frreq{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:8px;align-items:center;padding:8px 10px;margin-bottom:8px;border-color:var(--gold)}
+.frreq{display:grid;grid-template-columns:minmax(0,1fr) auto auto auto;gap:8px;align-items:center;padding:8px 10px;margin-bottom:8px;border-color:var(--gold)}
 .frreq .who b{font:16px var(--f-display);font-weight:400;color:#fff;display:block;word-break:break-word}
 .frreq .who small{display:block;font-size:12px;color:var(--muted)}
 .frdot{font-style:normal;display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:var(--pink);color:#fff;font:12px/18px var(--f-display);text-align:center}
@@ -777,7 +777,13 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
 .frgift.sent{opacity:.55;color:var(--goo);font:15px var(--f-display);background:transparent}
 .frsort{flex-wrap:wrap}
 .frsort button{padding:6px 7px;font-size:13px}
-.frreq.gift{border-color:#ff8ad8}
+.frreq.gift{border-color:#ff8ad8;grid-template-columns:minmax(0,1fr) auto auto}
+.linkb{border:0;background:none;padding:0;color:var(--muted);font:inherit;text-decoration:underline;cursor:pointer}
+.frfoot{text-align:center;margin-top:14px}
+.frblk{margin-top:10px}
+.frblk summary{cursor:pointer;color:var(--muted);font-size:14px;padding:4px 0}
+.frbrow{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 10px;margin-top:6px;border-radius:12px;background:rgba(7,5,20,.45);font:16px var(--f-display)}
+.frbrow .btn{font-size:13px;padding:5px 10px}
 .giftbox{font-size:64px;animation:giftPop .7s cubic-bezier(.3,1.6,.5,1)}
 @keyframes giftPop{0%{transform:scale(.2) rotate(-20deg)}100%{transform:scale(1) rotate(0)}}
 #modalBody .mcenter .btn{margin:4px}
@@ -1774,7 +1780,7 @@ function parseSave(raw){
   for(const k of ['shinyDex','req','lore','trials','shop']) if(!o[k]||typeof o[k]!=='object'||Array.isArray(o[k])) o[k]=fr[k]; if(!o.shop.bought) o.shop.bought={};
   if(!o.mast||typeof o.mast!=='object'||Array.isArray(o.mast)) o.mast={m:{},s:{}}; for(const r of ['m','s','w','d','n']) if(!o.mast[r]||typeof o.mast[r]!=='object') o.mast[r]={};
   if(o.decree&&!DECREES[o.decree]) o.decree=null; if(!Array.isArray(o.decreeOffer)) o.decreeOffer=null;
-  if(!o.fb||typeof o.fb!=='object'||typeof o.fb.code!=='string') o.fb=null; if(!Array.isArray(o.friends)) o.friends=[]; o.friends=o.friends.filter(f=>f&&typeof f.c==='string').slice(0,30);
+  if(!o.fb||typeof o.fb!=='object'||typeof o.fb.code!=='string') o.fb=null; if(!Array.isArray(o.friends)) o.friends=[]; o.friends=o.friends.filter(f=>f&&typeof f.c==='string').slice(0,30); o.blocked=Array.isArray(o.blocked)?o.blocked.filter(c=>typeof c==='string').slice(-100):[];
   if(!o.sl||typeof o.sl!=='object'||Array.isArray(o.sl)) o.sl={lv:0}; o.sl.lv=Math.max(0,o.sl.lv|0); o.slEvo=clamp(o.slEvo|0,0,SL_EVO.length); o.skyEvo=clamp(o.skyEvo|0,0,SL_EVO_SKY.length); if(typeof o.slName!=='string') o.slName='';
   o.shiny=new Array(BOARD_MAX).fill(0); if(Array.isArray(d.shiny)) d.shiny.slice(0,BOARD_MAX).forEach((v,i)=>{ o.shiny[i]=v&&o.board[i]?1:0; });
   o.gemc=new Array(BOARD_MAX).fill(0); if(Array.isArray(d.gemc)) d.gemc.slice(0,BOARD_MAX).forEach((v,i)=>{ o.gemc[i]=v&&o.board[i]?1:0; });
@@ -4190,7 +4196,7 @@ function skyWelcome(){ if(S.tut.sky) return; S.tut.sky=1; chapterCard(2); const 
 // and waits in S.dims while you are somewhere else
 const ACCT_KEYS=new Set(['v','realm','world','dims','lastSave','created','earnedAll','taps','crits','merges','pets','goldens','rushes','offline','ach','maxSpecies','skyMax','settings','playTime','bestGps',
   'level','xp','tenPow','tut','freeEggs','arts','bossNext','bossKills','bossEscapes','hollow','ascensions','skyAsc','starfalls','stardust','stardustAll','cst','conj','grands','seenTabs','gems','items','bpNew','cos',
-  'login','goals','wheel','season','shinyDex','lore','loreNew','trials','steward','shop','kname','req','slEvo','slName','slPets','mast','bestCombo','slGiftT','fb','friends','frSeen','retroXP',
+  'login','goals','wheel','season','shinyDex','lore','loreNew','trials','steward','shop','kname','req','slEvo','slName','slPets','mast','bestCombo','slGiftT','fb','friends','frSeen','blocked','retroXP',
   'rift','seeds','gifts','pz','skyEvo','dbook','stars','moons','statue','hallSeen','itemsR','pevt','ship','seaMax','seaEvo','dream','dreamMax','dreamEvo','kq','dawn','dawnMax','dawnEvo']);
 function realmPack(){ const o={}; for(const k of Object.keys(S)) if(!ACCT_KEYS.has(k)) o[k]=S[k]; return o; }
 const offCap=()=>[28800,86400,129600,172800][prk('night')]+(legacy(3)?7200:0)+(renBoon('away')?3600:0), offRate=()=>(prk('night')?1:.5)*(legacy(3)?1.25:1);
@@ -4832,8 +4838,8 @@ function albumHtml(){ const rows=[['meadow','🌳 The meadow',SL_EVO,S.slEvo||0]
 
 /* ================= 5.0: the Kingdom Hall: a museum of your journey ================= */
 // your trophies, keepsakes, stars, moons and the story so far. Friends can visit yours through the leaderboard
-function hallMe(){ return {me:true,name:S.kname||'My Kingdom',lvl:S.level,ms:starsN(),sm:moonsN(),sf:S.starfalls||0,best:S.maxSpecies,sky:S.skyMax,tia:S.hollow.tia?1:0,bk:bookCount(),rf:(S.rift&&S.rift.best)||0,guard:(S.rift&&S.rift.guard)||0,pza:(S.pz&&S.pz.all)||0,combo:S.bestCombo||0,asc:S.ascensions,skyAsc:S.skyAsc,cry:(S.rift&&S.rift.cry)||0,forms:(S.slEvo||0)+(S.skyEvo||0)+(S.seaEvo||0)+(S.dreamEvo||0)+(S.dawnEvo||0),lh:lhLit(),isl:(S.ship&&S.ship.best)||0,dr:drN(),bl:bellsN()}; }
-function openHall(p,back){ const d=p?{me:false,name:p.name||'A kingdom',lvl:+p.lvl||1,ms:+p.ms||0,sm:+p.sm||0,sf:+p.sf||0,best:+p.best||1,tia:+p.tia||0,bk:+p.bk||0,rf:+p.rf||0,pza:+p.pza||0,asc:+p.asc||0,lh:+p.lh||0,isl:+p.sea||0,dr:+p.dr||0}:hallMe();
+function hallMe(){ return {me:true,name:myName(),lvl:S.level,ms:starsN(),sm:moonsN(),sf:S.starfalls||0,best:S.maxSpecies,sky:S.skyMax,tia:S.hollow.tia?1:0,bk:bookCount(),rf:(S.rift&&S.rift.best)||0,guard:(S.rift&&S.rift.guard)||0,pza:(S.pz&&S.pz.all)||0,combo:S.bestCombo||0,asc:S.ascensions,skyAsc:S.skyAsc,cry:(S.rift&&S.rift.cry)||0,forms:(S.slEvo||0)+(S.skyEvo||0)+(S.seaEvo||0)+(S.dreamEvo||0)+(S.dawnEvo||0),lh:lhLit(),isl:(S.ship&&S.ship.best)||0,dr:drN(),bl:bellsN()}; }
+function openHall(p,back,code){ const d=p?{me:false,name:p.name||'A kingdom',lvl:+p.lvl||1,ms:+p.ms||0,sm:+p.sm||0,sf:+p.sf||0,best:+p.best||1,tia:+p.tia||0,bk:+p.bk||0,rf:+p.rf||0,pza:+p.pza||0,asc:+p.asc||0,lh:+p.lh||0,isl:+p.sea||0,dr:+p.dr||0}:hallMe();
   const stars='<div class="hallsky">'+[0,1,2,3,4,5,6].map(i=>'<span class="'+(i<d.ms?'on':'')+'">⭐</span>').join('')+'</div>'+(d.sf?'<div class="hallsky moon">'+[0,1,2,3,4,5,6,7].map(i=>'<span class="'+(i<d.sm?'on':'')+'">🌙</span>').join('')+'</div>':'')+(d.lh||(d.me&&S.tut&&S.tut.seaSeen)?'<div class="hallsky lh">'+[0,1,2,3,4,5,6,7,8].map(i=>'<span class="'+(i<d.lh?'on':'')+'">🏮</span>').join('')+'</div>':'')+(d.dr||(d.me&&S.tut&&S.tut.dreamSeen)?'<div class="hallsky dr">'+DREAMS.map((D,i)=>'<span class="'+(i<d.dr?'on':'')+'">'+D.ico+'</span>').join('')+'</div>':'')+(d.me&&(d.bl||(S.tut&&S.tut.dawnSeen))?'<div class="hallsky bl">'+BELLS.map((b,i)=>'<span class="'+(i<d.bl?'on':'')+'">🔔</span>').join('')+'</div>':'');
   const ped=(img,t,v,on)=>'<div class="hped'+(on?'':' off')+'"><div class="pi">'+img+'</div><b>'+t+'</b><small>'+v+'</small></div>';
   const best=Math.max(1,Math.min(MEADOW_SPECIES.length,d.best));
@@ -4854,8 +4860,8 @@ function openHall(p,back){ const d=p?{me:false,name:p.name||'A kingdom',lvl:+p.l
     { const lg=LEGACY.filter((L,i)=>legacy(i+1)); h+='<h3 class="sec" style="font-size:16px">Legacies · '+lg.length+'/'+LEGACY.length+'</h3><p class="note">'+(lg.length?lg.map(L=>L.ico+' <b>'+L.n+'</b>: '+L.d).join('<br>'):'Every chapter you finish leaves a Legacy that helps in every realm.')+'</p>'; }
     const pages=[]; for(const s of STAR7) if(starLit(s.k)) pages.push(['star',s]); if(starsN()===STAR7.length) pages.push(['star',{k:'all',n:'All seven stars'}]); for(const s of MOON8) if(moonLit(s.k)) pages.push(['moon',s]); if(moonsN()===MOON8.length) pages.push(['moon',{k:'all',n:'All eight moons'}]); for(let i=0;i<lhLit();i++) pages.push(['lh',{k:i,n:LH[i].n}]); for(let i=0;i<drN();i++) pages.push(['dr',{k:i,n:DREAMS[i].n}]); for(let i=0;i<bellsN();i++) pages.push(['bl',{k:i,n:BELLS[i].n}]);
     h+='<h3 class="sec" style="font-size:16px">The King\'s journey · '+pages.length+' pages</h3>'+(pages.length?pages.map(([kind,s])=>'<details class="jpage"><summary>'+(kind==='star'?'⭐ ':kind==='lh'?'🏮 ':kind==='dr'?DREAMS[s.k].ico+' ':kind==='bl'?'🔔 ':'🌙 ')+s.n+'</summary>'+(kind==='lh'?lhPage(s.k):kind==='dr'?drPage(s.k):kind==='bl'?bellPage(s.k+1):storyHtml(kind,s.k))+'</details>').join(''):'<p class="note">Every star and moon you light adds a page to the King\'s story.</p>'); }
-  if(back) h+='<div class="btnrow" style="justify-content:center"><button class="btn ghost" id="hallBack">← Back to friends</button></div>';
-  openModal(h); ui.modalBody.onclick=e=>{ if(e.target.closest('#hallBack')){ sfx('click'); openFriends(); } }; }
+  if(back) h+='<div class="btnrow" style="justify-content:center"><button class="btn ghost" id="hallBack">← Back to friends</button>'+(code?'<button class="btn ghost" id="hallBlock">🚫 Block or report</button>':'')+'</div>';
+  openModal(h); ui.modalBody.onclick=e=>{ if(e.target.closest('#hallBack')){ sfx('click'); openFriends(); } if(e.target.closest('#hallBlock')){ sfx('click'); openBlock(code,d.name); } }; }
 
 /* ================= 5.0.2: rare Rushes ================= */
 // now and then a Wobble Rush (or Supernova) is a rare one. Its special part always comes first (40 or 45 s);
@@ -7995,7 +8001,7 @@ async function fbReq(method,path,body){ const t=await fbToken(); const r=await f
 // Firestore's REST format: every value names its type
 const fbVal=v=>typeof v==='string'?{stringValue:v}:Number.isInteger(v)?{integerValue:String(v)}:{doubleValue:+v||0};
 const fbGet=f=>!f?undefined:f.stringValue!=null?f.stringValue:f.integerValue!=null?+f.integerValue:f.doubleValue!=null?+f.doubleValue:f.booleanValue;
-function fbMine(){ const rk=rankOf(); return {uid:FB.uid||'',name:(S.kname||'My Kingdom').slice(0,22),rank:rk.n,rc:rk.c,lvl:S.level,best:Math.max(S.maxSpecies,S.skyMax),gpsL:S.bestGps>1?Math.log10(S.bestGps):0,asc:ascTotal(),sf:S.starfalls||0,evo:S.slEvo||0,t:Date.now(),rf:(S.rift&&S.rift.best)||0,
+function fbMine(){ const rk=rankOf(); return {uid:FB.uid||'',name:myName(),rank:rk.n,rc:rk.c,lvl:S.level,best:Math.max(S.maxSpecies,S.skyMax),gpsL:S.bestGps>1?Math.log10(S.bestGps):0,asc:ascTotal(),sf:S.starfalls||0,evo:S.slEvo||0,t:Date.now(),rf:(S.rift&&S.rift.best)||0,
   ms:starsN(),sm:moonsN(),tia:S.hollow.tia?1:0,bk:bookCount(),pza:(S.pz&&S.pz.all)||0,lh:lhLit(),sea:(S.ship&&S.ship.best)||0,dr:drN(),dd:S.dream&&S.dream.daily&&S.dream.daily.t?S.dream.daily.t*1e5+Math.min(99999,S.dream.daily.best|0):0,pzd:S.pz&&S.pz.best?pzDayNum(S.pz.day):0,pzs:S.pz&&S.pz.best?S.pz.best.s:0,pzt:S.pz&&S.pz.best?S.pz.best.st:0}; }
 const pzNew=()=>pzOpen()&&!(S.pz&&S.pz.day===(today()||localDay(nowT()))&&S.pz.tries>0);
 function fbFields(){ const p=fbMine(), f={}; for(const k in p) f[k]=fbVal(p[k]); return f; }
@@ -8019,7 +8025,7 @@ async function fbPush(force){ if(!S.fb||!S.fb.ok||FB.busy||navigator.onLine===fa
 async function fbFetch(codes){ const out={}; if(!codes.length) return out; const t=await fbToken();
   const r=await fetch(FB_DOCS+':batchGet',{method:'POST',headers:{Authorization:'Bearer '+t,'Content-Type':'application/json'},body:JSON.stringify({documents:codes.map(c=>'projects/'+FB.pid+'/databases/(default)/documents/players/'+c)})});
   if(!r.ok) throw new Error('read '+r.status); const arr=await r.json();
-  for(const x of arr) if(x.found){ const id=x.found.name.split('/').pop(), f=x.found.fields||{}, o={}; for(const k in f) o[k]=fbGet(f[k]); out[id]=o; } else if(x.missing) out[x.missing.split('/').pop()]=null;
+  for(const x of arr) if(x.found){ const id=x.found.name.split('/').pop(), f=x.found.fields||{}, o={}; for(const k in f) o[k]=fbGet(f[k]); out[id]=frClean(o); } else if(x.missing) out[x.missing.split('/').pop()]=null;
   return out; }
 async function fbRefresh(){ const codes=S.friends.map(f=>f.c); try{ const d=await fbFetch(codes); FB.data=d; FB.at=Date.now(); FB.err='';
     for(const f of S.friends){ const p=d[f.c]; if(p&&p.name) f.n=p.name; } }
@@ -8030,29 +8036,30 @@ function frRows(){ const me=fbMine(), list=[{p:me,me:true}]; for(const f of S.fr
   const pzd=pzDayNum(), dn=dayNum(), ddT=p=>Math.floor((+p.dd||0)/1e5)===dn?(+p.dd)%1e5:0, key={lvl:'lvl',asc:'asc',rift:'rf'}[FB.sort]||'gpsL', val=x=>!x.p?-1:FB.sort==='dream'?(+x.p.dr||0)*1e6+(ddT(x.p)?1e5-ddT(x.p):0):FB.sort==='pz'?(+x.p.pzd===pzd?100*(+x.p.pzt||0)+(+x.p.pzs||0)+1:0):(+x.p[key]||0); list.sort((a,b)=>val(b)-val(a));
   const right=p=>FB.sort==='dream'?'🌀 '+(+p.dr||0)+'/10'+(ddT(p)?' · ☀️'+fmtTime(ddT(p)):''):FB.sort==='lvl'?'Lv '+(+p.lvl||1):FB.sort==='asc'?'👑 '+(+p.asc||0):FB.sort==='rift'?'🕳️ '+(+p.rf||0):FB.sort==='pz'?(+p.pzd===pzd?'⭐'.repeat(+p.pzt||1)+' +'+(+p.pzs||0):'—'):fmt(Math.pow(10,+p.gpsL||0),true)+'/s', g=giftDay();
   return list.map((x,i)=>{ const p=x.p;
-    if(!p) return '<div class="frrow gone"><span class="pos">·</span><div class="who"><b>'+esc(x.name||fcode(x.code))+'</b><small>'+(FB.at&&FB.data[x.code]===null?'No kingdom with this code':'Loading…')+'</small></div><span></span><span></span><button class="frrm" data-rm="'+x.code+'" aria-label="Remove friend">×</button></div>';
+    if(!p) return '<div class="frrow gone"><span class="pos">·</span><div class="who"><b>'+esc(safeName(x.name,24)||fcode(x.code))+'</b><small>'+(FB.at&&FB.data[x.code]===null?'No kingdom with this code':'Loading…')+'</small></div><span></span><span></span><button class="frrm" data-rm="'+x.code+'" aria-label="Remove friend">×</button></div>';
     const b=Math.max(1,Math.min(MEADOW_SPECIES.length,+p.best||1));
     return '<div class="frrow'+(x.me?' me':'')+'"><span class="pos">'+(i+1)+'</span><div class="who" data-hall="'+(x.me?'me':x.code)+'"><span class="rtag" style="--rc:'+okCol(p.rc)+'">'+esc(p.rank||'Droplet')+'</span> <b>'+esc(p.name||'?')+'</b><small>Lv '+(+p.lvl||1)+' · best Lv.'+b+' '+MEADOW_SPECIES[b-1].n+' · '+(+p.asc||0)+' ascension'+((+p.asc||0)===1?'':'s')+(+p.dr?' · 🌀'+(+p.dr)+'/10':+p.lh?' · 🏮'+(+p.lh)+'/9':+p.sf&&+p.sm?' · 🌙'+(+p.sm)+'/8':+p.ms?' · ⭐'+(+p.ms)+'/7':'')+' · '+(x.me?'you':ago(p.t))+'</small></div><b class="gps">'+right(p)+'</b>'+(x.me?'<span></span><span></span>':'<button class="frgift'+(g.sent[x.code]?' sent':'')+'" data-gift="'+x.code+'" aria-label="Send a gift">'+(g.sent[x.code]?'✓':'🎁')+'</button><button class="frrm" data-rm="'+x.code+'" aria-label="Remove friend">×</button>')+'</div>'; }).join(''); }
 function frNote(){ return FB.err?'📡 Could not reach the leaderboard. Check your internet and try again.':S.friends.length?(FB.at?'Updated '+ago(FB.at)+'. It refreshes every minute while this is open.':'Loading…'):'Add a friend with their code to start your leaderboard!'; }
-function frUpdate(){ const l=document.getElementById('frList'), n=document.getElementById('frNote'), q=document.getElementById('frReqs'), gq=document.getElementById('frGifts'); if(l) l.innerHTML=frRows(); if(n) n.textContent=frNote(); if(q) q.innerHTML=frReqHtml(); if(gq) gq.innerHTML=giftHtml(); frBadge(); }
+function frUpdate(){ const l=document.getElementById('frList'), n=document.getElementById('frNote'), q=document.getElementById('frReqs'), gq=document.getElementById('frGifts'), bq=document.getElementById('frBlk'); if(l) l.innerHTML=frRows(); if(n) n.textContent=frNote(); if(q) q.innerHTML=frReqHtml(); if(gq) gq.innerHTML=giftHtml(); if(bq&&!bq.querySelector('details[open]')) bq.innerHTML=frBlkHtml(); frBadge(); }
 /* friend requests (3.6.2): adding someone drops your code into their inbox; they accept to add you back */
 FB.reqs={}; FB.inboxN=0;
 function frReqHtml(){ const ks=Object.keys(FB.reqs||{}); if(!ks.length) return '';
-  return '<h3 class="sec" style="font-size:16px">Friend requests</h3>'+ks.map(c=>'<div class="frreq card"><div class="who"><b>'+esc(FB.reqs[c].n||'A kingdom')+'</b><small>'+fcode(c)+' · '+ago(FB.reqs[c].t)+' · wants to be friends</small></div><button class="btn gold" data-acc="'+c+'">Accept</button><button class="frrm" data-rej="'+c+'" aria-label="Decline">✕</button></div>').join(''); }
+  return '<h3 class="sec" style="font-size:16px">Friend requests</h3>'+ks.map(c=>'<div class="frreq card"><div class="who"><b>'+esc(FB.reqs[c].n||'A kingdom')+'</b><small>'+fcode(c)+' · '+ago(FB.reqs[c].t)+' · wants to be friends</small></div><button class="btn gold" data-acc="'+c+'">Accept</button><button class="frrm" data-rej="'+c+'" aria-label="Decline">✕</button><button class="frrm" data-blk="'+c+'" aria-label="Block or report">🚫</button></div>').join(''); }
 function frBadge(){ const n=Object.keys(FB.reqs||{}).length+giftCount(), b=ui.friendsBtn; if(b) setTxt(b,'👥 Friends'+(n?' <i class="frdot">'+n+'</i>':''),true); }
 async function fbInbox(){ if(!S.fb||!S.fb.ok||navigator.onLine===false) return;
   try{ const r=await fbReq('GET','inbox/'+S.fb.code); if(!r.ok&&r.status!==404) return; const f=(r.ok&&r.j&&r.j.fields&&r.j.fields.req&&r.j.fields.req.mapValue&&r.j.fields.req.mapValue.fields)||{}, out={};
     const gout={};
-    for(const k in f){ const c=k.replace(/^c_/,''); if(!fbParse(c)||c===S.fb.code) continue; const v=(f[k].mapValue&&f[k].mapValue.fields)||{}, n=String(fbGet(v.n)||'').slice(0,24), g=+fbGet(v.g)||0, friend=S.friends.some(x=>x.c===c);
-      if(g&&Date.now()-g<GIFT_DAYS*864e5) gout[c]={n,t:g}; else if(friend){ fbInboxClear(c); continue; }
-      if(!friend) out[c]={n,t:+fbGet(v.t)||0}; }
+    for(const k in f){ const c=k.replace(/^c_/,''); if(!fbParse(c)||c===S.fb.code) continue; if(isBlocked(c)){ fbInboxClear(c); continue; }
+      const v=(f[k].mapValue&&f[k].mapValue.fields)||{}, raw=String(fbGet(v.n)||'').slice(0,24), n=safeName(raw,24), g=+fbGet(v.g)||0, friend=S.friends.some(x=>x.c===c);
+      if(g&&Date.now()-g<GIFT_DAYS*864e5) gout[c]={n,raw,t:g}; else if(friend){ fbInboxClear(c); continue; }
+      if(!friend) out[c]={n,raw,t:+fbGet(v.t)||0}; }
     const seen=S.frSeen||(S.frSeen=[]); for(const c in out) if(!seen.includes(c)){ seen.push(c); if(seen.length>60) seen.shift(); sfx('ach'); toast('<span class="ti">👥</span><span><b>'+esc(out[c].n||'A kingdom')+'</b> wants to be friends!<br>Accept in 👥 Friends (Collection tab).</span>','gold'); }
     for(const c in gout){ const key='g'+c+gout[c].t; if(!seen.includes(key)){ seen.push(key); if(seen.length>60) seen.shift(); sfx('goldGet'); toast('<span class="ti">🎁</span><span><b>'+esc(gout[c].n||'A friend')+'</b> sent you a gift!<br>Open it in 👥 Friends (Collection tab).</span>','gold'); } }
     FB.gifts=gout; FB.reqs=out; frUpdate(); }
   catch(e){} }
 // clears one request from your own inbox (a field mask with no value deletes that key)
 async function fbInboxClear(c){ try{ await fbReq('PATCH','inbox/'+S.fb.code+'?updateMask.fieldPaths=req.c_'+c,{fields:{}}); }catch(e){} delete FB.reqs[c]; }
-async function fbSendReq(to){ if(!S.fb||!S.fb.ok) return; const me=S.fb.code, e={}; e['c_'+me]={mapValue:{fields:{n:fbVal((S.kname||'My Kingdom').slice(0,22)),t:fbVal(Date.now())}}};
+async function fbSendReq(to){ if(!S.fb||!S.fb.ok) return; const me=S.fb.code, e={}; e['c_'+me]={mapValue:{fields:{n:fbVal(myName()),t:fbVal(Date.now())}}};
   try{ await fbReq('PATCH','inbox/'+to+'?updateMask.fieldPaths=req.c_'+me+'&updateMask.fieldPaths=by',{fields:{by:fbVal(me),req:{mapValue:{fields:e}}}}); }catch(err){} }
 async function copyText(t){ try{ await navigator.clipboard.writeText(t); return true; }catch(e){ try{ const ta=document.createElement('textarea'); ta.value=t; ta.setAttribute('readonly',''); ta.style.cssText='position:fixed;left:-9999px;top:0'; document.body.appendChild(ta); ta.select(); ta.setSelectionRange(0,t.length); const ok=document.execCommand('copy'); ta.remove(); return ok; }catch(e2){ return false; } } }
 /* friend gifts (4.0): once a day you can send each friend a small gift. It lands in their inbox and becomes an item in their Backpack */
@@ -8064,7 +8071,7 @@ function giftRoll(){ let tot=0; for(const [,w] of GIFT_TABLE) tot+=w; let r=Math
 async function fbSendGift(to,btn){ if(!S.fb||!S.fb.ok) return; const g=giftDay(); if(g.sent[to]){ nope(btn); return; } g.sent[to]=1; g.all=(g.all||0)+1; if(btn){ btn.classList.add('off'); btn.textContent='Sent ✓'; }
   sfx('goldGet'); gainXP(20); goalAdd('gift'); saveLocal();
   // a gift rides in your entry of their inbox (the same one a friend request uses), marked with the time it was sent
-  const me=S.fb.code, e={}, now=Date.now(); e['c_'+me]={mapValue:{fields:{n:fbVal((S.kname||'My Kingdom').slice(0,22)),t:fbVal(now),g:fbVal(now)}}};
+  const me=S.fb.code, e={}, now=Date.now(); e['c_'+me]={mapValue:{fields:{n:fbVal(myName()),t:fbVal(now),g:fbVal(now)}}};
   try{ const r=await fbReq('PATCH','inbox/'+to+'?updateMask.fieldPaths=req.c_'+me+'&updateMask.fieldPaths=by',{fields:{by:fbVal(me),req:{mapValue:{fields:e}}}}); if(!r.ok) throw new Error(r.status); }
   catch(err){ delete g.sent[to]; g.all--; if(btn&&btn.isConnected){ btn.classList.remove('off'); btn.textContent='🎁'; } toast('<span class="ti">📡</span><span>The gift could not be sent. Check your internet.</span>'); } }
 async function fbGiftClear(c){ await fbInboxClear(c); delete FB.gifts[c]; }
@@ -8076,17 +8083,22 @@ function openGift(c,btn){ const gf=FB.gifts[c]; if(!gf) return; const g=giftDay(
   openModal('<div class="mcenter"><div class="giftbox">🎁</div><h2 class="mh">A gift from '+esc(gf.n||'a friend')+'!</h2><p>Inside: '+what+'</p>'+(back?'<button class="btn gold" id="giftBack">🎁 Send one back</button>':'')+(!fr&&S.friends.length<30?'<button class="btn gold" id="giftAdd">👥 Add '+esc(gf.n||'them')+' as a friend</button>':'')+'<button class="btn ghost" id="giftOk">Back to Friends</button></div>');
   const gb=$('#giftBack'); if(gb) gb.onclick=()=>{ fbSendGift(c,gb); }; const ga=$('#giftAdd'); if(ga) ga.onclick=()=>{ if(!S.friends.some(f=>f.c===c)) S.friends.push({c,n:gf.n||''}); delete FB.reqs[c]; sfx('ach'); ga.classList.add('off'); ga.textContent='Friends ✓'; saveLocal(); fbRefresh(); }; $('#giftOk').onclick=()=>openFriends(); }
 function giftHtml(){ const ks=Object.keys(FB.gifts||{}); if(!ks.length) return ''; const g=giftDay(), left=Math.max(0,GIFT_OPEN_DAY-g.opened);
-  return '<h3 class="sec" style="font-size:16px">🎁 Gifts for you</h3>'+ks.map(c=>'<div class="frreq card gift"><div class="who"><b>'+esc(FB.gifts[c].n||'A friend')+'</b><small>'+ago(FB.gifts[c].t)+' · sent you a gift</small></div><button class="btn gold'+(left?'':' off')+'" data-open="'+c+'">Open</button></div>').join('')+(left?'':'<p class="note">You can open '+GIFT_OPEN_DAY+' gifts a day. The rest wait until tomorrow.</p>'); }
+  return '<h3 class="sec" style="font-size:16px">🎁 Gifts for you</h3>'+ks.map(c=>'<div class="frreq card gift"><div class="who"><b>'+esc(FB.gifts[c].n||'A friend')+'</b><small>'+ago(FB.gifts[c].t)+' · sent you a gift</small></div><button class="btn gold'+(left?'':' off')+'" data-open="'+c+'">Open</button><button class="frrm" data-blk="'+c+'" aria-label="Block or report">🚫</button></div>').join('')+(left?'':'<p class="note">You can open '+GIFT_OPEN_DAY+' gifts a day. The rest wait until tomorrow.</p>'); }
 const giftCount=()=>Object.keys(FB.gifts||{}).length;
 
 function openFriends(){ const on=S.fb&&S.fb.ok; let h='<h2 class="mh">👥 Friends</h2>';
-  if(!on) h+='<p>Add your friends and see all your kingdoms side by side on a live leaderboard.</p><ul class="howto"><li><span>🔑</span>You get a <b>friend code</b> to send to your friends. Add their codes, and they show up on your leaderboard.</li><li><span>👀</span>Your kingdom name, rank, level, best slime, goo/s and ascensions are shown to people who have your code. Nothing else.</li><li><span>📶</span>It needs internet. The rest of the game works as always without it.</li></ul><div class="btnrow" style="justify-content:center"><button class="btn gold" id="frStart">Get my friend code</button></div><p class="note" id="frNote">'+(FB.err?'📡 Could not reach the leaderboard. Check your internet and try again.':'')+'</p>';
+  if(!on) h+='<p>Add your friends and see all your kingdoms side by side on a live leaderboard.</p><ul class="howto"><li><span>🔑</span>You get a <b>friend code</b> to send to your friends. Add their codes, and they show up on your leaderboard.</li><li><span>👀</span>Your kingdom name, rank and progress (level, best slime, goo/s, ascensions and more) are shown to people who have your code. Nothing else: no email, no real name, no location.</li><li><span>🛡️</span>Rude kingdom names are hidden. You can block or report anyone, and delete your online data any time. <button class="linkb" id="frPriv">Privacy policy</button></li><li><span>📶</span>It needs internet. The rest of the game works as always without it.</li></ul><div class="btnrow" style="justify-content:center"><button class="btn gold" id="frStart">Get my friend code</button></div><p class="note" id="frNote">'+(FB.err?'📡 Could not reach the leaderboard. Check your internet and try again.':'')+'</p>';
   else h+='<div class="frcode card"><div><small>Your friend code</small><b>'+fcode(S.fb.code)+'</b></div><div class="frbtns"><button class="btn" id="frCopy">Copy</button>'+(navigator.share?'<button class="btn ghost" id="frShare">Share</button>':'')+'</div></div><div id="frReqs">'+frReqHtml()+'</div><div id="frGifts">'+giftHtml()+'</div>'+
     '<div class="fradd"><input id="frIn" maxlength="9" placeholder="Friend code" autocomplete="off" autocapitalize="characters" spellcheck="false"><button class="btn gold" id="frAdd">Add</button></div>'+
     '<div class="seg frsort" id="frSort"><button data-s="gps" aria-pressed="'+(FB.sort==='gps')+'">Goo/s</button><button data-s="lvl" aria-pressed="'+(FB.sort==='lvl')+'">Level</button><button data-s="asc" aria-pressed="'+(FB.sort==='asc')+'">Ascensions</button><button data-s="rift" aria-pressed="'+(FB.sort==='rift')+'">Rift</button><button data-s="pz" aria-pressed="'+(FB.sort==='pz')+'">Puzzle</button>'+(drN()||S.friends.some(f=>FB.data[f.c]&&+FB.data[f.c].dr)?'<button data-s="dream" aria-pressed="'+(FB.sort==='dream')+'">Dream</button>':'')+'</div>'+
-    '<div class="frlist" id="frList">'+frRows()+'</div><p class="note" id="frNote">'+frNote()+'</p><p class="note">🏛️ Tap a kingdom to visit its Hall.</p>';
+    '<div class="frlist" id="frList">'+frRows()+'</div><p class="note" id="frNote">'+frNote()+'</p><p class="note">🏛️ Tap a kingdom to visit its Hall. You can block or report it there.</p>'+
+    '<div id="frBlk">'+frBlkHtml()+'</div><p class="note frfoot"><button class="linkb" id="frPriv">🔒 Privacy policy</button> · <button class="linkb" id="frDel">🗑️ Delete my online data</button></p>';
   openModal(h);
-  ui.modalBody.onclick=async e=>{ const hb=e.target.closest('[data-hall]'); if(hb){ sfx('click'); const hc=hb.dataset.hall; openHall(hc==='me'?null:FB.data[hc],true); return; } const st=e.target.closest('#frStart'), cp=e.target.closest('#frCopy'), shr=e.target.closest('#frShare'), ad=e.target.closest('#frAdd'), so=e.target.closest('[data-s]'), rm=e.target.closest('[data-rm]'), acc=e.target.closest('[data-acc]'), rej=e.target.closest('[data-rej]');
+  ui.modalBody.onclick=async e=>{ const hb=e.target.closest('[data-hall]'); if(hb){ sfx('click'); const hc=hb.dataset.hall; openHall(hc==='me'?null:FB.data[hc],true,hc==='me'?null:hc); return; }
+    if(e.target.closest('#frPriv')){ openPrivacy(); return; } if(e.target.closest('#frDel')){ sfx('click'); openDeleteOnline(openFriends); return; }
+    const bk=e.target.closest('[data-blk]'), ub=e.target.closest('[data-unb]');
+    if(bk){ sfx('click'); const c=bk.dataset.blk; openBlock(c,(FB.reqs[c]&&FB.reqs[c].n)||(FB.gifts[c]&&FB.gifts[c].n)); return; }
+    if(ub){ unblockCode(ub.dataset.unb); sfx('click'); saveLocal(); const bq=document.getElementById('frBlk'); if(bq) bq.innerHTML=frBlkHtml(); toast('<span class="ti">🚫</span><span>Unblocked. Their requests and gifts can reach you again.</span>'); return; } const st=e.target.closest('#frStart'), cp=e.target.closest('#frCopy'), shr=e.target.closest('#frShare'), ad=e.target.closest('#frAdd'), so=e.target.closest('[data-s]'), rm=e.target.closest('[data-rm]'), acc=e.target.closest('[data-acc]'), rej=e.target.closest('[data-rej]');
     if(acc&&!acc.classList.contains('off')){ const c=acc.dataset.acc, rq=FB.reqs[c]; acc.classList.add('off'); sfx('click');
       if(!S.friends.some(f=>f.c===c)&&S.friends.length<30) S.friends.push({c,n:(rq&&rq.n)||''}); await fbInboxClear(c); toast('<span class="ti">👥</span><span><b>'+esc((rq&&rq.n)||'A kingdom')+'</b> is now your friend!</span>','gold'); sfx('ach'); saveLocal(); frUpdate(); fbRefresh(); return; }
     if(rej){ const c=rej.dataset.rej; sfx('click'); await fbInboxClear(c); frUpdate(); return; }
@@ -8101,7 +8113,7 @@ function openFriends(){ const on=S.fb&&S.fb.ok; let h='<h2 class="mh">👥 Frien
     if(rm){ if(!rm.dataset.sure){ rm.dataset.sure=1; rm.textContent='Remove?'; rm.classList.add('sure'); return; } S.friends=S.friends.filter(f=>f.c!==rm.dataset.rm); sfx('click'); frUpdate(); return; }
     if(ad){ const inp=document.getElementById('frIn'), c=fbParse(inp.value); if(!c){ nope(ad); toast('<span class="ti">🔑</span><span>A friend code has 6 letters and numbers, like <b>K7Q-2XM</b>.</span>'); return; }
       if(c===S.fb.code){ nope(ad); toast('<span class="ti">😄</span><span>That is your own code!</span>'); return; } if(S.friends.some(f=>f.c===c)){ nope(ad); toast('<span class="ti">👥</span><span>That friend is already on your list.</span>'); return; }
-      if(S.friends.length>=30){ nope(ad); toast('<span class="ti">👥</span><span>Your list is full (30 friends).</span>'); return; }
+      if(S.friends.length>=30){ nope(ad); toast('<span class="ti">👥</span><span>Your list is full (30 friends).</span>'); return; } unblockCode(c);
       ad.classList.add('off'); try{ const d=await fbFetch([c]); const p=d[c]; if(!p){ nope(ad); toast('<span class="ti">🔍</span><span>No kingdom has the code <b>'+fcode(c)+'</b>. Check the letters?</span>'); }
         else { S.friends.push({c,n:p.name||''}); FB.data[c]=p; inp.value=''; sfx('ach'); fbSendReq(c); toast('<span class="ti">👥</span><span><b>'+esc(p.name||'A kingdom')+'</b> joined your leaderboard! They get a friend request to add you back.</span>','gold'); frUpdate(); saveLocal(); } }
       catch(err){ nope(ad); toast('<span class="ti">📡</span><span>Could not reach the leaderboard. Check your internet.</span>'); } ad.classList.remove('off'); return; } };
@@ -8116,7 +8128,7 @@ function drawKingdomCard(cv){ const c=cv.getContext('2d'), W=cv.width, H=cv.heig
   if(S.tut.slHatched) drawSlime(c,W*.87,H*.645,W*.16,W*.135,Object.assign(slLook(slStage()),{mouth:'grin',look:{x:-.8,y:0},noShadow:true}));
   // the rank tag, like a prefix in a game chat: one per ascension, each with its own color and style
   drawRankTag(c,W/2,66,rankOf());
-  c.textAlign='center'; c.fillStyle='#ffd43f'; c.font='bold 64px "Lilita One",sans-serif'; c.lineWidth=10; c.strokeStyle='#1b0f2e'; c.lineJoin='round'; const nm=S.kname||'My Kingdom'; c.strokeText(nm,W/2,162); c.fillText(nm,W/2,162);
+  c.textAlign='center'; c.fillStyle='#ffd43f'; c.font='bold 64px "Lilita One",sans-serif'; c.lineWidth=10; c.strokeStyle='#1b0f2e'; c.lineJoin='round'; const nm=myName(); c.strokeText(nm,W/2,162); c.fillText(nm,W/2,162);
   drawCardBadges(c,W/2,222);
   const st=[['💧','Goo per second',fmt(S.bestGps,true)],['🐣','Best slime','Lv.'+Math.max(S.maxSpecies,S.skyMax)],['🏆','Trophies',Object.keys(S.ach).length+'/'+ACH.length],['👑','Ascensions',String(ascTotal())],['✨','Shiny slimes',String(shinyCount())],['⏱️','Played',fmtTime(S.playTime)]];
   st.forEach((s,i)=>{ const x=W*(.08+.44*(i%2)), y=H*.72+Math.floor(i/2)*H*.085; c.fillStyle='rgba(7,5,20,.55)'; rr(c,x,y,W*.4,H*.07,22); c.fill(); c.textAlign='left'; c.font='40px sans-serif'; c.fillStyle='#fff'; c.fillText(s[0],x+20,y+H*.048); c.font='24px "Baloo 2",sans-serif'; c.fillStyle='#b7aedb'; c.fillText(s[1],x+80,y+H*.028); c.font='36px "Lilita One",sans-serif'; c.fillStyle='#fff'; c.fillText(s[2],x+80,y+H*.06); });
@@ -8145,8 +8157,9 @@ function drawRankTag(c,cx,cy,rk){ const fx=rk.fx, txt=rk.n.toUpperCase(); c.save
 function drawCardBadges(c,cx,cy){ const b=[['Lv '+S.level,'#b98bff']]; if(S.maxSpecies>=MEADOW_SPECIES.length) b.push(['🌈','#ff8ad8']); if(hasElder()) b.push(['🐉','#ff9a3c']); if(S.starfalls) b.push(['🌠','#7fe8ff']); if(shinyCount()>=10) b.push(['✨','#ffd43f']); if(Object.keys(S.ach).length>=ACH.length) b.push(['🏆','#ffd43f']); if(S.slEvo>=SL_EVO.length) b.push(['💚','#3ddcc4']); if(starsN()) b.push(['⭐'+starsN()+'/7','#ffd43f']); if(moonsN()) b.push(['🌙'+moonsN()+'/8','#bfd0ff']); if(lhLit()) b.push(['🏮'+lhLit()+'/9','#7fe8ff']); if(drN()) b.push(['🌀'+drN()+'/10','#d8a6ff']); if(bellsN()) b.push(['🔔'+bellsN()+'/11','#ffb35c']);
   c.save(); c.textAlign='center'; c.textBaseline='middle'; c.font='30px "Lilita One",sans-serif'; const ws=b.map(x=>x[0].length>2?c.measureText(x[0]).width+40:54), tot=ws.reduce((a,v)=>a+v,0)+(b.length-1)*12; let x=cx-tot/2;
   b.forEach((it,i)=>{ const w=ws[i]; c.fillStyle='rgba(7,5,20,.6)'; c.strokeStyle=it[1]; c.lineWidth=4; rr(c,x,cy-24,w,48,24); c.fill(); c.stroke(); c.fillStyle='#fff'; c.font=it[0].length>2?'30px "Lilita One",sans-serif':'28px sans-serif'; c.fillText(it[0],x+w/2,cy+2); x+=w+12; }); c.restore(); }
-function openKingdomCard(){ openModal('<h2 class="mh">📸 Kingdom card</h2><p>A picture of your kingdom to send to friends.</p><label class="srow" for="kname" style="grid-template-columns:auto 1fr"><span>Kingdom name</span><input id="kname" maxlength="22" value="'+esc(S.kname||'My Kingdom')+'" style="font:16px var(--f-display);padding:8px;border-radius:10px;border:2px solid #4a3470;background:var(--ink);color:#fff;min-width:0"></label><canvas id="kcard" width="1080" height="1350" class="kcard"></canvas><div class="btnrow" style="justify-content:center"><button class="btn gold" id="kShare">Share</button><button class="btn ghost" id="kSave">Save picture</button></div>');
-  const cv=$('#kcard'), inp=$('#kname'); const draw=()=>drawKingdomCard(cv); draw(); inp.oninput=()=>{ S.kname=inp.value.replace(/[<>]/g,'').slice(0,22); draw(); clearTimeout(ui.knT); ui.knT=setTimeout(()=>fbPush(true),2500); };
+function openKingdomCard(){ openModal('<h2 class="mh">📸 Kingdom card</h2><p>A picture of your kingdom to send to friends.</p><label class="srow" for="kname" style="grid-template-columns:auto 1fr"><span>Kingdom name</span><input id="kname" maxlength="22" value="'+esc(S.kname||'My Kingdom')+'" style="font:16px var(--f-display);padding:8px;border-radius:10px;border:2px solid #4a3470;background:var(--ink);color:#fff;min-width:0"></label><p class="note" id="knNote" hidden></p><canvas id="kcard" width="1080" height="1350" class="kcard"></canvas><div class="btnrow" style="justify-content:center"><button class="btn gold" id="kShare">Share</button><button class="btn ghost" id="kSave">Save picture</button></div>');
+  const cv=$('#kcard'), inp=$('#kname'), kn=$('#knNote'); const draw=()=>drawKingdomCard(cv), note=()=>{ const bad=nameBad(S.kname); kn.hidden=!bad; if(bad) kn.textContent='⚠️ That name has a word that isn\'t allowed, so your friends will see "'+SAFE_NAME+'".'; }; draw(); note();
+  inp.oninput=()=>{ S.kname=inp.value.replace(/[<>]/g,'').slice(0,22); draw(); note(); clearTimeout(ui.knT); ui.knT=setTimeout(()=>fbPush(true),2500); };
   const save=()=>{ const a=document.createElement('a'); a.download='slime-empire.png'; a.href=cv.toDataURL('image/png'); document.body.appendChild(a); a.click(); a.remove(); };
   $('#kSave').onclick=save; $('#kShare').onclick=()=>{ cv.toBlob(b=>{ if(!b) return; const f=new File([b],'slime-empire.png',{type:'image/png'}); if(navigator.canShare&&navigator.canShare({files:[f]})) navigator.share({files:[f],title:'Slime Empire',text:'My kingdom in Slime Empire!'}).catch(()=>{}); else save(); },'image/png'); }; }
 
@@ -8707,7 +8720,9 @@ function openSettings(){ const s=S.settings, sky=S.realm==='sky';
   '<div class="btnrow"><button class="btn" id="saveNow">Save now</button><button class="btn ghost" id="expBtn">Export save</button><button class="btn ghost" id="impBtn">Import save</button></div>'+
   '<div id="ioBox" hidden><textarea id="ioText" rows="4" spellcheck="false" aria-label="Save code"></textarea><div class="btnrow"><button class="btn ghost" id="ioCopy">Copy</button><button class="btn" id="ioLoad">Load this save</button></div></div>'+
   '<div class="btnrow"><button class="btn danger" id="resetBtn">Reset everything</button></div></section>'+
-  '<p class="note" id="verTxt">Slime Empire 8.0 · saves automatically every 10 seconds.</p>'+
+  '<section class="set"><h3>Privacy</h3><p class="note">Your kingdom is saved on this device. The game only goes online if you get a friend code in 👥 Friends: then your kingdom name and progress are shared with the people who have your code. No ads, no tracking, no account or email.</p>'+
+  '<div class="btnrow"><button class="btn ghost" id="privBtn">Privacy policy</button>'+(S.fb&&S.fb.code?'<button class="btn ghost" id="delOnline">Delete my online data</button>':'')+'</div></section>'+
+  '<p class="note" id="verTxt">Slime Empire 8.0.1 · saves automatically every 10 seconds.</p>'+
   '<section class="set" id="devBox" hidden><h3>Test tools</h3><p class="note">For testing only. These skip normal progress. Numbers can be typed like 1e15, 2.5M or 40B.</p>'+
   '<div class="devgrid">'+din('dvGoo','Goo','1e15','Add')+din('dvLv','Level','50','Set')+din('dvXp','XP','1000','Add')+din('dvAsc','Ascensions','10','Set')+din('dvJelly',RL().jelly,'500','Add')+din('dvDust','Stardust','25','Add')+din('dvEmb','Embers','5000','Add')+din('dvScl','Scales','50','Add')+'</div>'+
   '<div class="srow"><span>Time speed</span><div class="seg" id="devSpd">'+[1,10,100].map(v=>'<button data-v="'+v+'" aria-pressed="'+(devSpeed===v)+'">×'+v+'</button>').join('')+'</div></div>'+
@@ -8730,9 +8745,10 @@ function openSettings(){ const s=S.settings, sky=S.realm==='sky';
   $('#impBtn').onclick=()=>{ $('#ioBox').hidden=false; const t=$('#ioText'); t.value=''; t.placeholder='Paste your save code here'; t.focus(); $('#ioLoad').hidden=false; $('#ioCopy').hidden=true; };
   $('#ioCopy').onclick=()=>{ const t=$('#ioText'); t.select(); const done=()=>toast('<span class="ti">📋</span><span>Save code copied</span>'); if(navigator.clipboard&&navigator.clipboard.writeText) navigator.clipboard.writeText(t.value).then(done,()=>{ try{ document.execCommand('copy'); done(); }catch(e){} }); else { try{ document.execCommand('copy'); done(); }catch(e){} } };
   $('#ioLoad').onclick=()=>{ let json; try{ json=decodeURIComponent(escape(atob($('#ioText').value.trim()))); JSON.parse(json); }catch(e){ toast('<span class="ti">⚠️</span><span>That save code is not valid. Copy the whole code and try again.</span>'); return; } applySave(json,'import'); closeModal(); };
+  $('#privBtn').onclick=openPrivacy; const dlo=$('#delOnline'); if(dlo) dlo.onclick=()=>{ sfx('click'); openDeleteOnline(openSettings); };
   let armed=0; $('#resetBtn').onclick=e=>{ const b=e.currentTarget; if(nowT()-armed<4000){ wipeAll(); closeModal(); return; } armed=nowT(); b.textContent='Tap again to erase all progress'; setTimeout(()=>{ if(b.isConnected) b.textContent='Reset everything'; },4000); };
 }
-function wipeAll(){ const set=S.settings, fb=S.fb, fr=S.friends; S=fresh(); S.settings=set; S.fb=fb; S.friends=fr||[]; for(const x in hatching) delete hatching[x]; refreshAll(); saveLocal(); cloudSave(); toast('<span class="ti">🧽</span><span>Everything was reset. Fresh puddle!</span>'); }
+function wipeAll(){ const set=S.settings, fb=S.fb, fr=S.friends, bl=S.blocked; S=fresh(); S.settings=set; S.fb=fb; S.friends=fr||[]; S.blocked=bl||[]; for(const x in hatching) delete hatching[x]; refreshAll(); saveLocal(); cloudSave(); toast('<span class="ti">🧽</span><span>Everything was reset. Fresh puddle!</span>'); }
 function parseNum(s){ s=String(s).trim().replace(/[,\s]/g,'').toLowerCase(); const m=s.match(/^(\d*\.?\d+(?:e[+-]?\d+)?)([a-z]*)$/); if(!m) return NaN; let v=parseFloat(m[1]); if(m[2]){ const i=SUF.findIndex(x=>x&&x.toLowerCase()===m[2]); if(i<0) return NaN; v*=Math.pow(1000,i); } return v; }
 function refreshAll(){ INTRO.q.length=0; PK.list.length=0; AWAY.sec=0; clearSel(); ui.dockKey=null; closeSheet(); useRealmArt(); raiseLow(true); recalc(); computeG(); B=null; ST.hop.length=0; syncHoppers(); ui.facKey=null; ui.tabKey=null; ui.orrKey=null; ui.nestKey=ui.expKey=ui.shopKey=null; ui.started=false; ui.app.classList.toggle('eco',!!S.settings.eco);
   applyRealm(); setWorld(S.world); ui.started=true; stageResize(); renderBoard(); renderUpg(true); renderPerks(); ui.tapHint.hidden=S.taps>=15||S.world==='hollow'; applyVolumes(); uiTick(); }
@@ -8913,6 +8929,66 @@ function openNew80(){ const op=dawnOpen();
     '<li><span>🏛️</span>The Kingdom Hall shows your <b>Champions</b> on pedestals, Kingdom Renown goes on to <b>rank 30</b>, and the Dawn has its own quests, goals, weather and trophies.</li>'+
     '<li><span>🔧</span>Fixed: Boss Bait from the Scale Shop now goes to your Backpack, so you can use it wherever minibosses roam.</li></ul><div class="btnrow" style="justify-content:center"><button class="btn gold" id="n80Ok">To the dawn!</button></div>');
   $('#n80Ok').onclick=closeModal; }
+
+/* ================= 8.0.1: safe names, blocking, reports and deleting your online data ================= */
+// kingdom names are the only thing players write that other players see. A name with a rude word shows as "Slime Kingdom":
+// yours before it is sent, and every name that arrives (so an older copy of the game can't get one past you)
+const PRIVACY_URL='https://andreask06.github.io/slime-empire/privacy.html', SAFE_NAME='Slime Kingdom';
+// the word list is stored encoded so the source isn't full of it. s = anywhere in a word, w = a whole word (letters may repeat), x = that exact whole word
+const BADW=JSON.parse(atob('eyJzIjpbImZ1Y2siLCJzaGl0IiwiY3VudCIsImJpdGNoIiwibmlnZ2VyIiwibmlnZ2EiLCJmYWdnb3QiLCJ3aG9yZSIsInBlbmlzIiwidmFnaW5hIiwicG9ybiIsIm5hemkiLCJoaXRsZXIiLCJyZXRhcmQiLCJhc3Nob2xlIiwiYXJzZWhvbGUiLCJkaWxkbyIsImppenoiLCJwdXNzeSIsInR3YXQiLCJ3ZXRiYWNrIiwicmFnaGVhZCIsImJhc3RhcmQiLCJmYWVuIiwiamFldmwiLCJqYXZsYSIsImphdmxpZyIsIm5lZ2VyIiwibHVkZGVyIiwicmFzc2hvbCIsImt1a3N1ZyIsInBpa2tzdWciLCJoZXN0a3VrIiwia3VraHUiLCJmaXR0ZXRyeSIsIm1vcnJhcHVsIl0sInciOlsiYXNzIiwiYXJzZSIsImRpY2siLCJjb2NrIiwiY3VtIiwic2V4IiwidGl0cyIsImFuYWwiLCJyYXBlIiwicmFwaXN0Iiwia2trIiwiY2xpdCIsIndhbmsiLCJ3YW5rZXIiLCJib29iIiwia3VrIiwiaG9yIiwiaG9yZSIsImZpdHRlIiwiaG9tc2UiLCJtb25nbyIsImR5a2UiLCJjb29uIiwiZ29vayIsImtpa2UiLCJwYWtpIiwiY2hpbmsiLCJ0cmFubnkiLCJiZWFuZXIiXSwieCI6WyJwaWtrIiwicHVsZSIsImhvbW8iLCJzbHV0IiwiZmFnIl19'));
+const badRx=(w,exact)=>w.split('').map(ch=>exact?ch:ch+'+').join(''), BAD_SUF='(s|es|e|ed|d|en|er|a|ene|ing|y|ie|ist|ar|ere)?';
+const BAD_S=BADW.s.map(w=>new RegExp(badRx(w))), BAD_W=BADW.w.map(w=>new RegExp('^'+badRx(w)+BAD_SUF+'$')).concat(BADW.x.map(w=>new RegExp('^'+badRx(w,true)+BAD_SUF+'$')));
+const LEET={0:'o',1:'i',3:'e',4:'a',5:'s',7:'t',8:'b',9:'g','@':'a','$':'s','!':'i','|':'i','€':'e'};
+// the words of a name, lowercase and plain: "F.u.c.k", "f u c k", "fück" and "sh1t" all come out as the word itself
+function nameWords(s){ s=String(s||'').toLowerCase().replace(/æ/g,'ae').replace(/[øö]/g,'o').replace(/å/g,'a').normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[0-9@$!|€]/g,ch=>LEET[ch]||' ');
+  s=s.replace(/([a-z])[*._\-~'`^"]+(?=[a-z])/g,'$1');
+  const out=[]; let glue=''; for(const t of s.split(/[^a-z]+/)){ if(!t) continue; if(t.length===1){ glue+=t; continue; } if(glue.length>1) out.push(glue); glue=''; out.push(t); } if(glue.length>1) out.push(glue);
+  return out; }
+const nameBad=s=>nameWords(s).some(t=>BAD_S.some(r=>r.test(t))||BAD_W.some(r=>r.test(t)));
+function safeName(s,max){ s=String(s==null?'':s).replace(/[<>]/g,'').slice(0,max||22).trim(); return s&&nameBad(s)?SAFE_NAME:s; }
+const myName=()=>safeName(S.kname,22)||'My Kingdom';
+// a friend's profile as it arrives: the name made safe (the real one is kept for a report), an emptied profile counts as gone
+function frClean(o){ if(!o||(!o.name&&!o.lvl)) return null; o.raw=String(o.name||'').slice(0,24); o.name=safeName(o.name,24)||'A kingdom'; return o; }
+
+/* blocking: their requests, gifts and name never show again, and they leave your leaderboard. They are not told */
+const blocked=()=>Array.isArray(S.blocked)?S.blocked:(S.blocked=[]);
+const isBlocked=c=>blocked().includes(c);
+function blockCode(c){ const b=blocked(); if(!b.includes(c)){ b.push(c); if(b.length>100) b.shift(); } S.friends=S.friends.filter(f=>f.c!==c); delete FB.data[c];
+  if(S.fb&&S.fb.ok&&(FB.reqs[c]||FB.gifts[c])) fbInboxClear(c); delete FB.reqs[c]; delete FB.gifts[c]; saveLocal(); frBadge(); }
+function unblockCode(c){ S.blocked=blocked().filter(x=>x!==c); }
+function frBlkHtml(){ const b=blocked(); if(!b.length) return '';
+  return '<details class="frblk"><summary>🚫 Blocked kingdoms ('+b.length+')</summary>'+b.map(c=>'<div class="frbrow"><span>'+fcode(c)+'</span><button class="btn ghost" data-unb="'+c+'">Unblock</button></div>').join('')+'<p class="note">Unblocking lets their friend requests and gifts reach you again.</p></details>'; }
+// a report goes to the maker of the game (the reports list in the Firebase console), one per kingdom and reporter
+async function fbReport(c,name){ if(!S.fb||!S.fb.ok) return false; const me=S.fb.code;
+  try{ const r=await fbReq('POST','reports?documentId='+c+'_'+me,{fields:{who:fbVal(c),name:fbVal(String(name||'').slice(0,24)),by:fbVal(me),why:fbVal('name'),t:fbVal(Date.now())}}); return r.ok||r.status===409; }
+  catch(e){ return false; } }
+function openBlock(c,name){ const nm=name||fcode(c), raw=(FB.data[c]&&FB.data[c].raw)||(FB.reqs[c]&&FB.reqs[c].raw)||(FB.gifts[c]&&FB.gifts[c].raw)||nm;
+  openModal('<h2 class="mh">🚫 Block '+esc(nm)+'?</h2><p>You won\'t see this kingdom\'s friend requests, gifts or name anymore, and it leaves your leaderboard. They are not told.</p><p class="note">Is the name rude or mean? Report it too. Reports go to the maker of Slime Empire, who can remove the name.</p>'+
+    '<div class="btnrow" style="justify-content:center"><button class="btn danger" id="bkRep">🚩 Report and block</button><button class="btn" id="bkGo">🚫 Block</button><button class="btn ghost" id="bkNo">Cancel</button></div>');
+  const done=async rep=>{ for(const b of ui.modalBody.querySelectorAll('.btn')) b.classList.add('off'); sfx('click'); const sent=rep?await fbReport(c,raw):false; blockCode(c);
+    toast('<span class="ti">🚫</span><span><b>'+esc(nm)+'</b> is blocked.'+(rep?(sent?' Thank you for the report!':' The report could not be sent right now.'):'')+'</span>'); openFriends(); };
+  $('#bkRep').onclick=()=>done(true); $('#bkGo').onclick=()=>done(false); $('#bkNo').onclick=()=>{ sfx('click'); openFriends(); }; }
+
+/* "Delete my online data": the friend code, the profile, the inbox and the anonymous sign-in. The game itself stays on the device */
+async function fbDeleteAll(){ const c=S.fb&&S.fb.code; if(!c) return; await fbToken();
+  const del=async p=>{ const r=await fbReq('DELETE',p); return r.ok||r.status===404; };
+  // the 8.0.1 rules let the owner delete each document; under older rules the inbox and the profile are emptied instead
+  if(!await del('inbox/'+c)) await fbReq('PATCH','inbox/'+c,{fields:{}});
+  await del('keys/'+c); await del('claims/'+c);
+  if(!await del('players/'+c)){ const r=await fbReq('PATCH','players/'+c,{fields:{uid:fbVal(FB.uid||''),name:fbVal('')}}); if(!r.ok&&r.status!==404) throw new Error('profile '+r.status); }
+  const r=await fetch('https://identitytoolkit.googleapis.com/v1/accounts:delete?key='+FB.key,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({idToken:FB.tok})});
+  if(!r.ok){ let j=null; try{ j=await r.json(); }catch(e){} if(!(j&&j.error&&/USER_NOT_FOUND|INVALID_ID_TOKEN/.test(j.error.message||''))) throw new Error('auth '+r.status); }
+  try{ localStorage.removeItem(FB_LS); }catch(e){}
+  Object.assign(FB,{tok:null,exp:0,uid:null,data:{},reqs:{},gifts:{},at:0,err:'',lastPush:0}); S.fb=null; S.friends=[]; S.frSeen=[]; saveLocal(); frBadge(); }
+function openDeleteOnline(back){ const has=!!(S.fb&&S.fb.code), ret=()=>{ sfx('click'); if(back) back(); else closeModal(); };
+  openModal('<h2 class="mh">🗑️ Delete my online data</h2>'+(has?'<p>This removes everything Slime Empire keeps online for you:</p><ul class="howto"><li><span>🔑</span>Your friend code, and your kingdom on your friends\' leaderboards</li><li><span>📬</span>Friend requests and gifts waiting for you</li><li><span>👤</span>The anonymous sign-in the game made for you</li></ul><p class="note">Your game progress stays on this device. Your friend list is cleared. You can get a new friend code any time.</p>'+
+    '<div class="btnrow" style="justify-content:center"><button class="btn danger" id="delGo">Delete it</button><button class="btn ghost" id="delNo">Cancel</button></div><p class="note" id="delNote"></p>'
+    :'<p>You have no online data. Slime Empire only goes online when you get a friend code in 👥 Friends.</p><div class="btnrow" style="justify-content:center"><button class="btn ghost" id="delNo">OK</button></div>'));
+  $('#delNo').onclick=ret;
+  const go=$('#delGo'); if(go) go.onclick=async()=>{ if(go.classList.contains('off')) return; go.classList.add('off'); go.textContent='Deleting…'; sfx('click');
+    try{ await fbDeleteAll(); sfx('ach'); openModal('<div class="mcenter"><h2 class="mh">🗑️ Deleted</h2><p>Your online data is gone. Your kingdom is still here on this device.</p><button class="btn gold" id="delOk">OK</button></div>'); $('#delOk').onclick=()=>{ sfx('click'); closeModal(); }; }
+    catch(e){ go.classList.remove('off'); go.textContent='Try again'; const n=$('#delNote'); if(n) n.textContent='📡 Could not reach the server, so not everything was deleted. Check your internet and try again.'; } }; }
+function openPrivacy(){ sfx('click'); try{ window.open(PRIVACY_URL,'_blank','noopener'); }catch(e){} }
 
 /* ================= loop ================= */
 let lastT=0, saveAcc=0, achAcc=0, cloudAcc=0, uiAcc=0, lastHud='', hudV=null;
