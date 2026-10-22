@@ -12,7 +12,7 @@
 <link rel="icon" href="icon-192.png">
 <link rel="manifest" href="manifest.webmanifest">
 <style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}</style>
-<meta name="build" content="8.0.1">
+<meta name="build" content="9.0.1">
 <script>
 // install as an app: works offline and opens full screen from the home screen
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')) addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
@@ -585,7 +585,12 @@ textarea,.devin{width:100%;background:var(--ink);color:#fff;border:2px solid #3d
 .lvl .lv-n{font:15px/1 var(--f-display);color:var(--gold);white-space:nowrap}
 .lvl .lv-bar{height:6px;border-radius:4px;background:var(--ink);overflow:hidden}
 .lvl .lv-bar i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--gold),#fff3a8)}
-@media (max-width:520px){ .brand span{display:none} .chip-jelly{display:none} }
+.chips{display:flex;gap:8px;align-items:center}
+@media (max-width:520px){ .brand span{display:none} .chip-jelly{display:none}
+  .chips{flex-direction:column;gap:3px;align-items:stretch}
+  .chips .chip-jelly:not([hidden]){display:block;font-size:12px;line-height:17px;padding:0 7px;border-width:1.5px;text-align:center}
+  .hud-right{gap:5px} #ascBadge{display:none} #gooAmt{font-size:clamp(24px,7vw,34px)} }
+@media (max-width:430px){ #hud .brand{display:none} }
 
 /* Mentor */
 #mentor{position:absolute;right:8px;top:8px;z-index:5;display:flex;flex-direction:row-reverse;align-items:flex-start;gap:4px;max-width:min(82%,380px);pointer-events:none}
@@ -1053,6 +1058,53 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
 .wheel-wrap.royal .wheel-ptr{border-top-color:#ff6fb5}
 .den{display:flex;flex-direction:column;gap:6px;padding:10px;margin:10px 0}.den b{font:16px var(--f-display);font-weight:400;color:#fff}.den span,.den small{font-size:12.5px;color:var(--muted)}.den .pick{margin:2px 0}.den .bar{height:8px}.den .btn{align-self:flex-start}
 #coachCard .kw-act,#mentorBubble .kw-act{color:inherit}
+/* 9.0 the Royal Treasury */
+.chip-gem{color:#bff3ff;border-color:#7fe8ff}
+[data-cur]{cursor:pointer}
+.bank[data-cur]{border-radius:12px}
+.kgrow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:0 0 10px}
+.kgrow button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:6px 2px;border-radius:12px;border:2px solid var(--ink);background:linear-gradient(180deg,#2c2463,#1e1848);color:#fff;font:12px var(--f-display);cursor:pointer;position:relative}
+.kgrow button span{font-size:20px;line-height:1.1}
+.kgrow .frdot{position:absolute;top:-6px;right:-4px;margin:0}
+.store-gift,.store-pass{display:grid;grid-template-columns:44px minmax(0,1fr) auto;gap:10px;align-items:center;padding:10px;margin-bottom:10px}
+.store-gift .big,.store-pass .big,.store-charter .big{font-size:32px;text-align:center}
+.store-gift b,.store-pass b,.store-charter b{font:16px var(--f-display);font-weight:400;color:#fff;display:block}
+.store-gift span,.store-pass span,.store-charter .ch-top span{font-size:12.5px;color:var(--muted)}
+.store-pass{border-color:var(--ec,#ff9a3c);margin-top:12px}
+.store-charter{padding:10px;margin:12px 0;border-color:var(--gold);background:linear-gradient(180deg,#3a2a12,#22183a)}
+.store-charter.owned{border-color:#98f25a}
+.store-charter .ch-top{display:grid;grid-template-columns:44px 1fr;gap:10px;align-items:center}
+.store-charter .howto{margin:8px 0}
+.btn.soon{font-size:12.5px;white-space:nowrap}
+.deal .deal-arts{grid-column:1/3;display:grid;grid-template-columns:repeat(3,1fr);gap:2px;text-align:center}
+.deal .deal-arts .da{display:flex;flex-direction:column;align-items:center}
+.deal .deal-arts img{width:34px;height:34px;display:block}
+.deal .deal-arts small{font:10.5px var(--f-display);line-height:1.1}
+.gem-packs{display:grid;grid-template-columns:repeat(auto-fill,minmax(98px,1fr));gap:8px;margin-bottom:6px}
+.gem-packs .gp{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 4px;border-radius:14px;background:linear-gradient(180deg,#1f3a5a,#16244a);border:2px solid var(--ink)}
+.gem-packs .gp b{font:16px var(--f-display);font-weight:400;color:#bff3ff}
+.gem-packs .gp small{font-size:11px;color:#98f25a}
+.gem-packs .gp .btn{font-size:11.5px;padding:4px 8px;margin-top:2px}
+.tryon{width:min(220px,60vw);height:auto;display:block;margin:4px auto;border-radius:20px;background:radial-gradient(circle at 50% 60%,#3a2f7a,#1a1440 70%);border:2px solid var(--ink)}
+.curinfo .ci-head{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:center;margin-bottom:6px}
+.curinfo .ci-head .big{font-size:40px;text-align:center}
+.curinfo .ci-head b{font:22px var(--f-display);font-weight:400;color:#fff;display:block}
+.curinfo .ci-head span{color:var(--muted);font-size:13.5px}
+.exch{display:flex;flex-direction:column;gap:8px;margin:10px 0}
+.exch button{display:grid;grid-template-columns:40px 1fr;gap:0 10px;align-items:center;text-align:left;padding:10px 12px;border-radius:14px;border:2px solid var(--ink);background:linear-gradient(180deg,#2c2463,#1e1848);color:#fff;cursor:pointer;box-shadow:0 3px 0 var(--ink)}
+.exch button span{grid-row:span 2;font-size:28px;text-align:center}
+.exch button b{font:16px var(--f-display);font-weight:400}
+.exch button small{font-size:12px;color:var(--muted)}
+.exch button.off{opacity:.45}
+.exch button:not(.off):hover{border-color:var(--gold)}
+.trainbar{position:relative;flex:1;min-width:110px;height:26px;border-radius:9px;background:rgba(7,5,20,.7);border:2px solid var(--ink);overflow:hidden}
+.trainbar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#ffb347,#ffe066);transition:width .2s}
+.trainbar span{position:relative;display:block;text-align:center;font:12px/22px var(--f-display);color:#fff;text-shadow:0 1px 0 var(--ink)}
+.bp-btns{grid-column:1/3;display:flex;gap:6px}
+.bp-btns .btn{flex:1;font-size:13px;padding:5px 6px;margin-top:4px}
+.buff.warm{border-color:#ff9a3c;color:#ffd27a}
+.note.basket{margin:2px 0 8px;font-size:12.5px}
+.exp-slot.pend{border-color:var(--gold)}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition:none!important}
 }
@@ -1061,12 +1113,13 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
 <div id="app">
   <header id="hud">
     <div class="brand"><canvas id="logo" width="84" height="84" aria-hidden="true"></canvas><span id="brandTxt">Slime<br>Empire</span></div>
-    <div class="bank">
+    <div class="bank" data-cur="goo">
       <div class="goo-row"><span id="gooIcon" aria-hidden="true"></span><div id="gooAmt">0</div></div>
       <div class="gps-line"><b id="gpsAmt">0</b> <span id="gpsUnit">goo per second</span></div>
     </div>
     <div class="hud-right">
-      <div id="jellyChip" class="chip-jelly" hidden title="Royal Jelly">👑 <span id="jellyAmt">0</span></div>
+      <div class="chips"><div id="jellyChip" class="chip-jelly" hidden title="Royal Jelly" data-cur="prestige">👑 <span id="jellyAmt">0</span></div>
+      <div id="gemChip" class="chip-jelly chip-gem" hidden title="Gems" data-cur="gems">💎 <span id="gemAmt">0</span></div></div>
       <div id="scaleChip" class="chip-jelly chip-scale" hidden title="Dragon Scales">🐉 <span id="scaleAmt">0</span></div>
       <div id="dustChip" class="chip-jelly chip-dust" hidden title="Stardust">✨ <span id="dustAmt">0</span></div>
       <button id="ascBadge" class="ascb" hidden aria-label="Your ascensions. Opens the Crown Road"><canvas id="abCv" width="84" height="88"></canvas></button>
@@ -1213,14 +1266,16 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
             <button class="btn eggbtn" id="dEggBtn"><img id="dEggImg" alt=""><span>Hatch dragon<small id="dEggCost">30 embers</small></span></button>
             <div class="pen-stats"><div>Nest makes <b id="nestRate">0</b> embers/min</div><div><span id="nestCount">0/6</span> dragons · Patrol <b id="patrolCount">0/2</b></div><div id="elemTxt"></div></div>
           </div>
+          <p class="note basket" id="basketTxt"></p>
           <div class="dgrid" id="dGrid"></div>
           <div id="denBox"></div>
           <div id="bookBox"></div>
-          <p class="hint">Feed dragons embers to grow them: Hatchling → Drake → Wyvern → Elder. Different elements in the nest boost each other.</p>
+          <p class="hint">Grow a dragon with embers, then train it with golden stokes: Hatchling → Drake → Wyvern → Elder. While the flame is in the golden zone, every dragon at home makes ×3 embers. Different elements in the nest boost each other.</p>
         </div>
         <div class="view" id="view-exp" hidden>
           <h3 class="sec">Expeditions</h3>
-          <p class="hint" style="text-align:left">Send dragons into the Deep. Older dragons and longer trips bring back more Dragon Scales, and sometimes an ancient relic.</p>
+          <p class="hint" style="text-align:left">Send dragons into the Deep. Older dragons and longer trips bring back more treasure. When they come home, you choose: Dragon Scales, embers, or (on long trips) a dragon egg. Sometimes they find an ancient relic too.</p>
+          <div class="list" id="expPend"></div>
           <div class="list" id="expList"></div>
           <h3 class="sec">Send a dragon</h3>
           <div id="expPick"></div>
@@ -1240,11 +1295,9 @@ body.sky{background:radial-gradient(70% 50% at 85% 5%,rgba(255,111,181,.14),tran
           <div class="penups" id="hupList"></div>
         </div>
         <div class="view" id="view-shop" hidden>
-          <h3 class="sec">Scale shop <span id="shopScales" style="color:var(--muted);font-size:15px"></span></h3>
-          <p class="hint" style="text-align:left">Spend Dragon Scales on buffs for the King's world.</p>
-          <h3 class="sec" style="font-size:16px">Boosts</h3>
-          <div class="ugrid" id="shopCons"></div>
-          <h3 class="sec" style="font-size:16px">Permanent</h3>
+          <h3 class="sec">Dragon's Hoard <span id="shopScales" data-cur="scales" style="color:var(--muted);font-size:15px"></span></h3>
+          <p class="hint" style="text-align:left">Spend Dragon Scales on permanent perks for your dragons and for the King's world.</p>
+          <div class="ugrid" id="shopCons" hidden></div>
           <div class="ugrid" id="shopPerm"></div>
         </div>
       </div>
@@ -1706,7 +1759,7 @@ const CHRON=[
  {lv:8,t:'Festivals',hint:'Banners are going up all over the meadow.',txt:'Every month the kingdom throws a new festival with its own Royal Road, little things to find in the meadow, and new hats and colors to win.',un:'Monthly events and the Royal Road'},
  {lv:9,t:'Loyal Visitors',hint:'The castle is writing down who comes to visit.',txt:'The King rewards everyone who visits him, and the gifts grow with every day in a row you come back.',un:'The daily reward calendar'},
  {lv:10,t:'A Busy Kingdom',hint:'The castle\'s calendar is filling up fast.',txt:'Every day brings new goals, and every day one size of slime is the Slime of the Day.',un:'Daily and weekly goals, and the Slime of the Day'},
- {lv:11,t:'Wheels and Shops',hint:'Grandpa Gloop is carving something round out of old jelly…',txt:'Grandpa Gloop finally finished his wheel: one free spin a day, and no peeking at the prizes. And the shops of the kingdom open their doors.',un:'The Daily Wheel and the Gem shop'},
+ {lv:11,t:'Wheels and Shops',hint:'Grandpa Gloop is carving something round out of old jelly…',txt:'Grandpa Gloop finally finished his wheel: one free spin a day, and no peeking at the prizes. And the shops of the kingdom open their doors.',un:'The Daily Wheel and the Store'},
  {lv:12,t:'Royal Requests',hint:'The King keeps glancing at your pen…',txt:'The King has started asking for things. Specific things. A Lv.7 slime, please, and quickly. He always pays well.',un:'Royal Requests'},
  {lv:13,t:'Uninvited Guests',hint:'The King\'s goo smells delicious. Something out there has noticed.',txt:'Strange creatures slip through cracks in the world to steal the King\'s goo. Squish them and they drop treasure, and sometimes their secrets.',un:'Minibosses, Artifacts, the Fuse and lore cards'},
  {lv:14,t:'The Throne',hint:'The crown feels heavier every day. As if it wants something.',txt:'A King can melt his kingdom back into a puddle and rise again, stronger, with Royal Jelly. Every ascension breaks one of the Crown Seals, and the Crown Road shows what waits behind each one.',un:'Ascending, Royal perks and the Crown Road'},
@@ -1756,7 +1809,7 @@ const CST_EFFECT={tap:'Taps +25%',hatch:'Hatchery 12% faster',patrol:'Dragon Pat
 
 /* ================= state ================= */
 const DEF_SET={music:.5,sfx:.7,track:0,particles:true,floaters:true,shake:true,fmt:'short',skin:0,mentor:true,eco:false,silent:true};
-const BOARD_MAX=52, SAVE_V=14;
+const BOARD_MAX=52, SAVE_V=15;
 function freshHollow(){ return {embers:0,embersAll:0,heat:0,coolUntil:0,ups:{},dragons:[],exps:[],scales:0,scalesAll:0,sh:{},relics:[],nextId:1,hearts:0,tia:null,waking:false,eggsBought:0,visited:false,wisps:0}; }
 function freshOrr(){ return {rings:RING_N.map(n=>new Array(n).fill(0)),ups:{},t:0}; }
 function fresh(){ return {v:8,goo:0,earnedRun:0,earnedAll:0,earnedRealm:0,taps:0,crits:0,merges:0,pets:0,goldens:0,rushes:0,ascensions:0,skyAsc:0,twinLvl:0,ascSeen:[],gems:0,items:{},bpNew:0,cos:{owned:{},hat:null,theme:null},login:{day:0,last:''},goals:{day:'',list:[],week:'',wlist:[],bonus:0,full:''},wheel:{last:''},season:{id:'',pts:0,prem:false,got:{}},bonusEggs:0,maLvl:0,maNext:0,offline:0,
@@ -1787,6 +1840,8 @@ function parseSave(raw){
   // 5.0: the Swift Compass is retired (it made Dragon Hearts too easy); each one left in a backpack becomes 10 Gems
   { let n=0; const cv=b=>{ if(b&&typeof b==='object'){ n+=Math.max(0,Math.floor(+b.compass||0)); delete b.compass; } }; cv(o.items); if(d.itemsR&&typeof d.itemsR==='object') for(const r in d.itemsR) cv(d.itemsR[r]); if(n>0){ o.gems=(+o.gems||0)+10*n; o.tut.compassGone=(o.tut.compassGone||0)+n; } }
   { const R={}; if(d.itemsR&&typeof d.itemsR==='object') for(const r of ['meadow','sky']){ const b=d.itemsR[r]; if(b&&typeof b==='object'){ R[r]={}; for(const k in b) if(ITEMS[k]&&+b[k]>0) R[r][k]=Math.floor(+b[k]); } } o.itemsR=R; }
+  // 9.0: five boosts. Old items in every backpack turn into the new ones (Gem Pouches into Gems)
+  { const cv=b=>{ if(!b||typeof b!=='object') return; for(const k of Object.keys(b)){ const x=itemNorm(k,Math.max(0,Math.floor(+b[k]||0))); if(x[0]===k) continue; delete b[k]; if(!x[1]) continue; if(x[0]==='gems') o.gems=(+o.gems||0)+x[1]; else b[x[0]]=(b[x[0]]||0)+x[1]; } }; cv(o.items); for(const r in o.itemsR) cv(o.itemsR[r]); }
   // 6.0: the Moonship (account) and the current voyage (the sea's own run)
   { const sh=(o.ship&&typeof o.ship==='object')?o.ship:{}, f=freshShip(); for(const k in f) if(sh[k]==null||typeof sh[k]!==typeof f[k]||Array.isArray(f[k])!==Array.isArray(sh[k])) sh[k]=f[k];
     for(const m of ['wood','coral','steel']) sh.mats[m]=Math.max(0,+sh.mats[m]||0); for(const k of ['lit','pearls','pearlsAll','voyages','best','kills']) sh[k]=Math.max(0,+sh[k]||0); sh.lit=Math.min(LH.length,sh.lit);
@@ -1877,6 +1932,7 @@ function parseSave(raw){
   { const q=(o.kq&&typeof o.kq==='object'&&!Array.isArray(o.kq))?o.kq:{}; q.list=Array.isArray(q.list)?q.list.slice(0,6).map(c=>c&&typeof c==='object'&&KQ.some(x=>x.id===c.id)&&c.n>0&&c.rw&&typeof c.rw==='object'?Object.assign(c,{p:+c.p||0,r:+c.r||10}):null):[]; q.t=Array.isArray(q.t)?q.t.slice(0,6).map(v=>+v||0):[]; q.ren=Math.max(0,+q.ren||0); q.rank=Math.max(0,+q.rank||0); q.done=Math.max(0,+q.done||0); q.wp=Array.isArray(q.wp)?q.wp.filter(p=>typeof p==='string').slice(0,8):[]; q.wn=Math.max(0,+q.wn||0); q.wg=q.wg?1:0; if(typeof q.wk!=='string') q.wk=''; o.kq=q; }
   if(!d.v||d.v<13){ if(o.earnedAll>0) o.tut.new75=1; }
   if(!d.v||d.v<14){ if(o.earnedAll>0) o.tut.new80=1; }
+  if(!d.v||d.v<15){ if(o.earnedAll>0) o.tut.new90=1; }
   o.v=SAVE_V;
   return o;
 }
@@ -3555,7 +3611,7 @@ function bossDefeat(){
   toast('<span class="ti">🏆</span><span><b>'+b.n+' defeated!</b><br>+'+fmt(goo)+' '+curName()+' · '+eggs+' free egg'+(eggs>1?'s':'')+'</span>','gold');
   got.forEach((t,i)=>setTimeout(()=>{ if(t===5) mythicAnnounce(); else toast('<img src="'+ARTIMG[t]+'" alt=""><span><b style="color:'+RARITY[t].c+'">'+RARITY[t].n+' Artifact!</b><br>'+RARITY[t].a+' · +'+RARITY[t].b+'% goo</span>','disc'); },500+i*400));
   if(!S.tut.fuse){ S.tut.fuse=1; const nm=tabName('col'); setTimeout(()=>coach([
-    {el:()=>ui.tabMap&&ui.tabMap.col,text:'You found an <b>Artifact</b>! Artifacts are kept in <b>the Fuse</b>, in the '+nm+' tab.'},
+    {el:()=>ui.dock.querySelector('[data-d="goals"]')||ui.dock,text:'You found an <b>Artifact</b>! Artifacts are kept in <b>the Fuse</b>: open the 📜 <b>Kingdom</b> menu, then <b>Collection</b>.'},
     {before:()=>setTab('col'),el:'#fuseSec',text:'Every Artifact boosts all goo. Collect <b>3 of the same rarity</b> and fuse them into 1 of the next rarity. Fusing always raises the bonus. Can you reach <b style="color:#c46bd6">Mythic</b>?'}]),1500); }
   if(tab==='col') renderCol();
 }
@@ -3602,7 +3658,8 @@ function tipText(){
     if(Hh.dragons.some(d=>d.born&&d.st<3&&Hh.embers>=D_GROW[d.st])) return 'You have enough embers to grow a dragon.';
     if(tiaReady()) return 'You have all three Dragon Hearts and enough embers. Go through the <b>sealed door</b> and wake her.';
     if(Hh.tia&&tiaHome()&&tiaHoard()>=5) return 'Tiamatra\'s hoard holds <b>'+tiaHoard()+' scales</b>. Collect them in her chamber behind the door.';
-    if(Hh.scales>=5) return 'You have <b>'+Hh.scales+' scales</b>. The Scale Shop has buffs for the King\'s world.';
+    if(Hh.scales>=10) return 'You have <b>'+Hh.scales+' scales</b>. The <b>Dragon\'s Hoard</b> has permanent perks for your dragons and the King.';
+    if(basketFull()) return 'The dragon basket is full! It only holds a few hours of embers, so pop in now and then.';
     if(!Hh.tia&&Math.random()<.35) return 'Tiamatra sleeps behind the sealed door. She is one of the <b>Seven Stars</b>. Long expeditions with old dragons find <b>Dragon Hearts</b> ('+Math.min(3,Hh.hearts||0)+'/3).';
     return pick(SPIRIT_TIPS); }
   const R=RL(), seen={}; for(let i=0;i<penSize();i++){ const L=S.board[i]; if(L&&L<topL()){ if(seen[L]) return 'Psst! Two <b>Lv.'+L+'</b> '+R.slimes+' are waiting to be merged.'; seen[L]=1; } }
@@ -3650,7 +3707,7 @@ function enterHollow(){ if(S.level<HOLLOW_LV||S.world==='hollow'||ST.trans) retu
       {who:'spirit',el:'#heat',text:'This is the heat gauge. The golden band is the sweet spot. The flame cools all the time, so tap in a steady rhythm.'},
       {who:'spirit',el:()=>ui.tabMap.nest,text:'Spend embers to hatch dragon eggs in the <b>Nest</b>, then feed your dragons to grow them.'},
       {who:'spirit',el:()=>ui.tabMap.exp,text:'Send dragons on <b>Expeditions</b> into the Deep. They bring back <b>Dragon Scales</b>.'},
-      {who:'spirit',el:()=>ui.tabMap.shop,text:'Scales buy powerful buffs for the King\'s world in the <b>Scale Shop</b>.'},
+      {who:'spirit',el:()=>ui.tabMap.shop,text:'Scales buy permanent perks in the <b>Dragon\'s Hoard</b>, for your dragons and for the King\'s world.'},
       {who:'spirit',el:'#stage',text:'Deep below, behind a sealed door, sleeps <b>Tiamatra</b>, Mother of All Dragons. She is one of the <b>Seven Stars</b> the King needs to reach the stars. Long expeditions find <b>Dragon Hearts</b>: three of them wake her.'},
       {who:'spirit',rect:()=>stageRect(ST.rift),text:'This rift leads back to the King. Tap it any time. Your dragons keep working while you are away.'}]),700); }
     else say('Welcome back. The flame missed you.',4000); };
@@ -3678,7 +3735,7 @@ function bookHtml(){ const b=S.hollow.book||{}, n=ELEM.length; let cells='';
   return '<div class="book card"><b>📖 Dragon Book · '+bookCount()+'/'+(n*n)+'</b><span>Every kind of dragon you raise stays here forever, and each one makes the nest <b>2%</b> warmer (now +'+(2*bookCount())+'%). Breed mixed parents to find them all!</span><div class="bkgrid">'+cells+'</div></div>'; }
 // letting a dragon go: it flies off into the Deep and leaves a farewell gift (it stays in the Dragon Book)
 const REL_GIFT=[80,400,1800,6000];
-function releaseDragon(id,btn){ const Hh=S.hollow, d=Hh.dragons.find(x=>x.id===id); if(!d||!d.born||d.job!=='home') return;
+function releaseDragon(id,btn){ const Hh=S.hollow, d=Hh.dragons.find(x=>x.id===id); if(!d||!d.born||d.job!=='home') return; if(d.train>0){ nope(btn); toast('<span class="ti">🏋️</span><span>'+esc(d.name)+' is training. Finish the training first!</span>'); return; }
   if(d.st>=3&&!S.starfalls&&Hh.dragons.filter(x=>x.born&&x.st>=3).length<=1){ nope(btn); toast('<span class="ti">🐲</span><span>Keep '+esc(d.name)+'! <b>Starfall</b> needs an Elder dragon.</span>'); return; }
   if(btn.dataset.sure!=='1'){ btn.dataset.sure='1'; btn.textContent='Sure?'; sfx('click'); setTimeout(()=>{ if(btn.isConnected){ btn.dataset.sure=''; btn.textContent='Release'; } },3000); return; }
   Hh.dragons=Hh.dragons.filter(x=>x!==d); const e=REL_GIFT[d.st]; earnEmbers(e); if(d.st>=3){ Hh.scales++; Hh.scalesAll=(Hh.scalesAll||0)+1; } sfx('dragonHatch'); gainXP(20);
@@ -3695,7 +3752,7 @@ function hollowTap(x,y){
   if(now<Hh.coolUntil){ addFloat(x,y-10,'Too hot!','#ffb08a',18); sfx('no'); return; }
   Hh.heat+=8; if(Hh.heat>=100){ overheat(); return; }
   const z=zone(), b=1+hup('bellows'); let e, gold=false;
-  if(Hh.heat>=z[0]&&Hh.heat<=z[1]){ e=b; gold=true; gainXP(.2); goalAdd('stoke'); } else if(Hh.heat>z[1]) e=b*.5; else e=b*.25;
+  if(Hh.heat>=z[0]&&Hh.heat<=z[1]){ e=b; gold=true; gainXP(.2); goalAdd('stoke'); trainStoke(); } else if(Hh.heat>z[1]) e=b*.5; else e=b*.25;
   earnEmbers(e); const bz=ST.brazier||{x:ST.w/2,y:ST.h*.6,w:100};
   if(gold){ addFloat(bz.x+rand(-bz.w*.3,bz.w*.3),bz.y-bz.w*.3,'+'+e,'#FFD23F',24); if(Math.random()<.4) flyGoo(bz.x,bz.y-bz.w*.3,1,'ember'); }
   if(S.settings.particles) for(let i=0;i<(gold?6:3);i++) ST.parts.push({x:bz.x+rand(-bz.w*.2,bz.w*.2),y:bz.y,vx:rand(-60,60),vy:rand(-220,-120),r:rand(2,4),col:gold?'#ffe066':'#ff9a3c',life:0,max:rand(.5,.9),g:200,glow:true});
@@ -3711,10 +3768,7 @@ function buyDragonEgg(){ const Hh=S.hollow; if(Hh.dragons.length>=nestCap()){ to
   const c=dEggCost(); if(Hh.embers<c){ nope(ui.dEggBtn); return; } Hh.embers-=c; Hh.eggsBought++;
   Hh.dragons.push({id:Hh.nextId++,name:pickName(),el:rollElem(),st:0,born:false,hatchAt:nowT()+15000,job:'home'}); sfx('egg'); renderNest(true); uiTick(); }
 function onHatch(d){ d.born=true; bookAdd(d); sfx('dragonHatch'); gainXP(25); toast('<img src="'+dragonImg(d.el,0,d.el2)+'" alt=""><span><b>'+esc(d.name)+' hatched!</b><br>A '+ELEM[d.el].n+' hatchling</span>','disc'); if(tab==='nest') renderNest(true); }
-function growDragon(id,btn){ const Hh=S.hollow, d=Hh.dragons.find(x=>x.id===id); if(!d||!d.born||d.st>=3) return; const c=D_GROW[d.st]; if(Hh.embers<c){ nope(btn); return; }
-  Hh.embers-=c; d.st++; sfx('grow'); gainXP(40*d.st); goalAdd('grow'); toast('<img src="'+dragonImg(d.el,d.st,d.el2)+'" alt=""><span><b>'+esc(d.name)+' grew into a '+STAGES[d.st]+'!</b><br>'+(d.st===3?'A mighty Elder':'+'+D_RATE[d.st]+' embers/min')+'</span>','disc'); renderNest(true);
-  if(d.st===1&&!S.tut.patrol){ S.tut.patrol=1; setTimeout(()=>coach([{who:'spirit',el:()=>document.querySelector('.dcard[data-id="'+d.id+'"] .patrol'),text:'<b>'+esc(d.name)+'</b> is a Drake now! Drakes and older can join the <b>Dragon Patrol</b>: they fly up to the King and roast him for goo, and they help fight minibosses. Patrol dragons make no embers here, though.'}]),400); } }
-function togglePatrol(id,btn){ const d=S.hollow.dragons.find(x=>x.id===id); if(!d) return;
+function togglePatrol(id,btn){ const d=S.hollow.dragons.find(x=>x.id===id); if(!d) return; if(d.train>0){ nope(btn); toast('<span class="ti">🏋️</span><span>'+esc(d.name)+' is training. Finish the training first!</span>'); return; }
   if(d.job==='patrol'){ d.job='home'; toast('<span class="ti">🏠</span><span>'+esc(d.name)+' flew home to the Hollow.</span>'); }
   else { if(d.st<1){ toast('Only Drakes and older can patrol.'); return; } if(patrolList().length>=patrolCap()){ toast('<span class="ti">🏰</span><span>All patrol spots are taken. Upgrade the <b>Patrol Roost</b> for more.</span>'); nope(btn); return; }
     d.job='patrol'; PAT[d.id]={f:0,cd:1}; toast('<img src="'+dragonImg(d.el,d.st,d.el2)+'" alt=""><span><b>'+esc(d.name)+' joined the Dragon Patrol!</b><br>Every '+D_BLAST[d.st]+'s it roasts the King for goo.</span>','gold'); }
@@ -3736,23 +3790,10 @@ function patrolBlast(d){
 }
 function expDur(i){ return EXPS[i].s*(1-.1*hup('wings')); }
 function expPreview(d,di){ return {sc:D_SCALE[d.st]*EXPS[di].f*(1+.15*hup('sense')), em:D_RATE[d.st]*EXPS[di].s/60*.8*(1+.25*hup('diet'))}; }
-function sendExp(){ const Hh=S.hollow, d=Hh.dragons.find(x=>x.id===ui.expSel), di=ui.expDur||0; if(!d||!d.born||d.job!=='home'){ toast('Pick a dragon that is at home first.'); return; }
+function sendExp(){ const Hh=S.hollow, d=Hh.dragons.find(x=>x.id===ui.expSel), di=ui.expDur||0; if(!d||!d.born||d.job!=='home'){ toast('Pick a dragon that is at home first.'); return; } if(d.train>0){ toast('<span class="ti">🏋️</span><span>'+esc(d.name)+' is training. Finish the training first!</span>'); return; }
   if(Hh.exps.length>=expCap()){ toast('<span class="ti">🗺️</span><span>All expedition slots are busy. Buy <b>Expedition Maps</b> for more.</span>'); return; }
   const now=nowT(); Hh.exps.push({id:d.id,di,start:now,end:now+expDur(di)*1000}); d.job='exp'; goalAdd('exp'); ui.expSel=null; sfx('expSend'); gainXP(5);
   toast('<img src="'+dragonImg(d.el,d.st,d.el2)+'" alt=""><span><b>'+esc(d.name)+' flew into the Deep</b><br>Back in '+fmtTime(expDur(di))+'</span>'); renderExp(true); }
-function collectExp(i){ const Hh=S.hollow, e=Hh.exps[i]; if(!e||nowT()<e.end) return; const d=Hh.dragons.find(x=>x.id===e.id);
-  Hh.exps.splice(i,1); if(!d){ renderExp(true); return; } d.job='home';
-  const pv=expPreview(d,e.di); let sc=pv.sc*rand(.7,1.3); sc=Math.floor(sc)+(Math.random()<sc%1?1:0); const em=Math.round(pv.em*rand(.8,1.2));
-  let relic=null; const rc=[0,0,.1,.3][e.di]*(d.st>=1?1:.5); if(Hh.relics.length<RELICS.length&&Math.random()<rc){ relic=Hh.relics.length; Hh.relics.push(relic); sc+=2; }
-  // the rarest find: a Dragon Heart, needed to wake Tiamatra
-  // 5.0: long trips also follow a heart trail, so no one is stuck waiting on luck
-  let heart=false; if(!Hh.tia&&!Hh.waking&&Hh.hearts<3){ const hs=prkM('hseek'), hc=[0,0,.05,.2][e.di]*[.3,.5,.75,1][d.st]*(hs?1.5:1); if(Math.random()<hc){ Hh.hearts++; heart=true; }
-    else { Hh.hdust=(Hh.hdust||0)+[0,0,1,3][e.di]*[.5,.6,.8,1][d.st]*(hs?2:1); if(Hh.hdust>=HEART_DUST){ Hh.hdust-=HEART_DUST; Hh.hearts++; heart=true; } } }
-  Hh.scales+=sc; Hh.scalesAll+=sc; earnEmbers(em); sfx('expDone'); gainXP(10+15*e.di);
-  toast('<img src="'+dragonImg(d.el,d.st,d.el2)+'" alt=""><span><b>'+esc(d.name)+' is back!</b><br>+'+sc+' 🐉 scale'+(sc===1?'':'s')+' · +'+fmtE(em)+' embers</span>','gold');
-  if(relic!=null) setTimeout(()=>openModal('<div class="mcenter"><div style="font-size:64px">📜</div><h2 class="mh">Relic found: '+RELICS[relic].n+'</h2><p>'+RELICS[relic].t+'</p><p>This page is now in the Chronicle. <b>+2 bonus scales.</b></p></div>'),500);
-  if(heart) setTimeout(()=>{ const go=()=>{ if(!ui.modal.hidden){ setTimeout(go,500); return; } heartFound(); }; go(); },relic!=null?900:500);
-  renderExp(true); }
 let W=null, wispNext=rand(40,80);
 function wispLogic(dt){ if(S.world!=='hollow'){ W=null; return; }
   if(!W){ wispNext-=dt*(moonNew()?2:1); if(wispNext<=0){ wispNext=rand(60,150); const left=Math.random()<.5; W={x:left?-20:ST.w+20,y:rand(ST.h*.2,ST.h*.6),vx:(left?1:-1)*rand(40,70),ph:Math.random()*6,life:12}; sfx('wisp'); } return; }
@@ -3765,7 +3806,7 @@ function hollowLogic(dt){
   const Hh=S.hollow; if(S.level<HOLLOW_LV&&!Hh.dragons.length) return; const now=nowT();
   if(Hh.heat>0) Hh.heat=Math.max(0,Hh.heat-heatDecay()*dt);
   const z=zone(); if(now>=Hh.coolUntil&&Hh.heat>=z[0]&&Hh.heat<=z[1]) earnEmbers((.4+.2*hup('bellows'))*dt);
-  const r=nestRate(); if(r) earnEmbers(r/60*dt);
+  emberFlow(dt); if(S.world==='hollow'&&Hh.basket>0) basketCollect();
   for(const d of Hh.dragons) if(!d.born&&now>=d.hatchAt) onHatch(d);
   for(const d of Hh.dragons) if(d.born&&d.job==='patrol'){ const p=PAT[d.id]||(PAT[d.id]={f:0,cd:rand(.5,2)}); p.cd-=dt; if(p.cd<=0){ p.cd=D_BLAST[d.st]; patrolBlast(d); } }
 }
@@ -3817,14 +3858,14 @@ function buyShop(k,btn){ const Hh=S.hollow, c=SHOP_CONS.find(x=>x.k===k);
 
 /* hollow panels */
 function renderNest(force){ const Hh=S.hollow;
-  const key=Hh.dragons.map(d=>d.id+':'+d.st+':'+d.job+':'+(d.born?1:0)+':'+d.name).join('|')+'#'+nestMult().toFixed(2);
+  const key=Hh.dragons.map(d=>d.id+':'+d.st+':'+d.job+':'+(d.born?1:0)+':'+d.name+':'+(d.train||0)).join('|')+'#'+nestMult().toFixed(2);
   if(force||key!==ui.nestKey){ ui.nestKey=key;
     ui.dGrid.innerHTML=Hh.dragons.length?Hh.dragons.map(d=>{
       if(!d.born) return '<div class="dcard egg" data-id="'+d.id+'"><img src="'+DEGG_IMG+'" alt="Dragon egg"><b class="dn" style="text-decoration:none">Mystery egg</b><span class="ds" data-egg="'+d.id+'">Hatching…</span></div>';
       const E=ELEM[d.el], away=d.job!=='home';
       return '<div class="dcard'+(away?' away':'')+'" data-id="'+d.id+'">'+(d.job==='patrol'?'<span class="dtag">On patrol</span>':d.job==='exp'?'<span class="dtag exp">Exploring</span>':d.job==='den'?'<span class="dtag exp">In the den</span>':'')+'<span class="del" title="'+dName(d)+'">'+E.ico+(d.el2!=null&&d.el2!==d.el?ELEM[d.el2].ico:'')+'</span><span class="dst">'+STAGES[d.st]+'</span><img src="'+dragonImg(d.el,d.st,d.el2)+'" alt="'+E.n+' '+STAGES[d.st]+'"><button class="dn" data-act="ren" title="Rename">'+esc(d.name)+'</button>'+
         '<span class="ds">'+(d.job==='exp'?'Exploring the Deep':d.job==='den'?'Keeping an egg warm':d.job==='patrol'?'On Dragon Patrol with the King':'+'+fmtE(D_RATE[d.st]*nestMult())+' embers/min')+'</span>'+
-        '<div class="row2">'+(d.st<3?'<button class="btn grow" data-act="grow" title="Grow into a '+STAGES[d.st+1]+'">Grow '+fmtE(D_GROW[d.st])+'🔥</button>':'')+(d.job==='home'?'<button class="btn ghost rel" data-act="rel" title="Let '+esc(d.name)+' fly off into the Deep">Release</button>':'')+(d.st>=1&&d.job!=='exp'&&d.job!=='den'?'<button class="btn patrol '+(d.job==='patrol'?'patrol-back" data-act="pat" title="Bring '+esc(d.name)+' home">Recall':'patrol-go" data-act="pat" title="Send '+esc(d.name)+' to guard the King">Patrol')+'</button>':'')+'</div></div>'; }).join('')
+        '<div class="row2">'+(d.train>0?trainHtml(d):d.st<3?'<button class="btn grow" data-act="grow" title="Grow into a '+STAGES[d.st+1]+'">Grow '+fmtE(D_GROW[d.st])+'🔥</button>':'')+(d.job==='home'&&!(d.train>0)?'<button class="btn ghost rel" data-act="rel" title="Let '+esc(d.name)+' fly off into the Deep">Release</button>':'')+(d.st>=1&&d.job!=='exp'&&d.job!=='den'&&!(d.train>0)?'<button class="btn patrol '+(d.job==='patrol'?'patrol-back" data-act="pat" title="Bring '+esc(d.name)+' home">Recall':'patrol-go" data-act="pat" title="Send '+esc(d.name)+' to guard the King">Patrol')+'</button>':'')+'</div></div>'; }).join('')
       :'<p class="hint" style="grid-column:1/-1">No dragons yet. Tap the brazier for embers, then hatch your first egg.</p>'; }
   const now=nowT();
   for(const el of ui.dGrid.querySelectorAll('[data-egg]')){ const d=Hh.dragons.find(x=>x.id==el.dataset.egg); if(d) el.textContent='Hatching in '+Math.max(0,Math.ceil((d.hatchAt-now)/1000))+'s'; }
@@ -3832,7 +3873,7 @@ function renderNest(force){ const Hh=S.hollow;
   if(ui.denBox){ const D=Hh.den, dk=JSON.stringify([D,ui.denSel||[],homeDragons().map(d=>d.id+':'+d.st),Hh.embers>=DEN_COST,D?Math.ceil((D.end-now)/1000):0]); if(force||dk!==ui.denKey){ ui.denKey=dk; ui.denBox.innerHTML=denHtml(); } }
   for(const b of ui.dGrid.querySelectorAll('.grow')){ const d=Hh.dragons.find(x=>x.id==b.closest('.dcard').dataset.id); if(d&&d.st<3) b.classList.toggle('off',Hh.embers<D_GROW[d.st]); }
 }
-function renderExp(force){ const Hh=S.hollow, now=nowT(), home=homeDragons();
+function renderExp(force){ { const pe=$('#expPend'), ph=pendHtml(); if(pe&&pe._h!==ph){ pe._h=ph; pe.innerHTML=ph; } } const Hh=S.hollow, now=nowT(), home=homeDragons();
   if(ui.expSel&&!home.some(d=>d.id===ui.expSel)) ui.expSel=null; if(!ui.expSel&&home.length) ui.expSel=home.slice().sort((a,b)=>b.st-a.st)[0].id;
   const key=Hh.exps.map(e=>e.id+':'+e.end+':'+(e.end<=now?1:0)).join('|')+'#'+home.map(d=>d.id+':'+d.st).join(',')+'#'+expCap()+'#'+ui.expSel+'#'+(ui.expDur||0);
   if(force||key!==ui.expKey){ ui.expKey=key; let h='';
@@ -4196,10 +4237,10 @@ function skyWelcome(){ if(S.tut.sky) return; S.tut.sky=1; chapterCard(2); const 
 // and waits in S.dims while you are somewhere else
 const ACCT_KEYS=new Set(['v','realm','world','dims','lastSave','created','earnedAll','taps','crits','merges','pets','goldens','rushes','offline','ach','maxSpecies','skyMax','settings','playTime','bestGps',
   'level','xp','tenPow','tut','freeEggs','arts','bossNext','bossKills','bossEscapes','hollow','ascensions','skyAsc','starfalls','stardust','stardustAll','cst','conj','grands','seenTabs','gems','items','bpNew','cos',
-  'login','goals','wheel','season','shinyDex','lore','loreNew','trials','steward','shop','kname','req','slEvo','slName','slPets','mast','bestCombo','slGiftT','fb','friends','frSeen','blocked','retroXP',
+  'login','goals','wheel','season','shinyDex','lore','loreNew','trials','steward','shop','charter','kname','req','slEvo','slName','slPets','mast','bestCombo','slGiftT','fb','friends','frSeen','blocked','retroXP',
   'rift','seeds','gifts','pz','skyEvo','dbook','stars','moons','statue','hallSeen','itemsR','pevt','ship','seaMax','seaEvo','dream','dreamMax','dreamEvo','kq','dawn','dawnMax','dawnEvo']);
 function realmPack(){ const o={}; for(const k of Object.keys(S)) if(!ACCT_KEYS.has(k)) o[k]=S[k]; return o; }
-const offCap=()=>[28800,86400,129600,172800][prk('night')]+(legacy(3)?7200:0)+(renBoon('away')?3600:0), offRate=()=>(prk('night')?1:.5)*(legacy(3)?1.25:1);
+const offCap=()=>([28800,86400,129600,172800][prk('night')]+(legacy(3)?7200:0)+(renBoon('away')?3600:0))*(S.charter?1.5:1), offRate=()=>(prk('night')?1:.5)*(legacy(3)?1.25:1);
 // swaps the realm half of the save; the realm you come back to made goo while you were gone, like time away
 function switchRealm(to){ if(S.realm===to) return; const away=realmPack(); away.leftAt=nowT(); computeG(); away.gpsAt=G.base; const dims=Object.assign({},S.dims||{}); dims[S.realm]=away; const nx=dims[to]; delete dims[to];
   const o={}; for(const k of ACCT_KEYS) if(k in S) o[k]=S[k]; Object.assign(o,nx||{goo:0},{v:SAVE_V,realm:to,dims});
@@ -4779,7 +4820,7 @@ function starsListHtml(kind){ const L=kind==='star'?STAR7:MOON8, lit=kind==='sta
 // so the meadow is never a place to farm items for the stars
 function itemBag(){ if(!S.itemsR) S.itemsR={}; return S.itemsR[S.realm]||(S.itemsR[S.realm]={}); }
 function itemCount(id){ return (S.items[id]||0)+((S.itemsR&&S.itemsR[S.realm]&&S.itemsR[S.realm][id])||0); }
-function itemIds(){ const s=new Set(Object.keys(S.items)); if(S.itemsR&&S.itemsR[S.realm]) for(const k in S.itemsR[S.realm]) s.add(k); return [...s].filter(k=>ITEMS[k]&&itemCount(k)>0); }
+function itemIds(){ const s=new Set(Object.keys(S.items)); if(S.itemsR&&S.itemsR[S.realm]) for(const k in S.itemsR[S.realm]) s.add(k); return [...s].filter(k=>ITEMS[k]&&!ITEMS[k].alias&&itemCount(k)>0); }
 function itemTake(id){ const b=S.itemsR&&S.itemsR[S.realm]; if(b&&b[id]>0){ b[id]--; if(!b[id]) delete b[id]; return; } if(S.items[id]>0){ S.items[id]--; if(!S.items[id]) delete S.items[id]; } }
 
 /* ================= 5.0: surprise eggs ================= */
@@ -6305,10 +6346,10 @@ const kqPlacesOpen=()=>Object.keys(PLACE).filter(k=>PLACE[k].ok()).length;
 const kqGrandPl=()=>Math.max(1,Math.min(KQ_GRAND.places,kqPlacesOpen()));
 function kqGrand(){ const q=kqState(), wk=weekKey(nowT()); if(q.wk!==wk){ q.wk=wk; q.wn=0; q.wp=[]; q.wg=0; } if(!Array.isArray(q.wp)) q.wp=[]; q.wn=+q.wn||0; return q; }
 function kqGrandAdd(at){ const q=kqGrand(); q.wn++; if(!q.wp.includes(at)) q.wp.push(at); if(!q.wg&&q.wn>=KQ_GRAND.n&&q.wp.length>=kqGrandPl()){ q.wg=1; S.gems=(S.gems||0)+KQ_GRAND.gems; giveItem('rchest',1,true); sfx('mythic');
-  setTimeout(()=>{ toast('<span class="ti">🏆</span><span><b>Grand Quest complete!</b><br>+'+KQ_GRAND.gems+' 💎 · a 💝 Royal Chest · +'+KQ_GRAND.ren+' ⚜️</span>','gold'); renownAdd(KQ_GRAND.ren,'🏆'); },900); } }
+  setTimeout(()=>{ toast('<span class="ti">🏆</span><span><b>Grand Quest complete!</b><br>+'+KQ_GRAND.gems+' 💎 · 2 🎁 Artifact Chests · +'+KQ_GRAND.ren+' ⚜️</span>','gold'); renownAdd(KQ_GRAND.ren,'🏆'); },900); } }
 function kqGrandHtml(){ const q=kqGrand(), pl=kqGrandPl(), d=new Date(nowT()), nx=new Date(d); nx.setHours(0,0,0,0); nx.setDate(nx.getDate()+((8-nx.getDay())%7||7)); const left=(nx-d)/1000;
   return '<div class="kqg card'+(q.wg?' done':'')+'"><span class="kqg-i">🏆</span><div><small>GRAND QUEST OF THE WEEK · '+(q.wg?'DONE ✓':'ends in '+fmtTime(left))+'</small><b>Finish '+KQ_GRAND.n+' quests'+(pl>1?' from '+pl+' different places':'')+'</b>'+
-    '<div class="bar"><i style="width:'+(clamp(Math.min(q.wn/KQ_GRAND.n,pl>1?q.wp.length/pl:1),0,1)*100).toFixed(0)+'%"></i></div><span>📜 '+Math.min(q.wn,KQ_GRAND.n)+'/'+KQ_GRAND.n+(pl>1?' · places '+Math.min(q.wp.length,pl)+'/'+pl+' '+q.wp.map(p=>PLACE[p]?PLACE[p].ico:'').join(''):'')+' · reward: '+KQ_GRAND.gems+' 💎, 💝 Royal Chest, '+KQ_GRAND.ren+' ⚜️</span></div></div>'; }
+    '<div class="bar"><i style="width:'+(clamp(Math.min(q.wn/KQ_GRAND.n,pl>1?q.wp.length/pl:1),0,1)*100).toFixed(0)+'%"></i></div><span>📜 '+Math.min(q.wn,KQ_GRAND.n)+'/'+KQ_GRAND.n+(pl>1?' · places '+Math.min(q.wp.length,pl)+'/'+pl+' '+q.wp.map(p=>PLACE[p]?PLACE[p].ico:'').join(''):'')+' · reward: '+KQ_GRAND.gems+' 💎, 🎁 2 Artifact Chests, '+KQ_GRAND.ren+' ⚜️</span></div></div>'; }
 function kqSwap(i,btn){ const q=kqState(), c=q.list[i]; if(!c) return; const d=today()||localDay(nowT()), free=q.swap!==d;
   if(!free&&(S.gems||0)<2){ nope(btn); toast('<span class="ti">💎</span><span>A new letter costs 2 💎 after your free one today.</span>'); return; }
   if(btn.dataset.sure!=='1'){ btn.dataset.sure='1'; btn.textContent=free?'Sure? (free)':'Sure? (2 💎)'; sfx('click'); setTimeout(()=>{ if(btn.isConnected){ btn.dataset.sure=''; btn.textContent='Swap'; } },3000); return; }
@@ -6321,9 +6362,9 @@ function renInto(){ let r=0, x=+(S.kq&&S.kq.ren)||0; while(r<500&&x>=renNeed(r))
 const ROMAN=['','I','II','III','IV','V','VI','VII','VIII','IX','X'];
 const renTitle=r=>r<REN_T.length?REN_T[r]:REN_T[REN_T.length-1]+' '+(ROMAN[r-REN_T.length+2]||'★'+(r-REN_T.length+2));
 // the bigger gifts along the way (every rank also brings Gems)
-const REN_R={2:{ico:'📜',n:'A 4th quest slot'},3:{ico:'🌿',n:'Laurel Crown (hat)',cos:'laurel'},4:{ico:'🌙',n:'Time away lasts 1 hour longer, in every realm',boon:'away'},5:{ico:'💝',n:'A Royal Chest',item:'rchest'},
- 6:{ico:'🌟',n:'Golden finds come 15% more often, in every realm',boon:'gold'},7:{ico:'💜',n:'Regal Violet (color)',cos:'sk_regal'},8:{ico:'🌈',n:'Every Rush lasts 3 seconds longer',boon:'rush'},9:{ico:'🕰️',n:'An 8-hour Time Warp',item:'warp8h'},
- 10:{ico:'🃏',n:'Jester\'s Cap (hat)',cos:'jester'},12:{ico:'⏱️',n:'New quests arrive every 30 minutes',boon:'fast'},14:{ico:'🏰',n:'Banner Crown (hat)',cos:'bannercrown'},16:{ico:'💝',n:'A Royal Chest',item:'rchest'},18:{ico:'👑',n:'Imperial Gold (color)',cos:'sk_imperial'}};
+const REN_R={2:{ico:'📜',n:'A 4th quest slot'},3:{ico:'🌿',n:'Laurel Crown (hat)',cos:'laurel'},4:{ico:'🌙',n:'Time away lasts 1 hour longer, in every realm',boon:'away'},5:{ico:'🎁',n:'2 Artifact Chests',item:'rchest'},
+ 6:{ico:'🌟',n:'Golden finds come 15% more often, in every realm',boon:'gold'},7:{ico:'💜',n:'Regal Violet (color)',cos:'sk_regal'},8:{ico:'🌈',n:'Every Rush lasts 3 seconds longer',boon:'rush'},9:{ico:'⏳',n:'8 hours of Time Warp',item:'warp8h'},
+ 10:{ico:'🃏',n:'Jester\'s Cap (hat)',cos:'jester'},12:{ico:'⏱️',n:'New quests arrive every 30 minutes',boon:'fast'},14:{ico:'🏰',n:'Banner Crown (hat)',cos:'bannercrown'},16:{ico:'🎁',n:'2 Artifact Chests',item:'rchest'},18:{ico:'👑',n:'Imperial Gold (color)',cos:'sk_imperial'}};
 const renBoon=k=>{ if(!S||!S.kq) return false; const r=renRank(); for(const L in REN_R) if(REN_R[L].boon===k&&r>=+L) return true; return false; };
 const renGems=r=>Math.min(25,5+r);
 function renownAdd(n,ico){ const q=kqState(), before=renRank(); q.ren+=n; const after=renRank(); toast('<span class="ti">'+(ico||'⚜️')+'</span><span><b>+'+n+' ⚜️ Renown</b><br>'+renTitle(after)+' · '+renInto()[0]+'/'+renInto()[1]+'</span>','gold');
@@ -6355,7 +6396,7 @@ function drawCrest(c,x,y,s,r,t){ c.save(); c.translate(x,y); const tiers=[['#c08
   c.restore(); }
 /* ---- the Royal Ledger: Today · Goals · Quests · Puzzle in one window ---- */
 function ledgerTabs(cur){ const tabs=[]; if(kqOpen()) tabs.push(['today','📅 Today',todayLeft()?'!':'']); tabs.push(['goals','🎯 Goals',goalsClaimable()?'!':'']); if(kqOpen()) tabs.push(['kq','📜 Quests',kqClaimable()?'!':'']); if(pzOpen()) tabs.push(['pz','🧩 Puzzle',pzNew()?'!':'']);
-  if(tabs.length<2) return ''; return '<div class="seg mtabs ledger" id="gTabs">'+tabs.map(t=>'<button data-t="'+t[0]+'" aria-pressed="'+(t[0]===cur)+'">'+t[1]+(t[2]&&t[0]!==cur?' <i class="frdot">'+t[2]+'</i>':'')+'</button>').join('')+'</div>'; }
+  if(tabs.length<2) return kingdomRow(); return kingdomRow()+'<div class="seg mtabs ledger" id="gTabs">'+tabs.map(t=>'<button data-t="'+t[0]+'" aria-pressed="'+(t[0]===cur)+'">'+t[1]+(t[2]&&t[0]!==cur?' <i class="frdot">'+t[2]+'</i>':'')+'</button>').join('')+'</div>'; }
 function ledgerNav(t){ sfx('click'); ui.pzOn=false; ui.kqOn=false; if(t==='today') openToday(); else if(t==='goals') openGoals(); else if(t==='kq') openQuests(); else if(t==='pz') openPuzzle(); }
 function openLedger(){ if(kqOpen()) openToday(); else openGoals(); }
 function openQuests(){ rollGoals(); kqTick(); const q=kqState(), N=kqSlots(), now=nowT(), here=placeNow(), r=renRank(), into=renInto(); ui.kqOn=true; S.tut.kqSeen=1;
@@ -6484,7 +6525,7 @@ function drawLvRing(c,k,dt){ const R=ST.lvRing; if(!R) return; R.t+=dt; if(R.t>1
 /* ================= 7.5: what is new, and test tools ================= */
 function openNew75(){ const L=legacyN(), sf=S.starfalls>0;
   openModal('<h2 class="mh">✨ New in Slime Empire 7.5</h2><p class="hint" style="margin-top:0"><b>One Kingdom</b>: every realm is part of the same story now.</p><ul class="howto">'+
-    '<li><span>📜</span><b>Kingdom Quests</b> (Level '+KQ_LV+'): letters from every corner of your kingdom. Finish them for <b>⚜️ Renown</b> and grow from a Hamlet into an Empire. Every rank brings a gift, and a weekly 🏆 <b>Grand Quest</b> pays a Royal Chest.</li>'+
+    '<li><span>📜</span><b>Kingdom Quests</b> (Level '+KQ_LV+'): letters from every corner of your kingdom. Finish them for <b>⚜️ Renown</b> and grow from a Hamlet into an Empire. Every rank brings a gift, and a weekly 🏆 <b>Grand Quest</b> pays 2 Artifact Chests.</li>'+
     '<li><span>📅</span>The <b>Royal Ledger</b> (the 📜 button): <b>Today</b>, Goals, Quests and the Puzzle together. Today shows everything waiting for you, in every realm.</li>'+
     '<li><span>✨</span><b>Chapter Legacies</b>: every chapter you finish now gives a power for every realm.'+(L?' <b>You already have '+L+'!</b>':'')+' See them in the 📖 Journey Book.</li>'+
     (S.level>=HOLLOW_LV?'<li><span>🐉</span>Your <b>Dragon Patrol</b> flies with the King to every realm now.</li>':'')+
@@ -7032,7 +7073,7 @@ KQ.push(
  {id:'fham',at:'forge',k:'hammer',n:40,r:10,t:n=>'Hammer the anvil '+n+' times while it glows'},
  {id:'fmake',at:'forge',k:'forged',n:1,r:20,t:()=>'Forge a trap or a ward'});
 // Kingdom Renown goes on to rank 30
-Object.assign(REN_R,{20:{ico:'☀️',n:'Sun Crown (hat)',cos:'suncrown'},22:{ico:'💝',n:'A Royal Chest',item:'rchest'},24:{ico:'🌅',n:'Dawn Rose (color)',cos:'sk_dawnrose'},26:{ico:'🕰️',n:'An 8-hour Time Warp',item:'warp8h'},28:{ico:'🎖️',n:'Knight\'s Plume (hat)',cos:'knightplume'},30:{ico:'💝',n:'A Royal Chest',item:'rchest'}});
+Object.assign(REN_R,{20:{ico:'☀️',n:'Sun Crown (hat)',cos:'suncrown'},22:{ico:'🎁',n:'2 Artifact Chests',item:'rchest'},24:{ico:'🌅',n:'Dawn Rose (color)',cos:'sk_dawnrose'},26:{ico:'⏳',n:'8 hours of Time Warp',item:'warp8h'},28:{ico:'🎖️',n:'Knight\'s Plume (hat)',cos:'knightplume'},30:{ico:'🎁',n:'2 Artifact Chests',item:'rchest'}});
 // a Sunburst's rare tiers
 RUSH_T[1].n.push('Golden Hour'); RUSH_T[1].ico.push('🌅'); RUSH_T[1].col.push('#ffb35c');
 RUSH_T[2].n.push('High Noon'); RUSH_T[2].ico.push('☀️'); RUSH_T[2].col.push('#fff6aa');
@@ -7072,12 +7113,12 @@ const FEAT={
   col:{pri:2,then:()=>{ S.tut.achq=1; }}, shiny:{pri:1}, login:{pri:2}, wheel:{pri:2},
   goals:{pri:2,then:()=>{ setTimeout(()=>{ const sd=sotdL(); if(sd) intro('sotd',()=>say('Every day one size of '+RL().slime+' is the <b>Slime of the Day</b> and makes <b>double goo</b>. Today it is the <b>Lv.'+sd+' '+SPECIES[sd-1].n+'</b>. Look for the ⭐ in your '+RL().pen.toLowerCase()+'.',9000),2); },500); }},
   ev:{pri:2},
-  shop:{pri:2,then:()=>coach([{el:()=>ui.dock.querySelector('[data-d="bag"]')||ui.dock,text:'The <b>Gem shop</b> is open in your 🎒 Backpack! Gems 💎 come from levels, trophies, goals and the daily reward. Spend them on items, new looks, <b>Royal Spins</b> and the Royal Road.'}])},
+  shop:{pri:2,then:()=>coach([{el:()=>ui.dock.querySelector('[data-d="store"]')||ui.dock,text:'The <b>🛒 Store</b> has deals today! Gems 💎 come from levels, trophies, goals, quests and the daily reward. Spend them on boosts, looks and the <b>Kingdom Charter</b>. Tap a 💎 any time to see more.'}])},
   req:{pri:2,then:()=>{ S.req.next=S.playTime+3; }},
   boss:{pri:2,then:levelSync}, asc:{pri:2},
   combo:{pri:3,then:()=>{ if(S.realm!=='meadow') return; if(tab!=='pen') setTab('pen'); coach([{el:'#board',text:'⭐ <b>Merge Combos!</b> Merge again within 2 seconds to build a combo: ×2, ×3, ×4… Every merge in a combo pays goo and fills the Wobble meter. The Auto-Merger does not count, so this one is all you!'}]); }},
   decree:{pri:3,then:()=>{ if(S.realm!=='meadow') return; coach([{el:'#stage',text:'⭐ <b>Crown Decrees!</b> Every run the '+RL().king+' may issue one decree: pick one of three bonuses, and it lasts until you ascend. Here is your first one!',after:()=>setTimeout(openDecrees,250)}]); }},
-  mastery:{pri:3,then:()=>{ const n=mastTotal(); recalc(); coach([{el:()=>ui.tabMap.col||ui.tabs,text:'⭐ <b>Slime Mastery!</b> Every slime size earns ★ stars when you make it 10, 100 and 1,000 times. Each star boosts all goo by 2%, forever.'+(n?' You have already earned <b>'+n+' stars</b>!':'')+' See them in the Slimepedia.'}]); }},
+  mastery:{pri:3,then:()=>{ const n=mastTotal(); recalc(); coach([{el:()=>ui.dock.querySelector('[data-d="goals"]')||ui.tabs,text:'⭐ <b>Slime Mastery!</b> Every slime size earns ★ stars when you make it 10, 100 and 1,000 times. Each star boosts all goo by 2%, forever.'+(n?' You have already earned <b>'+n+' stars</b>!':'')+' See them in the Slimepedia.'}]); }},
   kq:{pri:3,then:()=>kqUnlock()},
   steward:{pri:2,then:()=>coach([{el:()=>ui.tabMap.fac||ui.tabs,text:'The <b>Royal Steward</b> joins your court! Switch him on in the '+tabName('fac')+' tab and he buys the best value for you, so there are fewer buttons to press.'}])}};
 const LV_KEYS={}; for(const k in LV) (LV_KEYS[LV[k]]=LV_KEYS[LV[k]]||[]).push(k);
@@ -7102,6 +7143,7 @@ function unlockTick(){ const L=S.level, pt=S.playTime, vet=ascTotal()>0||S.realm
   U('steward',L>=STEWARD_LV||crownAt(4));
   if(trialsOpen()&&!S.tut.trialsTip){ S.tut.trialsTip=1; intro('trials',()=>coach([{el:()=>ui.tabMap.asc||ui.tabs,text:'Three ascensions! The <b>Trials of the Crown</b> are open in the Ascend tab: runs with a twist, each with a permanent reward and a jewel for the crown.'}]),2); }
   if(S.tut.compassGone>0) intro('compassGone',()=>{ const n=S.tut.compassGone; delete S.tut.compassGone; toast('<span class="ti">🧭</span><span><b>The Swift Compass is retired.</b><br>You got '+(10*n)+' 💎 Gems back for '+(n>1?'your '+n+' compasses':'your compass')+'.</span>','gold'); },3);
+  if(S.tut.new90===1) intro('new90',()=>{ S.tut.new90=2; openNew90(); },8,()=>S.world==='meadow');
   if(S.tut.new80===1) intro('new80',()=>{ S.tut.new80=2; S.tut.new75=2; S.tut.new70=2; S.tut.new60=2; S.tut.new50=2; S.tut.new40=2; S.tut.new36=2; S.tut.new35=2; S.tut.new34=2; S.tut.new33=2; S.tut.new32=2; delete S.tut.refund35; delete S.tut.sf50; delete S.tut.sky40; openNew80(); },8,()=>S.world==='meadow');
   else if(S.tut.new75===1) intro('new75',()=>{ S.tut.new75=2; S.tut.new70=2; S.tut.new60=2; S.tut.new50=2; S.tut.new40=2; S.tut.new36=2; S.tut.new35=2; S.tut.new34=2; S.tut.new33=2; S.tut.new32=2; delete S.tut.refund35; delete S.tut.sf50; delete S.tut.sky40; openNew75(); },8,()=>S.world==='meadow');
   else if(S.tut.new70===1) intro('new70',()=>{ S.tut.new70=2; S.tut.new60=2; S.tut.new50=2; S.tut.new40=2; S.tut.new36=2; S.tut.new35=2; S.tut.new34=2; S.tut.new33=2; S.tut.new32=2; delete S.tut.refund35; delete S.tut.sf50; delete S.tut.sky40;
@@ -7151,7 +7193,7 @@ function unlockTick(){ const L=S.level, pt=S.playTime, vet=ascTotal()>0||S.realm
       '<li><span>👑</span>The <b>Crown Road</b> in the Ascend tab shows what each ascension opens: perk ranks II and III, new perks, Royal Research, more pen space and more.</li>'+
       '<li><span>🌠</span>Starfall now asks for the Slime God, Level 75 and an Elder dragon.</li><li><span>📸</span>Your Kingdom card shows your <b>slime rank</b>.</li><li><span>📅</span>Monthly events now open at Level 8.</li></ul><div class="btnrow" style="justify-content:center"><button class="btn" id="n35Ok">Let\'s go!</button></div>'); $('#n35Ok').onclick=closeModal; },8,()=>S.world!=='hollow');
   else if(S.tut.new34===1) intro('new34',()=>{ S.tut.new34=2; openModal('<h2 class="mh">✨ New in Slime Empire 3.4</h2><ul class="howto"><li><span>🐣</span>Your slimes are the heart of the kingdom now: bigger slimes make much more goo, and most of your goo comes from the pen.</li><li><span>🏭</span>Factories are rarer, bigger buys. Each one costs 50% more than the last, and they double at 5, 10, 15 and 20 owned.</li><li><span>⭐</span>Every level unlocks something new. The Chronicle shows what comes next.</li><li><span>🌈</span>Wobble Rush and golden slimes are rarer, but they last much longer.</li></ul><div class="btnrow" style="justify-content:center"><button class="btn" id="n34Ok">Let\'s go!</button></div>'); $('#n34Ok').onclick=closeModal; },8,()=>S.world!=='hollow');
-  else if(S.tut.new33===1) intro('new33',()=>{ S.tut.new33=2; S.tut.new32=2; openModal('<h2 class="mh">✨ New in Slime Empire 3.3</h2><ul class="howto"><li><span>📅</span>A new event every month, each with its own Royal Road, three hats, two colors and a meadow theme. See what is coming in the event Calendar.</li><li><span>👑</span>Royal Requests: the King asks for a slime, and pays well for it.</li><li><span>✨</span>Shiny slimes: about 1 in 100 eggs, with double goo.</li><li><span>⭐</span>Slime of the Day: one size makes double goo, every day.</li><li><span>🛒</span>The Gem shop and the Royal Spin, in your Backpack.</li><li><span>🌧️</span>Weather in the meadow, and the real moon phase in the night sky.</li><li><span>📜</span>Lore cards in the Chronicle.</li><li><span>🏆</span>Trials of the Crown after 3 ascensions, a run summary after every ascension, and the Royal Steward at level '+STEWARD_LV+'.</li><li><span>🐉</span>Dragon breeding in the Hollow, and comets among the stars.</li><li><span>📸</span>The Kingdom card: a picture of your kingdom to share (Collection tab).</li></ul><p class="note">The start of the game was rebalanced as well, so new players meet one thing at a time over their first hour.</p>'); },8,()=>S.world!=='hollow');
+  else if(S.tut.new33===1) intro('new33',()=>{ S.tut.new33=2; S.tut.new32=2; openModal('<h2 class="mh">✨ New in Slime Empire 3.3</h2><ul class="howto"><li><span>📅</span>A new event every month, each with its own Royal Road, three hats, two colors and a meadow theme. See what is coming in the event Calendar.</li><li><span>👑</span>Royal Requests: the King asks for a slime, and pays well for it.</li><li><span>✨</span>Shiny slimes: about 1 in 100 eggs, with double goo.</li><li><span>⭐</span>Slime of the Day: one size makes double goo, every day.</li><li><span>🛒</span>The Gem shop and the Royal Spin, in your Backpack.</li><li><span>🌧️</span>Weather in the meadow, and the real moon phase in the night sky.</li><li><span>📜</span>Lore cards in the Chronicle.</li><li><span>🏆</span>Trials of the Crown after 3 ascensions, a run summary after every ascension, and the Royal Steward at level '+STEWARD_LV+'.</li><li><span>🐉</span>Dragon breeding in the Hollow, and comets among the stars.</li><li><span>📸</span>The Kingdom card: a picture of your kingdom to share (📜 Kingdom menu).</li></ul><p class="note">The start of the game was rebalanced as well, so new players meet one thing at a time over their first hour.</p>'); },8,()=>S.world!=='hollow');
   else if(S.tut.new32===1) intro('new32',()=>{ S.tut.new32=2; if(tab!=='pen') setTab('pen'); uiTick(); coach([
     {el:'#board',text:'<b>New in 3.2:</b> tap a '+RL().slime+', then a matching one, to merge them. Hold and drag still works, and the '+RL().pen+' now scrolls like the rest of the page.'},
     {el:'#penUpBtn',text:'Pen upgrades moved here. <b>🏡 Upgrades</b> opens them as a panel, with a badge when one is ready.'},
@@ -7180,7 +7222,7 @@ function clockTick(){ const p=performance.now(); if(!TIME.anchorP){ anchorTime()
 // every frame: game time the loop did not play through (the app was closed, asleep or in the background) is paid out
 function creditCheck(dt){ TIME.simT+=dt*1000; const lag=nowT()-TIME.simT; if(lag>5000){ TIME.simT=nowT(); if(!TIME.fresh) creditAway(lag/1000); } else if(lag<-2000) TIME.simT=nowT(); }
 // time that passed while the game was closed or asleep: short gaps are paid quietly, longer ones get the Welcome back screen
-function creditAway(sec){ if(!(sec>0)) return; if(isSea()){ computeG(); voySail(seaSpeed()*Math.min(sec,offCap())*(sec<120?1:offRate())); } if(isDream()&&S.night){ computeG(); nightSink(dreamPace()*Math.min(sec,offCap())*(sec<120?1:offRate())); } if(isDawn()&&S.siege&&sec>=60) siegeAway(Math.min(sec,offCap())); if(S.rift&&riftOpen()) S.rift.idle+=riftIdleRate()*Math.min(sec,offCap()); if(sec<120){ computeG(); earn(G.base*sec,true); earnEmbers(nestRate()/60*sec); return; } AWAY.sec+=sec; clearTimeout(AWAY.timer); AWAY.timer=setTimeout(showWelcomeBack,350); }
+function creditAway(sec){ if(!(sec>0)) return; if(isSea()){ computeG(); voySail(seaSpeed()*Math.min(sec,offCap())*(sec<120?1:offRate())); } if(isDream()&&S.night){ computeG(); nightSink(dreamPace()*Math.min(sec,offCap())*(sec<120?1:offRate())); } if(isDawn()&&S.siege&&sec>=60) siegeAway(Math.min(sec,offCap())); if(S.rift&&riftOpen()) S.rift.idle+=riftIdleRate()*Math.min(sec,offCap()); if(sec<120){ computeG(); earn(G.base*sec,true); basketAdd(nestRate()/60*sec); return; } AWAY.sec+=sec; clearTimeout(AWAY.timer); AWAY.timer=setTimeout(showWelcomeBack,350); }
 function localDay(ms){ const d=new Date(ms); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); }
 function dayDiff(a,b){ return Math.round((Date.parse(b+'T12:00:00')-Date.parse(a+'T12:00:00'))/864e5); }
 function weekKey(ms){ const d=new Date(ms); d.setDate(d.getDate()-(d.getDay()+6)%7); return localDay(d.getTime()); }
@@ -7198,11 +7240,11 @@ function showWelcomeBack(){ AWAY.timer=0;
   if(!ui.modal.hidden||!ui.cine.hidden||!ui.sheet.hidden||coachQ||ST.trans||bossQuiet()){ AWAY.timer=setTimeout(showWelcomeBack,800); return; }
   const sec=AWAY.sec, lp=loginPending(); if(sec<120&&!lp) return; AWAY.sec=0;
   const cap=offCap(), eff=offRate(), t=Math.min(sec,cap); computeG();
-  const gain=sec>=120?G.base*t*eff:0, em=sec>=120?nestRate()/60*t*eff:0, Hh=S.hollow, nowv=nowT();
+  const gain=sec>=120?G.base*t*eff:0, em=sec>=120?basketRoom(nestRate()/60*t*eff):0, Hh=S.hollow, nowv=nowT();
   const eggs=sec>=120&&S.hatchLvl>0&&S.world!=='hollow'?Math.min(emptyCells().length,Math.floor(t/hatchInt())):0;
   const expDone=Hh.exps.filter(e=>e.end<=nowv).length, hoard=Hh.tia&&tiaHome()?tiaHoard():0;
   const line0=sec<120?'A new day, a new reward! Come back every day to fill the calendar.':expDone?'Your dragons are back from the Deep, and they brought treasure!':eggs>3?'The Hatchery kept laying eggs while you were away. I counted every single one!':sec>6*3600?'You were gone so long the King started talking to the clouds.':pick(WB_LINES), line=realmWords(line0);
-  const rows=[]; if(gain>=1) rows.push(['💧',curName().charAt(0).toUpperCase()+curName().slice(1)+' while you were away',gain,'goo']); if(em>=1) rows.push(['🔥','Embers from your dragons',em,'']); if(eggs) rows.push(['🥚','Eggs from the Hatchery',eggs,'']);
+  const rows=[]; if(gain>=1) rows.push(['💧',curName().charAt(0).toUpperCase()+curName().slice(1)+' while you were away',gain,'goo']); if(em>=1) rows.push(['🧺','Embers in the dragon basket'+(basketFull()?' (full!)':''),em,'']); if(eggs) rows.push(['🥚','Eggs from the Hatchery',eggs,'']);
   if(expDone) rows.push(['🧭','Expeditions back from the Deep',expDone,'']); if(hoard) rows.push(['💰','Scales in Tiamatra\'s hoard',hoard,'']);
   // 5.0: one Welcome back for every realm: the other realm's goo and the Rift squad's shards come in here too
   const others=[]; if(S.starfalls&&sec>=120) for(const r of ['meadow','sky','sea','dream','dawn']){ if(r===S.realm) continue; const od=S.dims&&S.dims[r]; if(!od) continue; const osec=od.leftAt>0&&od.gpsAt>0?Math.min(offCap(),Math.max(0,(nowv-od.leftAt)/1000)):0, og=osec>90?od.gpsAt*offRate()*osec:0;
@@ -7214,7 +7256,7 @@ function showWelcomeBack(){ AWAY.timer=0;
     '<button class="btn gold" id="colBtn" style="font-size:20px;padding:10px 30px">Collect</button></div>',()=>give());
   let given=false; const give=()=>{ if(given) return; given=true; if(gain>=1){ earn(gain,true); S.offline++; }
     for(const o2 of others){ const od=o2.od, og=o2.og; od.goo=(od.goo||0)+og; od.earnedRun=(od.earnedRun||0)+og; od.earnedRealm=(od.earnedRealm||0)+og; S.earnedAll+=og; od.leftAt=nowT(); }
-    if(rid>=1){ S.rift.shards+=rid; S.rift.shardsAll=(S.rift.shardsAll||0)+rid; S.rift.idle=Math.max(0,S.rift.idle-rid); } if(em>=1) earnEmbers(em); for(let i=0;i<eggs;i++) spawnEgg(effEgg(),true,i*90);
+    if(rid>=1){ S.rift.shards+=rid; S.rift.shardsAll=(S.rift.shardsAll||0)+rid; S.rift.idle=Math.max(0,S.rift.idle-rid); } if(em>=1) basketAdd(em); for(let i=0;i<eggs;i++) spawnEgg(effEgg(),true,i*90);
     if(lp){ S.login.last=lp.d; S.login.day=lp.day; LOGIN[lp.day-1].forEach(r=>grantReward(r)); } };
   $('#colBtn').onclick=()=>{ audioUnlock(); give(); sfx('goldGet'); const b=$('#colBtn').getBoundingClientRect(), sr=ST.cv.getBoundingClientRect(); closeModal(); if(gain>=1) flyGoo(b.left-sr.left+b.width/2,Math.min(ST.h-20,b.top-sr.top),8); uiTick(); };
   // the counters roll up, and the King wakes up
@@ -7374,27 +7416,22 @@ SKINS.push({n:'Sea Captain',c:'#2f8fd0',pat:'waves',glow:true,cos:'sk_captain'})
 // 7.0 the Dreaming Deep's keepsake (clear all Ten Dreams), and a hat brewed in the Alchemy Grotto
 SKINS.push({n:'Dream Walker',c:'#b08aff',pat:'swirl',glow:true,cos:'sk_dreamwalker'}); COS.sk_dreamwalker={k:'skin',n:'Dream Walker'}; COS.dreamcap={k:'hat',n:'Dreamer\'s Nightcap',acc:'dreamcap'};
 
-function rewIco(r){ const se=season(); return r.k==='goo'?'💧':r.k==='gems'?'💎':r.k==='candy'?(se?se.ci:'🍬'):r.k==='lore'?'📜':r.k==='item'?ITEMS[r.id].ico:r.k==='cos'?(COS[r.id].k==='hat'?'🎩':COS[r.id].k==='skin'?'🎨':'🏞️'):'🎁'; }
+function rewIco(r){ r=normRew(r); const se=season(); return r.k==='goo'?'💧':r.k==='gems'?'💎':r.k==='candy'?(se?se.ci:'🍬'):r.k==='lore'?'📜':r.k==='item'?ITEMS[r.id].ico:r.k==='cos'?(COS[r.id].k==='hat'?'🎩':COS[r.id].k==='skin'?'🎨':'🏞️'):'🎁'; }
 // the tiny labels in the 7-day calendar
-function rewTiny(r){ return r.k==='goo'?fmtRough(gooFor(r.s)):r.k==='gems'?r.n+'💎':r.k==='item'?(r.n>1?r.n+'× ':'')+(ITEMS[r.id].sn||ITEMS[r.id].n):rewShort(r); }
-function rewShort(r){ const se=season(); return r.k==='goo'?fmtRough(gooFor(r.s))+' '+curName():r.k==='gems'?r.n+' 💎':r.k==='candy'?r.n+' '+(se?se.ci:'🍬'):r.k==='lore'?'Lore card':r.k==='item'?(r.n>1?r.n+'× ':'')+ITEMS[r.id].n:r.k==='cos'?COS[r.id].n:''; }
-function grantReward(r,quiet,glob){ let msg='';
+function rewTiny(r){ r=normRew(r); return r.k==='goo'?fmtRough(gooFor(r.s)):r.k==='gems'?r.n+'💎':r.k==='item'?(r.id==='warp'?r.n+'h Warp':(r.n>1?r.n+'× ':'')+(ITEMS[r.id].sn||ITEMS[r.id].n)):rewShort(r); }
+function rewShort(r){ r=normRew(r); const se=season(); return r.k==='goo'?fmtRough(gooFor(r.s))+' '+curName():r.k==='gems'?r.n+' 💎':r.k==='candy'?r.n+' '+(se?se.ci:'🍬'):r.k==='lore'?'Lore card':r.k==='item'?rewWord(r):r.k==='cos'?COS[r.id].n:''; }
+function grantReward(r,quiet,glob){ let msg=''; r=normRew(r);
   if(r.k==='goo'){ const v=gooFor(r.s); earn(v,true); msg='+'+fmtRough(v)+' '+curName(); if(ST.w&&S.world!=='hollow'){ const k=kingGeom(); addFloat(k.cx,k.by-k.h*1.1,'+'+fmtRough(v),'#98f25a',28); flyGoo(k.cx,k.by-k.h*.5,6); } }
   else if(r.k==='gems'){ S.gems=(S.gems||0)+r.n; msg='+'+r.n+' 💎 Gems'; }
   else if(r.k==='candy'){ addCandy(r.n); msg='+'+r.n+' '+season().ci+' '+season().cur; }
   else if(r.k==='lore'){ const n=grantLore(r.id,true); msg=n?'Lore card: '+n:'+1 💎'; if(!n) S.gems=(S.gems||0)+1; }
-  else if(r.k==='item'){ giveItem(r.id,r.n||1,glob); msg=(r.n>1?r.n+'× ':'')+ITEMS[r.id].n; }
+  else if(r.k==='item'){ giveItem(r.id,r.n||1,glob); msg=rewWord(r); }
   else if(r.k==='cos'){ S.cos.owned[r.id]=1; msg=COS[r.id].n+' (Wardrobe)'; S.bpNew=(S.bpNew||0)+1; }
   if(!quiet) toast('<span class="ti">'+rewIco(r)+'</span><span><b>'+msg+'</b></span>','gold'); return msg; }
-function giveItem(id,n,glob){ if(S.starfalls>0&&!glob){ const b=itemBag(); b[id]=(b[id]||0)+(n||1); } else S.items[id]=(S.items[id]||0)+(n||1); S.bpNew=(S.bpNew||0)+(n||1); if(!S.tut.bag){ S.tut.bag=1; intro('bag',()=>say('You got an item! Items wait in your <b>🎒 Backpack</b> until you want to use them.',7000),3); } }
-function useItem(id,btn){ const n=itemCount(id), it=ITEMS[id]; if(!n||!it) return; const warp=/^warp/.test(id);
-  if(warp&&bossBusy()){ nope(btn); toast('<span class="ti">'+it.ico+'</span><span>Finish the miniboss first!</span>','rush'); return; }
-  const r=it.use();
-  if(!r||r.fail){ nope(btn); toast('<span class="ti">'+it.ico+'</span><span>'+((r&&r.fail)||'You can\'t use that right now.')+'</span>'); return; }
-  itemTake(id); sfx('buy'); toast('<span class="ti">'+it.ico+'</span><span><b>'+r+'</b></span>','gold'); computeG(); if(warp||id==='bell'||id==='bait') closeModal(); else openBackpack(); } // the backpack closes for items you want to watch
-function openBackpack(tabId){ tabId=tabId||ui.bpTab||'items'; if(tabId==='shop'&&!unlocked('shop')) tabId='items'; ui.bpTab=tabId; S.bpNew=0;
+function giveItem(id,n,glob){ { const x=itemNorm(id,n); id=x[0]; n=x[1]; } if(id==='gems'){ S.gems=(S.gems||0)+n; return; } if(S.starfalls>0&&!glob){ const b=itemBag(); b[id]=(b[id]||0)+(n||1); } else S.items[id]=(S.items[id]||0)+(n||1); S.bpNew=(S.bpNew||0)+(n||1); if(!S.tut.bag){ S.tut.bag=1; intro('bag',()=>say('You got an item! Items wait in your <b>🎒 Backpack</b> until you want to use them.',7000),3); } }
+function openBackpack(tabId){ tabId=tabId||ui.bpTab||'items'; if(tabId==='shop') tabId='items'; ui.bpTab=tabId; S.bpNew=0;
   const ids=itemIds();
-  const items=ids.length?'<div class="bp-grid">'+ids.map(k=>'<div class="bp-item"><span class="ico">'+ITEMS[k].ico+'<i>'+itemCount(k)+'</i></span><b>'+realmWords(ITEMS[k].n)+'</b><span>'+realmWords(typeof ITEMS[k].d==='function'?ITEMS[k].d():ITEMS[k].d)+'</span><button class="btn" data-use="'+k+'">Use</button></div>').join('')+'</div>':'<p class="hint">Your backpack is empty. Items come from the Daily Wheel, goals, the daily reward, Royal Requests and the Royal Road.</p>';
+  const items=ids.length?'<div class="bp-grid">'+ids.map(bpItemHtml).join('')+'</div>':'<p class="hint">Your backpack is empty. Boosts come from the Daily Wheel, goals, the daily reward, quests, the Royal Road and the 🛒 Store.</p>';
   let body=items+(S.starfalls>0&&ids.length?'<p class="note">'+({sky:'🌌',sea:'⛵'}[S.realm]||'🌳')+' Items you find stay in the realm where you found them. Royal Road rewards, gifts and the shop work everywhere.</p>':'');
   if(tabId==='ward'){ const se=unlocked('ev')?season():null, evIds=se?Object.values(se.cos):[], show=id=>S.cos.owned[id]||evIds.includes(id), cur=themeOn();
     const hats=Object.keys(COS).filter(id=>COS[id].k==='hat'&&show(id)&&(!COS[id].shop||S.cos.owned[id]));
@@ -7407,14 +7444,14 @@ function openBackpack(tabId){ tabId=tabId||ui.bpTab||'items'; if(tabId==='shop'&
       (S.tut.slHatched&&S.realm!=='sky'?'<h3 class="sec" style="font-size:16px">Slimeling hats</h3><div class="ward">'+slHatBtn(null,'Its own look')+hats.filter(id=>S.cos.owned[id]).map(id=>slHatBtn(id,COS[id].n)).join('')+'</div>':'')+
       '<h3 class="sec" style="font-size:16px">Colors</h3><div class="ward">'+skins.map(skinBtn).join('')+'</div>'+
       '<h3 class="sec" style="font-size:16px">Meadow</h3><div class="ward"><button data-theme="normal" aria-pressed="'+(!cur)+'"><span class="thico">🌳</span>Normal</button>'+themes.map(thBtn).join('')+'</div>'+
-      '<p class="note">'+(se?'Every month\'s event brings new hats, colors and a meadow theme on its Royal Road. Its theme is free to use while the event lasts; win it to keep it. ':'Locked looks come from trophies, events and the Gem shop. ')+(S.realm==='sky'?'Among the stars the King wears his star crown unless you pick a hat.':'')+'</p>'; }
+      '<p class="note">'+(se?'Every month\'s event brings new hats, colors and a meadow theme on its Royal Road. Its theme is free to use while the event lasts; win it to keep it. ':'Locked looks come from trophies, events and the 🛒 Store. ')+(S.realm==='sky'?'Among the stars the King wears his star crown unless you pick a hat.':'')+'</p>'; }
   else if(tabId==='shop') body=shopHtml();
-  const tabs='<div class="seg mtabs" id="bpTabs"><button data-t="items" aria-pressed="'+(tabId==='items')+'">Items</button><button data-t="ward" aria-pressed="'+(tabId==='ward')+'">Wardrobe</button>'+(unlocked('shop')?'<button data-t="shop" aria-pressed="'+(tabId==='shop')+'">Shop</button>':'')+'</div>';
+  const tabs='<div class="seg mtabs" id="bpTabs"><button data-t="items" aria-pressed="'+(tabId==='items')+'">Items</button><button data-t="ward" aria-pressed="'+(tabId==='ward')+'">Wardrobe</button>'+'</div>';
   openModal('<h2 class="mh">🎒 Backpack <span class="gems" style="font-size:15px">· '+(S.gems||0)+' 💎</span></h2>'+tabs+body);
   $('#bpTabs').onclick=e=>{ const b=e.target.closest('[data-t]'); if(b){ sfx('click'); openBackpack(b.dataset.t); } };
   ui.modalBody.onclick=e=>{ const slh=e.target.closest('[data-slhat]'); if(slh&&!slh.disabled){ S.cos.slHat=slh.dataset.slhat||null; sfx('click'); ui.slKey=null; openBackpack('ward'); return; }
     const u=e.target.closest('[data-use]'), h=e.target.closest('[data-hat]'), s=e.target.closest('[data-skin]'), th=e.target.closest('[data-theme]'), by=e.target.closest('[data-buy]'), lk=e.target.closest('[data-look]'), ro=e.target.closest('[data-royal]');
-    if(u){ useItem(u.dataset.use,u); }
+    if(u){ useItem(u.dataset.use,u,u.dataset.arg); }
     else if(h&&!h.disabled){ S.cos.hat=h.dataset.hat||null; sfx('click'); drawLogo(); openBackpack('ward'); }
     else if(s&&!s.disabled){ S.settings.skin=+s.dataset.skin; sfx('click'); drawLogo(); openBackpack('ward'); }
     else if(th&&!th.disabled){ const id=th.dataset.theme; S.cos.theme=id==='normal'?'normal':S.cos.owned[id]?id:null; sfx('click'); openBackpack('ward'); }
@@ -7472,7 +7509,7 @@ function openGoals(){ rollGoals(); const G2=S.goals, now=new Date(nowT()), mid=n
     const weekly=v[0]==='w', g=(weekly?G2.wlist:G2.list)[+v.slice(1)]; if(!g||g.c||g.p<g.n) return; g.c=1; goalRewards(g.diff,weekly).forEach(r=>grantReward(r)); sfx('goldGet'); openGoals(); uiTick(); }; }
 
 /* ================= Daily Wheel ================= */
-function wheelSegs(){ const ev=!!season(); return [{k:'goo',s:900,w:20,c:'#98f25a',l:'15 min'},{k:'item',id:'frenzy',w:13,c:'#ffd43f',l:'Frenzy'},{k:'goo',s:3600,w:15,c:'#5cd3ff',l:'1 hour'},ev?{k:'candy',n:20,w:12,c:'#ff9a3c',l:'20 🍬'}:{k:'item',id:'bell',w:12,c:'#ff9a3c',l:'Bell'},{k:'goo',s:10800,w:9,c:'#b37bff',l:'3 hours'},{k:'item',id:'eggcrate',w:12,c:'#ff6fb5',l:'Eggs'},{k:'gems',n:3,w:8,c:'#7fe8ff',l:'3 💎'},{k:'goo',s:43200,w:3,c:'#ffd700',l:'12h!'}]; }
+function wheelSegs(){ const ev=!!season(); return [{k:'goo',s:900,w:20,c:'#98f25a',l:'15 min'},{k:'item',id:'frenzy',w:13,c:'#ffd43f',l:'Frenzy'},{k:'goo',s:3600,w:15,c:'#5cd3ff',l:'1 hour'},ev?{k:'candy',n:20,w:12,c:'#ff9a3c',l:'20 🍬'}:{k:'item',id:'summon',w:12,c:'#ff9a3c',l:'Summon'},{k:'goo',s:10800,w:9,c:'#b37bff',l:'3 hours'},{k:'item',id:'eggcrate',w:12,c:'#ff6fb5',l:'Eggs'},{k:'gems',n:3,w:8,c:'#7fe8ff',l:'3 💎'},{k:'goo',s:43200,w:3,c:'#ffd700',l:'12h!'}]; }
 function wheelFree(){ const d=today(); return !!d&&unlocked('wheel')&&S.wheel.last!==d; }
 function drawWheel(c,sz,rot,segs,hi,royal){ const tot=segs.reduce((a,s)=>a+s.w,0), R=sz/2-(royal?16:6); c.clearRect(0,0,sz,sz);
   if(royal){ const g=c.createLinearGradient(0,0,sz,sz); g.addColorStop(0,'#fff19a'); g.addColorStop(.5,'#f2a900'); g.addColorStop(1,'#fff19a'); c.fillStyle=g; c.beginPath(); c.arc(sz/2,sz/2,sz/2-2,0,TAU); c.fill(); c.fillStyle='#fff'; for(let i=0;i<16;i++){ const a=i*TAU/16+rot*.2; c.beginPath(); c.arc(sz/2+Math.cos(a)*(sz/2-9),sz/2+Math.sin(a)*(sz/2-9),4,0,TAU); c.fill(); } }
@@ -7481,14 +7518,14 @@ function drawWheel(c,sz,rot,segs,hi,royal){ const tot=segs.reduce((a,s)=>a+s.w,0
     if(i===hi){ c.fillStyle='rgba(255,255,255,.35)'; c.fill(); }
     c.save(); c.rotate(a+da/2); c.textAlign='right'; c.fillStyle='#070514'; c.font=Math.round(sz*(da<.35?.04:.05))+'px "Lilita One",sans-serif'; c.fillText(sg.l||rewShort(sg),R-10,5); c.font=Math.round(sz*.07)+'px sans-serif'; if(da>=.3) c.fillText(rewIco(sg),R*.5,8); c.restore(); a+=da; }
   c.restore(); c.fillStyle=royal?'#ff6fb5':'#ffd43f'; c.strokeStyle='#070514'; c.lineWidth=4; c.beginPath(); c.arc(sz/2,sz/2,sz*.09,0,TAU); c.fill(); c.stroke(); c.fillStyle=royal?'#fff':'#070514'; c.font=Math.round(sz*(royal?.045:.06))+'px "Lilita One",sans-serif'; c.textAlign='center'; c.fillText(royal?'ROYAL':'SPIN',sz/2,sz/2+sz*.018); }
-function openWheel(mode){ if(mode==='royal'&&wheelFree()){ toast('<span class="ti">🎡</span><span>Spin your free Daily Wheel first!</span>'); mode=null; } const royal=mode==='royal'&&unlocked('shop'), segs=(royal?royalSegs():wheelSegs()).map(s=>s.k==='goo'?Object.assign(s,{l:fmtRough(gooFor(s.s))+(s.s===43200&&!royal?'!':'')}):s), free=wheelFree(), now=new Date(nowT()), mid=new Date(now); mid.setHours(24,0,0,0);
+function openWheel(mode){ if(mode==='royal'&&wheelFree()){ toast('<span class="ti">🎡</span><span>Spin your free Daily Wheel first!</span>'); mode=null; } const royal=false, segs=(royal?royalSegs():wheelSegs()).map(s=>s.k==='goo'?Object.assign(s,{l:fmtRough(gooFor(s.s))+(s.s===43200&&!royal?'!':'')}):s), free=wheelFree(), now=new Date(nowT()), mid=new Date(now); mid.setHours(24,0,0,0);
   const left=royalLeft();
-  openModal('<h2 class="mh">'+(royal?'👑 Royal Wheel':'🎡 Daily Wheel')+'</h2><p>'+(royal?'Bigger prizes: hours of goo, Gems, Royal Chests and more. '+ROYAL_SPIN+' 💎 a spin, up to '+ROYAL_MAX+' a day (<b id="wheelLeft">'+left+'</b> left today). You have <span class="gems" id="wheelGems">'+(S.gems||0)+' 💎</span>.':'One free spin every day. Goo prizes are 15 minutes to 12 hours of your goo, so they grow with your kingdom.'+(unlocked('shop')?' After your free spin you can buy a <b>Royal Spin</b> with bigger prizes.':''))+'</p>'+
+  openModal('<h2 class="mh">'+(royal?'👑 Royal Wheel':'🎡 Daily Wheel')+'</h2><p>'+(royal?'Bigger prizes: hours of goo, Gems, Royal Chests and more. '+ROYAL_SPIN+' 💎 a spin, up to '+ROYAL_MAX+' a day (<b id="wheelLeft">'+left+'</b> left today). You have <span class="gems" id="wheelGems">'+(S.gems||0)+' 💎</span>.':'One free spin every day. Goo prizes are 15 minutes to 12 hours of your goo, so they grow with your kingdom.'+(storeOpen()?' It lives in the 🛒 Store.':''))+'</p>'+
     '<div class="wheel-wrap'+(royal?' royal':'')+'"><div class="wheel-ptr"></div><canvas id="wheelCv" width="600" height="600"></canvas></div><p id="wheelRes" class="hint" style="min-height:20px"></p>'+
     '<div class="btnrow" style="justify-content:center">'+(royal?'<button class="btn gold'+(left>0?'':' off')+'" id="wheelGo" style="font-size:19px;padding:10px 22px">'+(left>0?'Royal Spin · '+ROYAL_SPIN+' 💎':'Come back tomorrow')+'</button><button class="btn ghost" id="wheelBack">Daily Wheel</button>'
-      :'<button class="btn gold'+(free?'':' off')+'" id="wheelGo" style="font-size:20px;padding:10px 26px">'+(free?'Spin!':'Next free spin in '+fmtTime((mid-now)/1000))+'</button>'+(unlocked('shop')?'<button class="btn pink'+(free?' off':'')+'" id="wheelRoyal">👑 Royal Spin</button>':''))+'</div>');
+      :'<button class="btn gold'+(free?'':' off')+'" id="wheelGo" style="font-size:20px;padding:10px 26px">'+(free?'Spin!':'Next free spin in '+fmtTime((mid-now)/1000))+'</button>'+(storeOpen()?'<button class="btn ghost" id="wheelStore">🛒 Store</button>':''))+'</div>');
   const cv=$('#wheelCv'), c=cv.getContext('2d'); drawWheel(c,600,0,segs,-1,royal);
-  const rb=$('#wheelRoyal'); if(rb) rb.onclick=()=>{ if(wheelFree()){ nope(rb); toast('<span class="ti">🎡</span><span>Use your free spin first!</span>'); return; } sfx('click'); openWheel('royal'); };
+  const rb=$('#wheelStore'); if(rb) rb.onclick=()=>{ if(ui.spinning) return; sfx('click'); openStore(); };
   const bk=$('#wheelBack'); if(bk) bk.onclick=()=>{ if(ui.spinning) return; sfx('click'); openWheel(); };
   $('#wheelGo').onclick=()=>{ const go=$('#wheelGo'); if(ui.spinning){ nope(go); return; }
     if(royal){ if(royalLeft()<=0){ nope(go); return; } if((S.gems||0)<ROYAL_SPIN){ nope(go); toast('<span class="ti">💎</span><span>You need '+ROYAL_SPIN+' Gems for a Royal Spin.</span>'); return; } S.gems-=ROYAL_SPIN; S.wheel.royal.n++; const wl=$('#wheelLeft'), wg=$('#wheelGems'); if(wl) wl.textContent=royalLeft(); if(wg) wg.textContent=S.gems+' 💎'; }
@@ -7561,7 +7598,7 @@ function openEvent(tabId){ const se=season(), st=seasonState(); if(!se||!st){ to
   const head='<div class="rr-head" style="--ec:'+se.col+'"><span class="big">'+se.ico+'</span><div><b>'+se.name+'</b><span>'+left+' day'+(left===1?'':'s')+' left · '+se.ci+' '+fmt(st.pts)+' '+se.cur+'</span></div></div><div class="seg mtabs" id="evTabs"><button data-t="road" aria-pressed="'+(tabId==='road')+'">Royal Road</button><button data-t="info" aria-pressed="'+(tabId==='info')+'">Event</button><button data-t="cal" aria-pressed="'+(tabId==='cal')+'">Calendar</button></div>';
   let body='';
   if(tabId==='road'){ body='<div class="rr-prog"><span>'+(reached>=RR.length?'Road complete!':'Tier '+(reached+1))+'</span><div class="bar"><i style="width:'+(reached>=RR.length?100:into/RR_PTS*100)+'%"></i></div><span>'+(reached>=RR.length?'':into+'/'+RR_PTS+' '+se.ci)+'</span></div>'+
-    '<div class="btnrow" style="margin:0 0 10px">'+(st.prem?'<span class="note" style="margin:0">⭐ Premium unlocked</span>':'<button class="btn gold" id="rrPrem">Unlock Premium · '+RR_PRICE+' 💎</button>')+'<button class="btn" id="rrAll">Claim all</button>'+(reached<RR.length?'<button class="btn ghost" id="rrTier">+1 tier · '+RR_TIER_GEMS+' 💎</button>':'')+'</div><p class="note" style="margin-top:0">You have <span class="gems">'+(S.gems||0)+' 💎</span>. Free rewards are on every other tier; Premium unlocks the rest, and they are the better ones. Anything you reach but forget to claim is added for you when the month ends.</p>'+
+    '<div class="btnrow" style="margin:0 0 10px">'+(st.prem?'<span class="note" style="margin:0">⭐ Premium unlocked</span>':'<button class="btn off" id="rrPrem">⭐ Premium · Coming soon</button>')+'<button class="btn" id="rrAll">Claim all</button>'+(reached<RR.length?'<button class="btn ghost" id="rrTier">+1 tier · '+RR_TIER_GEMS+' 💎</button>':'')+'</div><p class="note" style="margin-top:0">You have <span class="gems">'+(S.gems||0)+' 💎</span>. Free rewards are on every other tier; Premium unlocks the rest, and they are the better ones. Anything you reach but forget to claim is added for you when the month ends.</p>'+
     RR.map((r,i)=>{ const prem=rrPrem(i), got=st.got[i], can=i<reached&&!got&&(!prem||st.prem), cos=r.k==='cos'&&COS[r.id];
       const ico=cos&&cos.k==='hat'?'<img class="rr-hat" src="'+hatPreview(cos.acc,72)+'" alt="">':cos&&cos.k==='skin'?'<span class="rr-sw" style="background:'+(SKINS.find(k=>k.cos===r.id)||{c:'#fff'}).c+'"></span>':rewIco(r);
       return '<div class="rr-row'+(i<reached?' reached':'')+'"><span class="t">'+(i+1)+'</span><div class="rr-cell'+(prem?' prem':'')+(got?' got':'')+(prem&&!st.prem?' lock':'')+(cos?' cos':'')+'"><span class="ico">'+ico+'</span><b>'+rewShort(r)+'</b><small>'+(prem?'PREMIUM':'FREE')+'</small>'+(can?'<button class="btn gold" data-rr="'+i+'">Claim</button>':'')+'</div></div>'; }).join(''); }
@@ -7578,7 +7615,7 @@ function openEvent(tabId){ const se=season(), st=seasonState(); if(!se||!st){ to
       list.map(e=>{ const dd=dayDiff(td,e.start); return '<div class="evnext" style="--ec:'+e.col+'"><span class="big">'+e.ico+'</span><div><b>'+e.name+'</b><span>'+MON[e.m]+' 1–'+(+e.end.slice(8))+' · starts in '+dd+' day'+(dd===1?'':'s')+'</span><p>'+e.desc+'</p><div class="evhats">'+evCos(e).map(id=>'<img src="'+hatPreview(COS[id].acc,64)+'" alt="'+COS[id].n+'" title="'+COS[id].n+'">').join('')+'<em>'+e.ci+' '+e.cur+'</em></div></div></div>'; }).join(''); }
   openModal(head+body);
   $('#evTabs').onclick=e=>{ const b=e.target.closest('[data-t]'); if(b){ sfx('click'); openEvent(b.dataset.t); } };
-  const pb=$('#rrPrem'); if(pb) pb.onclick=()=>{ if((S.gems||0)<RR_PRICE){ nope(pb); toast('<span class="ti">💎</span><span>You need '+RR_PRICE+' Gems. Earn them from weekly goals, levels, trophies and the daily reward.</span>'); return; }
+  const pb=$('#rrPrem'); if(pb) pb.onclick=()=>{ nope(pb); toast('<span class="ti">⭐</span><span>Royal Road Premium arrives when Slime Empire is on the App Store.</span>'); return; if((S.gems||0)<RR_PRICE){ nope(pb); toast('<span class="ti">💎</span><span>You need '+RR_PRICE+' Gems. Earn them from weekly goals, levels, trophies and the daily reward.</span>'); return; }
     if(!pb.dataset.sure){ pb.dataset.sure=1; pb.textContent='Tap again to spend '+RR_PRICE+' 💎'; setTimeout(()=>{ if(pb.isConnected){ delete pb.dataset.sure; pb.textContent='Unlock Premium · '+RR_PRICE+' 💎'; } },4000); return; } S.gems-=RR_PRICE; st.prem=true; sfx('mythic'); toast('<span class="ti">⭐</span><span><b>Premium unlocked!</b><br>Every reward on the Royal Road is yours to claim</span>','gold'); openEvent('road'); };
   const ab=$('#rrAll'); if(ab) ab.onclick=()=>{ let n=0; for(let i=0;i<RR.length;i++) if(rrClaim(i)) n++; if(!n) nope(ab); else sfx('goldGet'); openEvent('road'); };
   const tb=$('#rrTier'); if(tb) tb.onclick=()=>{ if((S.gems||0)<RR_TIER_GEMS){ nope(tb); return; } S.gems-=RR_TIER_GEMS; st.pts=(Math.floor(st.pts/RR_PTS)+1)*RR_PTS; sfx('buy'); openEvent('road'); };
@@ -7625,8 +7662,8 @@ function mergeAllOnce(){ if(!S.maLvl) return; const now=nowT(); if(now<(S.maNext
   S.maNext=now+MA_CD[S.maLvl-1]*1000; computeG(); sfx('rush'); uiTick(); }
 
 /* ================= the Pen upgrades panel ================= */
-function openSheet(){ if(!ui.sheet.hidden) return; modalFlip=nowT(); ui.sheet.hidden=false; S.tut.sheetSeen=1; sfx('click'); uiTick(); }
-function closeSheet(){ if(ui.sheet.hidden) return; modalFlip=nowT(); ui.sheet.hidden=true; }
+function openSheet(){ if(!ui.sheet.hidden) return; modalFlip=Date.now(); ui.sheet.hidden=false; S.tut.sheetSeen=1; sfx('click'); uiTick(); }
+function closeSheet(){ if(ui.sheet.hidden) return; modalFlip=Date.now(); ui.sheet.hidden=true; }
 function setupSheet(){ ui.sheet.addEventListener('pointerdown',e=>{ if(e.target===ui.sheet){ blockGhost(e.clientX,e.clientY); closeSheet(); } }); $('#sheetX').onclick=closeSheet;
   const head=ui.sheet.querySelector('.sheet-head'), grab=$('#sheetGrab'), card=ui.sheet.querySelector('.sheet-card'); let sy=null;
   for(const el of [head,grab]){ el.addEventListener('pointerdown',e=>{ if(e.target.closest('button')) return; sy=e.clientY; try{ el.setPointerCapture(e.pointerId); }catch(er){} });
@@ -7644,13 +7681,13 @@ function openResearchGuide(){ const list=UPGRADES.filter(u=>!u.tier), owned=list
 /* ================= the dock: event, goals, wheel, backpack ================= */
 function dockList(){ const L=[]; const se=season();
   if(se&&unlocked('ev')) L.push({id:'ev',ico:se.ico,cls:'event',lbl:se.name,badge:rrClaimable(),fn:()=>openEvent()});
-  if(goalsOpen()) L.push(kqOpen()?{id:'goals',ico:'📜',lbl:'Royal Ledger',badge:goalsClaimable()+kqClaimable()+(pzNew()?1:0),fn:openLedger}:{id:'goals',ico:'🎯',lbl:'Goals',badge:goalsClaimable()+(pzNew()?1:0),fn:openGoals});
-  if(unlocked('wheel')) L.push({id:'wheel',ico:'🎡',lbl:'Daily Wheel',badge:wheelFree()?'!':0,fn:openWheel});
+  if(kingdomOpen()) L.push({id:'goals',ico:'📜',lbl:'Kingdom',badge:kingdomBadge(),fn:openKingdom});
+  if(storeOpen()) L.push({id:'store',ico:'🛒',lbl:'Store',badge:storeBadge(),fn:()=>openStore()});
   if(S.tut.bag||Object.keys(S.items).length||Object.keys(S.cos.owned).length||unlocked('shop')) L.push({id:'bag',ico:'🎒',lbl:'Backpack',badge:S.bpNew||0,fn:()=>openBackpack()});
 
   return L; }
 function updateDock(){ ui.dock.hidden=S.world==='rift'; const L=dockList(), key=L.map(x=>x.id+x.ico).join(); if(key!==ui.dockKey){ ui.dockKey=key; ui.dock.innerHTML=L.map(x=>'<button class="dockbtn'+(x.cls?' '+x.cls:'')+'" data-d="'+x.id+'" aria-label="'+x.lbl+'">'+x.ico+'<span class="badge" hidden></span></button>').join('');
-    for(const x of L){ const was=ui.dockSeen||(ui.dockSeen={}); if(!was[x.id]&&ui.started&&!S.tut['dk_'+x.id]){ S.tut['dk_'+x.id]=1; const se=season(); const txt={req:'A <b>Royal Request</b>! The '+RL().king+' wants a certain '+RL().slime+'. Give it to him from your '+RL().pen.toLowerCase()+' for a reward. Tap 👑 or the bubble next to him.',ev:'The <b>'+se.name+'</b> has begun! '+se.ico+' Tap it to see the <b>Royal Road</b>: find '+se.itemN+'s for '+se.ci+' '+se.cur+' and claim rewards. A new event starts every month.',goals:'<b>Goals</b> unlocked! Three new daily goals every day, and bigger weekly ones. Tap 🎯.',wheel:'The <b>Daily Wheel</b> is here! One free spin every day. Tap 🎡.',bag:''}[x.id]; if(txt) intro('dk_'+x.id,()=>coach([{el:()=>ui.dock.querySelector('[data-d="'+x.id+'"]'),text:txt}]),9); } was[x.id]=1; } }
+    for(const x of L){ const was=ui.dockSeen||(ui.dockSeen={}); if(!was[x.id]&&ui.started&&!S.tut['dk_'+x.id]){ S.tut['dk_'+x.id]=1; const se=season(); const txt={req:'A <b>Royal Request</b>! The '+RL().king+' wants a certain '+RL().slime+'. Give it to him from your '+RL().pen.toLowerCase()+' for a reward. Tap 👑 or the bubble next to him.',ev:'The <b>'+se.name+'</b> has begun! '+se.ico+' Tap it to see the <b>Royal Road</b>: find '+se.itemN+'s for '+se.ci+' '+se.cur+' and claim rewards. A new event starts every month.',goals:'Your <b>📜 Kingdom</b> menu! The Collection, the Hall and Friends live here, and later your Goals and Quests too. Tap 📜.',store:'The <b>🛒 Store</b> is open! Spin the free Daily Wheel there every day, and spend Gems 💎 on deals and looks.',bag:''}[x.id]; if(txt) intro('dk_'+x.id,()=>coach([{el:()=>ui.dock.querySelector('[data-d="'+x.id+'"]'),text:txt}]),9); } was[x.id]=1; } }
   // short screens: the dock wraps into a second column instead of running past the Wobble bar
   const rows=Math.max(1,Math.floor((ui.stage.clientHeight-76-34+8)/50)); if(rows!==ui.dockRows){ ui.dockRows=rows; ui.dock.style.gridTemplateRows='repeat('+rows+',42px)'; }
   for(const x of L){ const b=ui.dock.querySelector('[data-d="'+x.id+'"] .badge'); if(!b) continue; b.hidden=!x.badge; if(x.badge&&b.textContent!==String(x.badge)) b.textContent=x.badge; } }
@@ -7755,7 +7792,7 @@ const KWT=[['goo/s','goo'],['goo','goo'],['Gems','gem'],['Gem','gem'],['Royal Je
  ['Factories','feat'],['factories','feat'],['Factory','feat'],['factory','feat'],['Research','feat'],['Hatchery','feat'],['Pen upgrades','feat'],['Backpack','feat'],['Wardrobe','feat'],['Royal Road','feat'],['Daily Wheel','feat'],['Royal Spin','feat'],['Royal Wheel','feat'],
  ['Goals','feat'],['Collection','feat'],['Chronicle','feat'],['Ascend','feat'],['ascend','feat'],['Wobble Rush','feat'],['Wobble meter','feat'],['Wobble','feat'],['Supernova','feat'],['golden slimes','feat'],['golden slime','feat'],['shooting stars','feat'],['shooting star','feat'],
  ['minibosses','feat'],['miniboss','feat'],['Artifacts','feat'],['Artifact','feat'],['the Fuse','feat'],['Royal Requests','feat'],['Royal Request','feat'],['Gem shop','feat'],['Trials of the Crown','feat'],['Royal Steward','feat'],['Slime of the Day','feat'],
- ['shiny','feat'],['Shiny','feat'],['the Hollow','feat'],['Orrery','feat'],['Constellations','feat'],['Merge all','feat'],['Auto-Merger','feat'],['Egg Quality','feat'],['Time Warp','feat'],['tap streak','feat'],['streak','feat'],['milestone','feat'],['milestones','feat'],['trophies','feat'],['trophy','feat'],['lore card','feat'],['Lore','feat'],
+ ['shiny','feat'],['Shiny','feat'],['the Hollow','feat'],['Orrery','feat'],['Constellations','feat'],['Merge all','feat'],['Auto-Merger','feat'],['Egg Quality','feat'],['Time Warp','feat'],['Frenzy','feat'],['Egg Crates','feat'],['Egg Crate','feat'],['Artifact Chests','feat'],['Artifact Chest','feat'],['Store','feat'],['Daily Deals','feat'],["Dragon's Hoard",'feat'],['Kingdom Charter','feat'],['Kingdom menu','feat'],['dragon basket','feat'],['tap streak','feat'],['streak','feat'],['milestone','feat'],['milestones','feat'],['trophies','feat'],['trophy','feat'],['lore card','feat'],['Lore','feat'],
  ['tap','act'],['Tap','act'],['taps','act'],['Taps','act'],['tapping','act'],['merge','act'],['Merge','act'],['merging','act'],['hatch','act'],['Hatch','act']];
 let KWRE=null, KWM=null, KWEV='';
 function kwBuild(){ const se=season(), list=KWT.slice(); if(se) list.push([se.cur,'ev']); KWEV=se?se.id:''; KWM={}; for(const [w,c] of list) KWM[w]=c;
@@ -8053,8 +8090,8 @@ async function fbInbox(){ if(!S.fb||!S.fb.ok||navigator.onLine===false) return;
       const v=(f[k].mapValue&&f[k].mapValue.fields)||{}, raw=String(fbGet(v.n)||'').slice(0,24), n=safeName(raw,24), g=+fbGet(v.g)||0, friend=S.friends.some(x=>x.c===c);
       if(g&&Date.now()-g<GIFT_DAYS*864e5) gout[c]={n,raw,t:g}; else if(friend){ fbInboxClear(c); continue; }
       if(!friend) out[c]={n,raw,t:+fbGet(v.t)||0}; }
-    const seen=S.frSeen||(S.frSeen=[]); for(const c in out) if(!seen.includes(c)){ seen.push(c); if(seen.length>60) seen.shift(); sfx('ach'); toast('<span class="ti">👥</span><span><b>'+esc(out[c].n||'A kingdom')+'</b> wants to be friends!<br>Accept in 👥 Friends (Collection tab).</span>','gold'); }
-    for(const c in gout){ const key='g'+c+gout[c].t; if(!seen.includes(key)){ seen.push(key); if(seen.length>60) seen.shift(); sfx('goldGet'); toast('<span class="ti">🎁</span><span><b>'+esc(gout[c].n||'A friend')+'</b> sent you a gift!<br>Open it in 👥 Friends (Collection tab).</span>','gold'); } }
+    const seen=S.frSeen||(S.frSeen=[]); for(const c in out) if(!seen.includes(c)){ seen.push(c); if(seen.length>60) seen.shift(); sfx('ach'); toast('<span class="ti">👥</span><span><b>'+esc(out[c].n||'A kingdom')+'</b> wants to be friends!<br>Accept in 👥 Friends (📜 Kingdom menu).</span>','gold'); }
+    for(const c in gout){ const key='g'+c+gout[c].t; if(!seen.includes(key)){ seen.push(key); if(seen.length>60) seen.shift(); sfx('goldGet'); toast('<span class="ti">🎁</span><span><b>'+esc(gout[c].n||'A friend')+'</b> sent you a gift!<br>Open it in 👥 Friends (📜 Kingdom menu).</span>','gold'); } }
     FB.gifts=gout; FB.reqs=out; frUpdate(); }
   catch(e){} }
 // clears one request from your own inbox (a field mask with no value deletes that key)
@@ -8180,15 +8217,15 @@ const TABDEF=[
 ];
 const GTABS=[['brew','🧪','Cauldron'],['pantry','🎒','Pantry']];
 const DREAM_TAB_ORDER=['pen','night','fac','upg','catcher','col'];
-const HTABS=[['nest','🥚','Nest'],['exp','🧭','Expeditions'],['hup','🔥','Upgrades'],['shop','🐉','Scale Shop']];
+const HTABS=[['nest','🥚','Nest'],['exp','🧭','Expeditions'],['hup','🔥','Upgrades'],['shop','🐉','Hoard']];
 const ALLVIEWS=['pen','orr','fac','upg','asc','col','nest','exp','hup','shop','squad','rup','chart','harbor','night','catcher','brew','pantry'];
 const SEA_TAB_ORDER=['pen','chart','fac','upg','harbor','col'];
 const RTABS=[['squad','⚔️','Squad'],['rup','💠','Upgrades']];
 function tabName(id){ const d=TABDEF.find(x=>x.id===id); return d?d.l[RIDX()]:id; }
 function tabList(){ if(S.world==='hollow') return HTABS.map(([id,ico,l])=>({id,ico,l})); if(S.world==='rift') return RTABS.map(([id,ico,l])=>({id,ico,l})); if(S.world==='grotto') return GTABS.map(([id,ico,l])=>({id,ico,l})); if(S.world==='forge') return FTABS.map(([id,ico,l])=>({id,ico,l})); const s=RIDX(), list=TABDEF.filter(d=>d.show()).map(d=>({id:d.id,ico:d.ico[s],l:d.l[s]})); if(s===2) list.sort((a,b)=>SEA_TAB_ORDER.indexOf(a.id)-SEA_TAB_ORDER.indexOf(b.id)); if(s===3) list.sort((a,b)=>DREAM_TAB_ORDER.indexOf(a.id)-DREAM_TAB_ORDER.indexOf(b.id)); if(s===4) list.sort((a,b)=>DAWN_TAB_ORDER.indexOf(a.id)-DAWN_TAB_ORDER.indexOf(b.id)); return list; }
 function buildTabs(force){ const list=tabList(), key=S.world+S.realm+list.map(x=>x.id).join(); if(!force&&key===ui.tabKey) return false; ui.tabKey=key; ui.tabs.innerHTML=''; ui.tabMap={};
-  ui.tabBtns=list.map(({id,ico,l})=>{ const b=document.createElement('button'); b.className='tab'; b.dataset.t=id; b.setAttribute('role','tab'); b.innerHTML='<span class="ti">'+ico+'</span><span class="tl">'+l+'</span><span class="badge" hidden></span>'; b.onclick=()=>{ sfx('click'); setTab(id); }; ui.tabs.appendChild(b); ui.tabMap[id]=b;
-    if(S.world==='meadow'&&!S.seenTabs[id]){ S.seenTabs[id]=1; if(ui.started){ b.classList.add('fresh'); ui.newTabs.push(id); } } return b; });
+  ui.tabBtns=list.map(({id,ico,l})=>{ const b=document.createElement('button'); b.className='tab'; if(id==='col') b.hidden=true; b.dataset.t=id; b.setAttribute('role','tab'); b.innerHTML='<span class="ti">'+ico+'</span><span class="tl">'+l+'</span><span class="badge" hidden></span>'; b.onclick=()=>{ sfx('click'); setTab(id); }; ui.tabs.appendChild(b); ui.tabMap[id]=b;
+    if(S.world==='meadow'&&!S.seenTabs[id]){ S.seenTabs[id]=1; if(ui.started&&id!=='col'){ b.classList.add('fresh'); ui.newTabs.push(id); } } return b; });
   for(const b of ui.tabBtns) b.setAttribute('aria-selected',b.dataset.t===tab); return true; }
 function buildUI(){
   ['app','stage','board','golden','ghost','toasts','modal','modalBody','tapHint','buffs','rushFill','eggBtn','eggCost','penGps','penCount','eggLvlTxt','hatchRow','hatchBar','hatchTxt','amRow','amBar','amTxt','palRow','palAmt','penInfo','penUps','facList','buyMode','perkGrid','ascBtn','jellyOwned','jellyRateTxt','jellyBonus','jellyGain','jellyNext','jellyBar','statList','spGrid','trGrid','spCount','trCount','gooAmt','gpsAmt','gpsUnit','jellyChip','jellyAmt','views','tabs',
@@ -8361,7 +8398,7 @@ function renderBoard(){
 // Safari still sends its own click a moment later. If the screen changed in between (a window closed or opened),
 // that late "ghost" click would land on whatever is now under the finger, so it is blocked wherever it lands.
 let ghost=null;
-function blockGhost(x,y){ ghost={x,y,t:nowT()}; }
+function blockGhost(x,y){ ghost={x,y,t:Date.now()}; }
 function setupTouchTaps(){
   let down=null;
   document.addEventListener('pointerdown',e=>{ const b=e.pointerType!=='mouse'&&e.target.closest?e.target.closest('button'):null; down=b?{b,x:e.clientX,y:e.clientY,id:e.pointerId}:null; },true);
@@ -8370,8 +8407,8 @@ function setupTouchTaps(){
     if(Math.hypot(e.clientX-d.x,e.clientY-d.y)>14) return; blockGhost(e.clientX,e.clientY); d.b.click(); },true);
   document.addEventListener('click',e=>{ if(!e.isTrusted) return;
     // right after a window opens or closes, the screen under the finger has changed: ignore the late click completely
-    if(nowT()-modalFlip<450){ e.stopImmediatePropagation(); e.preventDefault(); return; }
-    if(!ghost||nowT()-ghost.t>800) return; if(Math.hypot(e.clientX-ghost.x,e.clientY-ghost.y)>40) return; e.stopImmediatePropagation(); e.preventDefault(); },true);
+    if(Date.now()-modalFlip<450){ e.stopImmediatePropagation(); e.preventDefault(); return; }
+    if(!ghost||Date.now()-ghost.t>800) return; if(Math.hypot(e.clientX-ghost.x,e.clientY-ghost.y)>40) return; e.stopImmediatePropagation(); e.preventDefault(); },true);
 }
 let drag=null, sel=null;
 // on a phone the pen scrolls like the rest of the page: a slime is picked up after a short hold (or a sideways move),
@@ -8612,24 +8649,25 @@ function uiTick(){
   if(TOASTQ.length&&!bossBusy()&&performance.now()-(ui.toastAt||0)>toastGap()){ const tq=TOASTQ.shift(); toastShow(tq[0],tq[1]); }
   if(performance.now()-(ui.nextAt||0)>1000){ ui.nextAt=performance.now(); updateNext(); }
   if(!AWAY.timer&&ui.modal.hidden&&!coachQ&&!INTRO.q.length&&!bossQuiet()&&performance.now()-(ui.sessT||0)>8000&&S.playTime-INTRO.last>20&&loginPending()) AWAY.timer=setTimeout(showWelcomeBack,350);
-  if(hol){ setTxt(ui.gpsAmt,(Math.floor(nestRate()*10)/10).toLocaleString('en-US')); setTxt(ui.gpsUnit,'embers per minute'); }
+  if(hol){ setTxt(ui.gpsAmt,(Math.floor(nestRate()*(warmNest()?3:1)*10)/10).toLocaleString('en-US')); setTxt(ui.gpsUnit,'embers per minute'); }
   else if(S.world==='rift'){ setTxt(ui.gpsAmt,'Depth '+S.rift.floor); setTxt(ui.gpsUnit,'· deepest '+S.rift.best); if(tab==='squad'||tab==='rup') renderRift(); }
   else { setTxt(ui.gpsAmt,fmt(G.total,true)); setTxt(ui.gpsUnit,curName()+' per second'); }
   if(S.realm==='dawn'){ ui.jellyChip.hidden=!(S.dawn&&S.dawn.stonesAll); setTxt(ui.jellyAmt,fmt((S.dawn&&S.dawn.stones)||0)); if(ui.jellyChip.firstChild&&ui.jellyChip.firstChild.nodeValue!=='☀️ ') ui.jellyChip.firstChild.nodeValue='☀️ '; }
   else if(S.realm==='dream'){ ui.jellyChip.hidden=!(S.dream&&S.dream.shardsAll); setTxt(ui.jellyAmt,fmt((S.dream&&S.dream.shards)||0)); if(ui.jellyChip.firstChild&&ui.jellyChip.firstChild.nodeValue!=='💠 ') ui.jellyChip.firstChild.nodeValue='💠 '; }
   else if(S.realm==='sea'){ ui.jellyChip.hidden=!(S.ship&&S.ship.pearlsAll); setTxt(ui.jellyAmt,fmt((S.ship&&S.ship.pearls)||0)); if(ui.jellyChip.firstChild&&ui.jellyChip.firstChild.nodeValue!=='🦪 ') ui.jellyChip.firstChild.nodeValue='🦪 '; } else { ui.jellyChip.hidden=!S.jellyEarned; setTxt(ui.jellyAmt,fmt(S.jelly)); }
-  ui.scaleChip.hidden=!(S.level>=HOLLOW_LV||Hh.scalesAll>0); setTxt(ui.scaleAmt,String(Hh.scales));
-  ui.dustChip.hidden=!(S.stardustAll>0); setTxt(ui.dustAmt,fmt(S.stardust));
+  ui.scaleChip.hidden=true; ui.dustChip.hidden=true;
+  { const g=ui.gemChip||(ui.gemChip=$('#gemChip')); if(g){ const on=storeOpen()||(S.gems||0)>0; if(g.hidden===on) g.hidden=!on; if(on) setTxt(ui.gemAmt||(ui.gemAmt=$('#gemAmt')),fmt(S.gems||0)); } }
   setTxt(ui.lvlTxt,'Lv '+S.level); ui.lvlBar.style.width=(S.level>=LV_CAP?100:clamp(S.xp/xpNeed(S.level),0,1)*100)+'%';
   ui.mentor.hidden=!S.settings.mentor||(!!B&&!hol);
-  if(hol){ setBadge('nest',0); setBadge('exp',Hh.exps.filter(e=>e.end<=nowT()).length); setBadge('shop',SHOP_CONS.some(c=>Hh.scales>=c.cost)?'!':0); setBadge('hup',0);
+  if(hol){ setBadge('nest',0); setBadge('exp',Hh.exps.filter(e=>e.end<=nowT()).length+(Hh.pend||[]).length); setBadge('shop',hoardAffordable()?'!':0); setBadge('hup',0);
     if(tab==='nest'){ const c=dEggCost(), full=Hh.dragons.length>=nestCap(); setTxt(ui.dEggCost,full?'Nest is full':fmtE(c)+' embers'); ui.dEggBtn.classList.toggle('off',Hh.embers<c||full);
+      { const bt=$('#basketTxt'), bh=basketLine(); if(bt&&bt._h!==bh){ bt._h=bh; bt.innerHTML=bh; bt.hidden=!bh; } }
       const els=[...new Set(homeDragons().map(d=>d.el))]; setTxt(ui.nestRate,(Math.floor(nestRate()*10)/10).toLocaleString('en-US')); setTxt(ui.nestCount,Hh.dragons.length+'/'+nestCap()); setTxt(ui.patrolCount,patrolList().length+'/'+patrolCap());
       setTxt(ui.elemTxt,els.length?'Elements '+els.map(i=>ELEM[i].ico).join('')+' · +'+Math.round(((1+.2*els.length)*(els.length===4?1.25:1)-1)*100)+'%':''); renderNest(false); }
     else if(tab==='exp') renderExp(false);
     else if(tab==='hup') renderHup();
     else if(tab==='shop') renderShop(false);
-    { const mp=moonFull()?'<div class="buff moon">🌕 Full moon · embers +25%</div>':moonNew()?'<div class="buff moon">🌑 New moon · more wisps</div>':''; if(mp!==ui.buffHtml){ ui.buffHtml=mp; ui.buffs.innerHTML=mp; } }
+    { const mp=(warmNest()?'<div class="buff warm">🔥 Warm nest · ×3 embers</div>':'')+(moonFull()?'<div class="buff moon">🌕 Full moon · embers +25%</div>':moonNew()?'<div class="buff moon">🌑 New moon · more wisps</div>':''); if(mp!==ui.buffHtml){ ui.buffHtml=mp; ui.buffs.innerHTML=mp; } }
     return; }
   if(S.world==='rift'){ if(ui.buffHtml!==''){ ui.buffHtml=''; ui.buffs.innerHTML=''; } ui.rush.hidden=true; const Rr=S.rift; setBadge('rup',tab!=='rup'&&RUPS.some(p=>rup(p.k)<p.max&&Rr.shards>=p.cost(rup(p.k)))?'!':0); setBadge('squad',tab!=='squad'&&Rr.stuck?'!':0); return; }
   if(S.world==='forge'){ if(ui.buffHtml!==''){ ui.buffHtml=''; ui.buffs.innerHTML=''; } ui.rush.hidden=true; const D=S.dawn, rd=D&&D.build&&nowT()>=D.build.until; setBadge('anvil',tab!=='anvil'&&rd?'!':0); setBadge('wards',tab!=='wards'&&rd?'!':0); if(tab==='anvil'||tab==='wards') renderForgeTab(); return; }
@@ -8694,8 +8732,8 @@ function setBadge(id,v){ const t=ui.tabMap&&ui.tabMap[id]; if(!t) return; const 
 
 /* modal */
 let modalOnClose=null, modalFlip=0;
-function openModal(html,onClose){ ui.modalBody.innerHTML=html; hl(ui.modalBody); ui.modal.hidden=false; modalOnClose=onClose||null; modalFlip=nowT(); }
-function closeModal(){ if(ui.modal.hidden) return; modalFlip=nowT(); ui.modal.hidden=true; ui.modalBody.innerHTML=''; const f=modalOnClose; modalOnClose=null; if(f) f(); }
+function openModal(html,onClose){ ui.modalBody.innerHTML=html; hl(ui.modalBody); ui.modal.hidden=false; modalOnClose=onClose||null; modalFlip=Date.now(); }
+function closeModal(){ if(ui.modal.hidden) return; modalFlip=Date.now(); ui.modal.hidden=true; ui.modalBody.innerHTML=''; const f=modalOnClose; modalOnClose=null; if(f) f(); }
 function showWelcome(){ openModal('<div class="mcenter"><img src="'+SPIMG[1]+'" alt=""><h2 class="mh">Welcome to Slime Empire!</h2></div><ul class="howto"><li><span>👑</span>Tap the King Slime to squeeze out goo.</li><li><span>🐣</span>Hatch eggs in the Pen, then tap two matching slimes to merge them into a stronger one.</li><li><span>✨</span>Your kingdom grows from there. New things open up one at a time as you play.</li></ul><div class="mcenter"><button class="btn" id="goBtn" style="font-size:20px;padding:10px 26px">Start squishing</button></div>',()=>audioUnlock()); $('#goBtn').onclick=()=>{ audioUnlock(); sfx('ach'); closeModal(); }; }
 
 /* settings */
@@ -8722,7 +8760,7 @@ function openSettings(){ const s=S.settings, sky=S.realm==='sky';
   '<div class="btnrow"><button class="btn danger" id="resetBtn">Reset everything</button></div></section>'+
   '<section class="set"><h3>Privacy</h3><p class="note">Your kingdom is saved on this device. The game only goes online if you get a friend code in 👥 Friends: then your kingdom name and progress are shared with the people who have your code. No ads, no tracking, no account or email.</p>'+
   '<div class="btnrow"><button class="btn ghost" id="privBtn">Privacy policy</button>'+(S.fb&&S.fb.code?'<button class="btn ghost" id="delOnline">Delete my online data</button>':'')+'</div></section>'+
-  '<p class="note" id="verTxt">Slime Empire 8.0.1 · saves automatically every 10 seconds.</p>'+
+  '<p class="note" id="verTxt">Slime Empire 9.0.1 · saves automatically every 10 seconds.</p>'+
   '<section class="set" id="devBox" hidden><h3>Test tools</h3><p class="note">For testing only. These skip normal progress. Numbers can be typed like 1e15, 2.5M or 40B.</p>'+
   '<div class="devgrid">'+din('dvGoo','Goo','1e15','Add')+din('dvLv','Level','50','Set')+din('dvXp','XP','1000','Add')+din('dvAsc','Ascensions','10','Set')+din('dvJelly',RL().jelly,'500','Add')+din('dvDust','Stardust','25','Add')+din('dvEmb','Embers','5000','Add')+din('dvScl','Scales','50','Add')+'</div>'+
   '<div class="srow"><span>Time speed</span><div class="seg" id="devSpd">'+[1,10,100].map(v=>'<button data-v="'+v+'" aria-pressed="'+(devSpeed===v)+'">×'+v+'</button>').join('')+'</div></div>'+
@@ -8814,7 +8852,7 @@ function applySave(json,src){ S=parseSave(json); for(const x in hatching) delete
 /* cloud save (claude.ai viewer only) */
 const CL={ok:false,ref:null,busy:false,last:0,state:'off'};
 let freshStart=false;
-function cloudText(){ if(CL.state==='on') return '☁️ Cloud save is on. Progress syncs between your devices when you open this game at its claude.ai link'+(CL.last?' · last synced '+fmtTime((nowT()-CL.last)/1000)+' ago':'')+'.'; if(CL.state==='error') return '☁️ Cloud save could not connect right now. Progress is still saved on this device.'; return '💾 Progress is saved on this device. Use Export and Import to move it to another device.'; }
+function cloudText(){ const app=window.SE_APP&&SE_APP.cloudLine&&SE_APP.cloudLine(); if(app) return app; if(CL.state==='on') return '☁️ Cloud save is on. Progress syncs between your devices when you open this game at its claude.ai link'+(CL.last?' · last synced '+fmtTime((nowT()-CL.last)/1000)+' ago':'')+'.'; if(CL.state==='error') return '☁️ Cloud save could not connect right now. Progress is still saved on this device.'; return '💾 Progress is saved on this device. Use Export and Import to move it to another device.'; }
 async function cloudInit(){
   try{
     if(!window.claude||typeof window.claude.use!=='function') return;
@@ -8989,6 +9027,191 @@ function openDeleteOnline(back){ const has=!!(S.fb&&S.fb.code), ret=()=>{ sfx('c
     try{ await fbDeleteAll(); sfx('ach'); openModal('<div class="mcenter"><h2 class="mh">🗑️ Deleted</h2><p>Your online data is gone. Your kingdom is still here on this device.</p><button class="btn gold" id="delOk">OK</button></div>'); $('#delOk').onclick=()=>{ sfx('click'); closeModal(); }; }
     catch(e){ go.classList.remove('off'); go.textContent='Try again'; const n=$('#delNote'); if(n) n.textContent='📡 Could not reach the server, so not everything was deleted. Check your internet and try again.'; } }; }
 function openPrivacy(){ sfx('click'); try{ window.open(PRIVACY_URL,'_blank','noopener'); }catch(e){} }
+
+/* ================= 9.0 The Royal Treasury: five boosts, one Store, the Kingdom menu ================= */
+// ---- five boosts. Every old item still works wherever it is handed out: it turns into one of the five (or Gems) on the way in
+function itemNorm(id,n){ n=n||1; const M={warp30:['warp',1],warp2h:['warp',2],warp8h:['warp',8],boost2:['frenzy',2],gegg:['eggcrate',1],bell:['summon',1],bait:['summon',1],rchest:['chest',2],balloon:['frenzy',1],pouch:['gems',2]}; const m=M[id]; return m?[m[0],n*m[1]]:[id,n]; }
+function normRew(r){ if(!r||r.k!=='item') return r; const x=itemNorm(r.id,r.n); return x[0]==='gems'?{k:'gems',n:x[1]}:Object.assign({},r,{id:x[0],n:x[1]}); }
+Object.assign(ITEMS,{
+ warp:{ico:'⏳',n:'Time Warp',sn:'Warp',hrs:true,d:()=>'Goo right now. One hour is about <b>'+fmtRough(gooFor(3600))+'</b>. Use one hour, or all of them at once.',use:h=>timeWarp(3600*(h||1))},
+ frenzy:{ico:'🌟',n:'Frenzy',sn:'Frenzy',d:'×3 goo for 20 minutes. Another one adds 20 more minutes.',use:()=>frenzyOn()},
+ summon:{ico:'🔔',n:'Summon',sn:'Summon',d:'Calls a golden slime right away, or a miniboss when you want a fight.',use:w=>summonUse(w)}
+});
+for(const k of ['warp30','warp2h','warp8h','boost2','gegg','bell','bait','rchest','balloon','pouch']) ITEMS[k].alias=1;
+function frenzyOn(){ const now=nowT(), b=S.buffs.find(x=>x.k==='frenzy'&&x.m===3);
+  if(b&&b.until>now){ b.until=Math.min(b.until+1200e3,now+3*3600e3); return 'Frenzy! +20 minutes ('+fmtTime((b.until-now)/1000)+' left)'; }
+  addBuff('frenzy','Frenzy ×3',3,1200); return 'Frenzy! ×3 goo for 20 minutes'; }
+function summonUse(w){ return w==='boss'?ITEMS.bait.use():ITEMS.bell.use(); }
+const summonBossOk=()=>unlocked('boss')&&(S.realm==='meadow'||S.realm==='sky');
+// what a reward says, after old items have turned into new ones
+function rewWord(r){ r=normRew(r); if(r.k==='item'&&r.id==='warp') return r.n+' h Time Warp'; if(r.k==='item') return (r.n>1?r.n+'× ':'')+ITEMS[r.id].n; return null; }
+
+// ---- the Store: one place for everything you can buy ----
+const STORE_GEMS=[{n:100},{n:550,b:'+10%'},{n:1200,b:'+20%'},{n:2600,b:'+30%'},{n:7000,b:'+40%'}];
+const CHARTER_PRICE=1000;
+const DEALS=[{k:'warp2',it:'warp',n:2,p:12},{k:'warp8',it:'warp',n:8,p:35},{k:'frenzy2',it:'frenzy',n:2,p:10},{k:'frenzy5',it:'frenzy',n:5,p:22},{k:'crate2',it:'eggcrate',n:2,p:14},{k:'summon3',it:'summon',n:3,p:12},{k:'chest',ch:0,p:15},{k:'rchest',ch:2,p:40}];
+SKINS.push({n:'Charter Gold',c:'#e7b23c',pat:'stripes',glow:true,cos:'sk_charter'}); COS.sk_charter={k:'skin',n:'Charter Gold'};
+const storeOpen=()=>unlocked('wheel')||unlocked('shop');
+function dealDay(){ const d=today()||localDay(nowT()); if(S.shop.day!==d){ S.shop.day=d; S.shop.bought={}; } return d; }
+// today's deals: the same for the whole day, and a chest always shows exactly what is inside
+function dealsToday(){ const d=dealDay(), r=seeded('deals'+d), pool=DEALS.filter(o=>!o.ch||unlocked('boss')||S.arts.some(n=>n>0)), out=[], want=S.charter?4:3;
+  while(out.length<want&&pool.length){ const o=pool.splice(Math.floor(r()*pool.length),1)[0]; if(o.ch!=null&&out.some(x=>x.ch!=null)) continue; out.push(o); }
+  return out.map(o=>{ if(o.ch==null) return o; const rr=seeded('chest'+d+o.k), arts=[0,1,2].map(()=>{ let x=rr()*100, t=0; for(let i=0;i<6;i++){ x-=ART_W[i]; if(x<0){ t=i; break; } } return Math.max(o.ch,t); }); return Object.assign({},o,{arts}); }); }
+function dealHtml(o){ const got=S.shop.bought[o.k];
+  if(o.ch!=null) return '<div class="bp-item deal"><span class="ico">🎁</span><b>'+(o.ch?'Rare Artifact Chest':'Artifact Chest')+'</b><span>Inside, for sure:</span><div class="deal-arts">'+o.arts.map(t=>'<span class="da"><img src="'+ARTIMG[t]+'" alt="'+RARITY[t].n+'" title="'+RARITY[t].n+' '+RARITY[t].a+'"><small style="color:'+RARITY[t].c+'">'+RARITY[t].n+'</small></span>').join('')+'</div><button class="btn'+(got?' off':' gold')+'" data-deal="'+o.k+'">'+(got?'Sold out':o.p+' 💎')+'</button></div>';
+  const it=ITEMS[o.it], what=o.it==='warp'?o.n+' hours of goo: about <b>'+fmtRough(gooFor(3600*o.n))+'</b>':o.it==='frenzy'?'Each one: ×3 goo for 20 minutes':o.it==='eggcrate'?o.n*10+' eggs that hatch 2 levels higher':o.n+' golden slimes or minibosses';
+  return '<div class="bp-item deal"><span class="ico">'+it.ico+'<i>'+(o.it==='warp'?o.n+'h':o.n)+'</i></span><b>'+(o.it==='warp'?o.n+' h Time Warp':o.n+'× '+it.n)+'</b><span>'+what+'</span><button class="btn'+(got?' off':' gold')+'" data-deal="'+o.k+'">'+(got?'Sold out':o.p+' 💎')+'</button></div>'; }
+function storeBuy(btn,price,done){ if((S.gems||0)<price){ nope(btn); toast('<span class="ti">💎</span><span>You need '+price+' Gems. See "Where Gems come from" at the bottom of the Store.</span>'); return; }
+  if(price>=40&&!btn.dataset.sure){ btn.dataset.sure=1; const t=btn.textContent; btn.textContent='Tap again: '+price+' 💎'; setTimeout(()=>{ if(btn.isConnected){ delete btn.dataset.sure; btn.textContent=t; } },4000); return; }
+  S.gems-=price; sfx('buy'); done(); saveLocal(); }
+function storeBadge(){ return wheelFree()?'!':(storeOpen()&&S.shop.seen!==(today()||''))?'!':0; }
+function openStore(){ dealDay(); S.shop.seen=today()||''; const free=wheelFree(), now=new Date(nowT()), mid=new Date(now); mid.setHours(24,0,0,0); const se=unlocked('ev')?season():null, st=se?seasonState():null;
+  const looks=Object.keys(COS).filter(k=>COS[k].shop);
+  let h='<h2 class="mh">🛒 Store <span class="gems" style="font-size:15px">· '+fmt(S.gems||0)+' 💎</span></h2>'+
+    '<div class="store-gift card"><span class="big">🎡</span><div><b>Free daily gift</b><span>'+(free?'Your free spin of the Daily Wheel is ready!':'Next free spin in '+fmtTime((mid-now)/1000))+'</span></div><button class="btn '+(free?'gold':'ghost')+'" data-st="wheel">'+(free?'Spin':'Look')+'</button></div>'+
+    '<h3 class="sec" style="font-size:16px">Today\'s deals <small style="color:var(--muted)">· new in '+fmtTime((mid-now)/1000)+'</small></h3><div class="bp-grid">'+dealsToday().map(dealHtml).join('')+'</div>';
+  if(se&&st) h+='<div class="store-pass card" style="--ec:'+se.col+'"><span class="big">'+se.ico+'</span><div><b>Royal Road Premium · '+se.name+'</b><span>'+(st.prem?'Unlocked this month. Every reward on the Royal Road is yours.':'The better half of this month\'s Royal Road: more looks, chests and Gems.')+'</span></div>'+(st.prem?'<button class="btn ghost" data-st="road">Open</button>':'<button class="btn off soon" data-st="soon">Coming soon</button>')+'</div>';
+  h+='<div class="store-charter card'+(S.charter?' owned':'')+'"><div class="ch-top"><span class="big">📜</span><div><b>Kingdom Charter</b><span>One purchase, yours for good:</span></div></div><ul class="howto"><li><span>🌙</span>Time away counts <b>50% longer</b>, in every realm</li><li><span>🛒</span><b>4 deals</b> a day instead of 3</li><li><span>🧺</span>The dragon basket holds <b>50% more</b> embers</li><li><span>🎨</span>The <b>Charter Gold</b> color for the King</li></ul>'+
+    (S.charter?'<p class="note" style="text-align:center;margin:0">✅ Your kingdom has its Charter.</p>':'<div class="btnrow" style="justify-content:center"><button class="btn gold" data-st="charter">'+CHARTER_PRICE.toLocaleString('en-US')+' 💎</button></div>')+'</div>';
+  if(looks.length) h+='<h3 class="sec" style="font-size:16px">Looks <small style="color:var(--muted)">· tap to try one on</small></h3><div class="ward">'+looks.map(id=>{ const C=COS[id], own=S.cos.owned[id], sk=C.k==='skin'?SKINS.find(k=>k.cos===id):null; return '<button data-look="'+id+'"><img src="'+(C.k==='hat'?hatPreview(C.acc,96):skinPreview(sk,96))+'" alt="">'+C.n+'<br>'+(own?'Owned':C.shop+' 💎')+'</button>'; }).join('')+'</div>';
+  h+='<h3 class="sec" style="font-size:16px">💎 Gems</h3><div class="gem-packs">'+STORE_GEMS.map(g=>'<div class="gp"><b>'+g.n.toLocaleString('en-US')+' 💎</b>'+(g.b?'<small>'+g.b+' bonus</small>':'<small>&nbsp;</small>')+'<button class="btn off soon" data-st="soon">Coming soon</button></div>').join('')+'</div>'+
+    '<h3 class="sec" style="font-size:16px">Where Gems come from</h3><p class="note" style="margin-top:0">Every 5 levels, trophies, daily and weekly goals, Kingdom Quests, Renown ranks, the Daily Puzzle, the daily reward, the Daily Wheel and the Royal Road. Gems never reset.</p>';
+  openModal(h);
+  ui.modalBody.onclick=e=>{ const b=e.target.closest('[data-st]'), dl=e.target.closest('[data-deal]'), lk=e.target.closest('[data-look]');
+    if(b){ const k=b.dataset.st; if(k==='wheel'){ sfx('click'); openWheel(); } else if(k==='road'){ sfx('click'); openEvent('road'); } else if(k==='soon'){ nope(b); toast('<span class="ti">🛒</span><span>This arrives when Slime Empire is on the App Store.</span>'); }
+      else if(k==='charter'&&!S.charter) storeBuy(b,CHARTER_PRICE,()=>{ S.charter=1; S.cos.owned.sk_charter=1; S.bpNew=(S.bpNew||0)+1; sfx('mythic'); toast('<span class="ti">📜</span><span><b>The Kingdom Charter is yours!</b><br>Longer time away, a 4th daily deal, a bigger basket and Charter Gold</span>','gold'); openStore(); });
+      return; }
+    if(dl&&!dl.classList.contains('off')){ const o=dealsToday().find(x=>x.k===dl.dataset.deal); if(!o||S.shop.bought[o.k]) return;
+      storeBuy(dl,o.p,()=>{ S.shop.bought[o.k]=1;
+        if(o.ch!=null){ o.arts.forEach(t=>S.arts[t]++); recalc(); computeG(); if(o.arts.includes(5)) mythicAnnounce(); toast('<span class="ti">🎁</span><span><b>Artifacts: '+o.arts.map(t=>RARITY[t].n).join(', ')+'</b><br>They are in the Fuse (Kingdom → Collection)</span>','gold'); }
+        else { giveItem(o.it,o.n,true); S.bpNew=0; toast('<span class="ti">'+ITEMS[o.it].ico+'</span><span><b>Bought '+rewWord({k:'item',id:o.it,n:o.n})+'</b><br>It is in your 🎒 Backpack</span>','gold'); }
+        openStore(); }); return; }
+    if(lk){ sfx('click'); openLook(lk.dataset.look); } }; }
+// try a look on before buying it
+function openLook(id){ const C=COS[id]; if(!C) return; const own=S.cos.owned[id], sk=C.k==='skin'?SKINS.find(k=>k.cos===id):null;
+  openModal('<div class="mcenter"><h2 class="mh">'+C.n+'</h2><img class="tryon" src="'+(C.k==='hat'?hatPreview(C.acc,240):skinPreview(sk,240))+'" alt="The King wearing '+C.n+'"><p class="note">'+(C.k==='hat'?'A hat for the King. It shows in every realm, on the Kingdom card and in your friends\' Halls.':'A color for the King. Pick it any time in the Wardrobe.')+'</p>'+
+    '<div class="btnrow" style="justify-content:center">'+(own?'<button class="btn ghost" id="lkWear">Wear it</button>':'<button class="btn gold" id="lkBuy">Buy · '+C.shop+' 💎</button>')+'<button class="btn ghost" id="lkBack">Back to the Store</button></div></div>');
+  $('#lkBack').onclick=()=>{ sfx('click'); openStore(); };
+  const w=$('#lkWear'); if(w) w.onclick=()=>{ sfx('click'); if(C.k==='hat') S.cos.hat=id; else S.settings.skin=SKINS.indexOf(sk); drawLogo(); toast('<span class="ti">✨</span><span>Wearing <b>'+C.n+'</b></span>'); openStore(); };
+  const bb=$('#lkBuy'); if(bb) bb.onclick=()=>storeBuy(bb,C.shop,()=>{ S.cos.owned[id]=1; sfx('mythic'); toast('<span class="ti">✨</span><span><b>'+C.n+'</b> is yours! Wear it from the Wardrobe (🎒 Backpack)</span>','gold'); openLook(id); }); }
+
+// ---- the Kingdom menu: the Ledger plus everything that belongs to the whole kingdom ----
+const kingdomOpen=()=>goalsOpen()||unlocked('col')||ascTotal()>0||S.starfalls>0;
+function kingdomBadge(){ return (goalsOpen()?goalsClaimable():0)+(kqOpen()?kqClaimable():0)+(pzNew()?1:0)+S.arts.slice(0,5).filter(n=>n>=3).length+Object.keys(FB.reqs||{}).length+giftCount(); }
+function kingdomRow(){ const fr=Object.keys(FB.reqs||{}).length+giftCount(), fu=S.arts.slice(0,5).filter(n=>n>=3).length;
+  return '<div class="kgrow">'+[['col','🏛️','Collection',fu],['hall','🏰','Hall',0],['fr','👥','Friends',fr],['card','📸','Card',0]].map(x=>'<button data-kg="'+x[0]+'"><span>'+x[1]+'</span>'+x[2]+(x[3]?' <i class="frdot">'+x[3]+'</i>':'')+'</button>').join('')+'</div>'; }
+function openKingdom(){ if(goalsOpen()) openLedger(); else { openModal('<h2 class="mh">📜 Kingdom</h2>'+kingdomRow()+'<p class="note">Goals, Kingdom Quests and the Daily Puzzle join this menu as your kingdom grows.</p>'); } }
+document.addEventListener('click',e=>{ const k=e.target.closest&&e.target.closest('[data-kg]'); if(!k) return; e.stopPropagation(); sfx('click'); const v=k.dataset.kg;
+  if(v==='col'){ closeModal(); setTab('col'); } else if(v==='hall') openHall(); else if(v==='fr') openFriends(); else if(v==='card') openKingdomCard(); },true);
+
+// ---- what each currency is: tap it anywhere ----
+function curInfo(k){ const R=RL(), realm=S.realm, pre={meadow:['👑','Royal Jelly','Ascend'],sky:['🌙','Moon Jelly','the Eclipse'],sea:['🦪','Pearls','Sail home'],dream:['💠','Dream Shards','waking up'],dawn:['☀️','Sunstones','greeting the dawn']}[realm]||['👑','Royal Jelly','Ascend'];
+  const goo=curName(), Goo=goo.charAt(0).toUpperCase()+goo.slice(1);
+  if(k==='goo'&&S.world==='hollow') k='embers';
+  const I={
+   goo:['💧',Goo,'This realm\'s main currency.','Tap the '+R.king+', merge '+R.slimes+' and fill your '+R.pen.toLowerCase()+'. It keeps coming while you are away.','Eggs, the Slimeling and Research.','Yes: it starts over after '+pre[2]+'.'],
+   prestige:[pre[0],pre[1],'Makes you stronger for good.','You get it from '+pre[2]+'. The bigger the run, the more you get.','It boosts everything in this realm, and buys this realm\'s lasting upgrades.','Never.'],
+   gems:['💎','Gems','The kingdom\'s rare currency, the same in every realm.','Every 5 levels, trophies, goals, Kingdom Quests, Renown, the Daily Puzzle, the daily reward and the Daily Wheel.','The 🛒 Store: deals, looks and the Kingdom Charter. Also speeding up timers and new quests.','Never.'],
+   embers:['🔥','Embers','The Hollow\'s fire.','Stoke the brazier, and from your dragons at home. Away from the Hollow they fill the dragon basket.','Dragon eggs, growing dragons and Hollow upgrades. The Dawn Forge uses them too.','Never.'],
+   scales:['🐉','Dragon Scales','Treasure from the Deep.','Dragon expeditions, and Tiamatra\'s hoard.','Permanent perks in the Dragon\'s Hoard.','Never.'],
+   stardust:['✨','Stardust','Light from the Starfall.','Starfalls and Star Seeds.','Each one boosts stargoo by 25%, and it buys Constellations in the Orrery.','Never.'],
+   shards:['💠','Void Shards','The Rift\'s crystals.','Your Rift squad, while you fight and while you are away.','Rift upgrades.','Never.']};
+  return I[k]; }
+function openCurInfo(k){ const c=curInfo(k); if(!c) return; sfx('click');
+  openModal('<div class="curinfo"><div class="ci-head"><span class="big">'+c[0]+'</span><div><b>'+c[1]+'</b><span>'+c[2]+'</span></div></div><ul class="howto"><li><span>📥</span><div><b>Where it comes from</b><br>'+c[3]+'</div></li><li><span>🛍️</span><div><b>What it is for</b><br>'+c[4]+'</div></li><li><span>🔄</span><div><b>Does it reset?</b><br>'+c[5]+'</div></li></ul></div>'); }
+document.addEventListener('click',e=>{ const c=e.target.closest&&e.target.closest('[data-cur]'); if(!c||ui.coach&&!ui.coach.hidden) return; openCurInfo(c.dataset.cur); });
+
+// ---- the Backpack: Time Warps are counted in hours, and a Summon asks what to call
+function bpItemHtml(k){ const it=ITEMS[k], n=itemCount(k), d=realmWords(typeof it.d==='function'?it.d():it.d);
+  const btns=k==='warp'?'<div class="bp-btns"><button class="btn" data-use="warp" data-arg="1">Use 1 h</button>'+(n>1?'<button class="btn ghost" data-use="warp" data-arg="all">All '+n+' h</button>':'')+'</div>'
+    :k==='summon'?'<div class="bp-btns"><button class="btn" data-use="summon" data-arg="gold">Golden</button>'+(summonBossOk()?'<button class="btn ghost" data-use="summon" data-arg="boss">Boss</button>':'')+'</div>'
+    :'<button class="btn" data-use="'+k+'">Use</button>';
+  return '<div class="bp-item"><span class="ico">'+it.ico+'<i>'+(k==='warp'?n+'h':n)+'</i></span><b>'+realmWords(it.n)+'</b><span>'+d+'</span>'+btns+'</div>'; }
+function useItem(id,btn,arg){ const n=itemCount(id), it=ITEMS[id]; if(!n||!it) return; const warp=id==='warp'||/^warp/.test(id);
+  if(warp&&bossBusy()){ nope(btn); toast('<span class="ti">'+it.ico+'</span><span>Finish the miniboss first!</span>','rush'); return; }
+  const take=id==='warp'?(arg==='all'?n:1):1, r=it.use(id==='warp'?take:arg);
+  if(!r||r.fail){ nope(btn); toast('<span class="ti">'+it.ico+'</span><span>'+((r&&r.fail)||'You can\'t use that right now.')+'</span>'); return; }
+  for(let i=0;i<take;i++) itemTake(id); sfx('buy'); toast('<span class="ti">'+it.ico+'</span><span><b>'+r+'</b></span>','gold'); computeG();
+  if(warp||id==='summon'||id==='bell'||id==='bait') closeModal(); else openBackpack(); } // the backpack closes for things you want to watch
+
+function openNew90(){
+  openModal('<h2 class="mh">✨ New in Slime Empire 9.0</h2><ul class="howto">'+
+    '<li><span>🛒</span><b>The Store</b>: one place for your free Daily Wheel, today\'s deals (a chest always shows what is inside), looks you can try on, and the <b>Kingdom Charter</b>.</li>'+
+    '<li><span>🎒</span><b>Five boosts</b> instead of many: ⏳ Time Warp (in hours), 🌟 Frenzy, 📦 Egg Crate, 🎁 Artifact Chest and 🔔 Summon. Your old items were turned into these, rounded up.</li>'+
+    '<li><span>🐉</span><b>The Hollow</b>: a <b>dragon basket</b> holds a few hours of embers while you are away, a <b>warm nest</b> makes ×3 embers while you stoke, dragons <b>train</b> to grow, and expeditions let you <b>choose</b> their treasure. The Scale Shop is now the <b>Dragon\'s Hoard</b>, with permanent perks.</li>'+
+    '<li><span>📜</span><b>The Kingdom menu</b> holds the Collection, the Hall, Friends, Goals and Quests. The tabs below the King are now the same in every realm.</li>'+
+    '<li><span>💎</span>The top bar shows your realm\'s currency, its lasting currency and your Gems. <b>Tap any of them</b> to see what it is for.</li></ul><div class="btnrow" style="justify-content:center"><button class="btn gold" id="n90Ok">Show me!</button></div>');
+  $('#n90Ok').onclick=closeModal; }
+/* ================= 9.0 the Hollow: a basket, a warm nest, training and choices ================= */
+// away from the Hollow, the dragons at home fill a basket that holds a few hours of embers, so short visits beat one long one
+const D_TRAIN=[12,24,40];  // golden stokes to grow out of each stage
+const sh9=k=>(S.hollow.sh&&S.hollow.sh[k])||0;
+function basketHours(){ return (3+sh9('basket'))*(S.charter?1.5:1); }
+function basketCap(){ return nestRate()*60*basketHours(); }
+function basketRoom(e){ return Math.max(0,Math.min(e,basketCap()-(S.hollow.basket||0))); }
+function basketAdd(e){ const Hh=S.hollow; Hh.basket=Math.min(basketCap(),(Hh.basket||0)+Math.max(0,e)); }
+function basketFull(){ const c=basketCap(); return c>0&&(S.hollow.basket||0)>=c-1; }
+function basketCollect(){ const Hh=S.hollow, b=Math.floor(Hh.basket||0); Hh.basket=0; if(b<1) return; earnEmbers(b);
+  if(ST.w){ const bz=ST.brazier||{x:ST.w/2,y:ST.h*.6,w:100}; addFloat(bz.x,bz.y-bz.w*.7,'🧺 +'+fmtE(b),'#ffd27a',26); }
+  toast('<span class="ti">🧺</span><span><b>+'+fmtE(b)+' embers</b> from the dragon basket</span>','gold'); }
+// while the flame sits in the golden zone, every dragon at home makes three times the embers
+function warmNest(){ const Hh=S.hollow, z=zone(); return S.world==='hollow'&&nowT()>=Hh.coolUntil&&Hh.heat>=z[0]&&Hh.heat<=z[1]; }
+function emberFlow(dt){ const r=nestRate(); if(!r) return; if(S.world==='hollow') earnEmbers(r/60*dt*(warmNest()?3:1)); else basketAdd(r/60*dt); }
+function basketLine(){ const cap=basketCap(); if(!cap) return ''; return '🧺 The dragon basket holds <b>'+fmtE(cap)+'</b> embers ('+basketHours()+' h of your nest). It fills while you are away from the Hollow and empties into your bank when you come back.'; }
+
+// growing takes embers, then a short training: golden-zone stokes while the dragon watches. One dragon trains at a time
+function trainNeed(st){ return Math.max(4,Math.round(D_TRAIN[st]*(1-.25*sh9('coach')))); }
+function trainingDragon(){ const Hh=S.hollow; if(Hh.trainId==null) return null; const d=Hh.dragons.find(x=>x.id===Hh.trainId); if(!d||!(d.train>0)){ Hh.trainId=null; return null; } return d; }
+function growDragon(id,btn){ const Hh=S.hollow, d=Hh.dragons.find(x=>x.id===id); if(!d||!d.born||d.st>=3||d.train>0) return;
+  const td=trainingDragon(); if(td){ nope(btn); toast('<span class="ti">🏋️</span><span><b>'+esc(td.name)+'</b> is training right now. One dragon trains at a time.</span>'); return; }
+  if(d.job!=='home'){ nope(btn); toast('<span class="ti">🏠</span><span>Bring '+esc(d.name)+' home to the nest to train it.</span>'); return; }
+  const c=D_GROW[d.st]; if(Hh.embers<c){ nope(btn); return; }
+  Hh.embers-=c; d.train=trainNeed(d.st); d.trainMax=d.train; Hh.trainId=d.id; sfx('buy');
+  toast('<img src="'+dragonImg(d.el,d.st,d.el2)+'" alt=""><span><b>'+esc(d.name)+' is training!</b><br>Stoke the brazier in the golden zone '+d.train+' times</span>','gold');
+  if(!S.tut.train){ S.tut.train=1; setTimeout(()=>say('Training time! Keep the flame in the <b>golden zone</b>: every golden stoke trains '+esc(d.name)+'.',8000),700); }
+  renderNest(true); }
+function trainStoke(){ const d=trainingDragon(); if(!d) return; d.train--;
+  if(ST.w){ const bz=ST.brazier||{x:ST.w/2,y:ST.h*.6,w:100}; addFloat(bz.x+rand(-40,40),bz.y-bz.w*.95,'💪','#bff6ff',18); }
+  if(d.train<=0){ d.train=0; delete d.trainMax; S.hollow.trainId=null; growDone(d); } }
+function growDone(d){ d.st++; sfx('grow'); gainXP(40*d.st); goalAdd('grow');
+  toast('<img src="'+dragonImg(d.el,d.st,d.el2)+'" alt=""><span><b>'+esc(d.name)+' grew into a '+STAGES[d.st]+'!</b><br>'+(d.st===3?'A mighty Elder':'+'+D_RATE[d.st]+' embers/min')+'</span>','disc'); renderNest(true);
+  if(d.st===1&&!S.tut.patrol){ S.tut.patrol=1; setTimeout(()=>coach([{who:'spirit',el:()=>document.querySelector('.dcard[data-id="'+d.id+'"] .patrol'),text:'<b>'+esc(d.name)+'</b> is a Drake now! Drakes and older can join the <b>Dragon Patrol</b>: they fly up to the King and roast him for goo, and they help fight minibosses. Patrol dragons make no embers here, though.'}]),400); } }
+function trainHtml(d){ const p=d.trainMax?1-d.train/d.trainMax:0; return '<div class="trainbar" title="Golden stokes left"><i style="width:'+Math.round(p*100)+'%"></i><span>🏋️ '+d.train+' stokes</span></div>'; }
+
+// expeditions come home with a choice: keep the scales, the embers or (on long trips) a dragon egg
+function collectExp(i){ const Hh=S.hollow, e=Hh.exps[i]; if(!e||nowT()<e.end) return; const d=Hh.dragons.find(x=>x.id===e.id);
+  Hh.exps.splice(i,1); if(!d){ renderExp(true); return; } d.job='home';
+  const pv=expPreview(d,e.di); let sc=pv.sc*rand(.7,1.3); sc=Math.floor(sc)+(Math.random()<sc%1?1:0); const em=Math.round(pv.em*rand(.8,1.2));
+  let relic=null; const rc=[0,0,.1,.3][e.di]*(d.st>=1?1:.5); if(Hh.relics.length<RELICS.length&&Math.random()<rc){ relic=Hh.relics.length; Hh.relics.push(relic); Hh.scales+=2; Hh.scalesAll+=2; }
+  // the rarest find: a Dragon Heart, needed to wake Tiamatra (long trips also follow a heart trail, so no one is stuck waiting on luck)
+  let heart=false; if(!Hh.tia&&!Hh.waking&&Hh.hearts<3){ const hs=prkM('hseek'), hc=[0,0,.05,.2][e.di]*[.3,.5,.75,1][d.st]*(hs?1.5:1); if(Math.random()<hc){ Hh.hearts++; heart=true; }
+    else { Hh.hdust=(Hh.hdust||0)+[0,0,1,3][e.di]*[.5,.6,.8,1][d.st]*(hs?2:1); if(Hh.hdust>=HEART_DUST){ Hh.hdust-=HEART_DUST; Hh.hearts++; heart=true; } } }
+  sfx('expDone'); gainXP(10+15*e.di);
+  const tm=1+.2*sh9('tmap'), opts=[{k:'sc',n:Math.max(1,Math.round(sc*1.5*tm))},{k:'em',n:Math.max(1,Math.round(em*2*tm))}]; if(e.di>=2) opts.push({k:'egg',n:1});
+  (Hh.pend||(Hh.pend=[])).push({id:d.id,opts,relic,heart});
+  renderExp(true); openExpChoice(Hh.pend.length-1); }
+function expOptHtml(o){ return o.k==='sc'?'<span>🐉</span><b>+'+fmtE(o.n)+' Dragon Scales</b><small>For perks in the Dragon\'s Hoard</small>':o.k==='em'?'<span>🔥</span><b>+'+fmtE(o.n)+' embers</b><small>For eggs, growing and upgrades</small>':'<span>🥚</span><b>A dragon egg</b><small>'+(S.hollow.dragons.length<nestCap()?'A free egg for the nest':'The nest is full!')+'</small>'; }
+function openExpChoice(pi){ const Hh=S.hollow, p=(Hh.pend||[])[pi]; if(!p) return; const d=Hh.dragons.find(x=>x.id===p.id)||{name:'Your dragon',el:0,st:0};
+  openModal('<div class="mcenter"><img src="'+dragonImg(d.el,d.st,d.el2)+'" alt="" style="width:110px"><h2 class="mh">'+esc(d.name)+' is back!</h2><p>It found treasure in the Deep. Which one do you keep?</p><div class="exch">'+p.opts.map((o,i)=>'<button class="'+(o.k==='egg'&&Hh.dragons.length>=nestCap()?'off':'')+'" data-ex="'+i+'">'+expOptHtml(o)+'</button>').join('')+'</div>'+(p.relic!=null||p.heart?'<p class="note">'+(p.relic!=null?'📜 It also found a relic! ':'')+(p.heart?'❤️‍🔥 And something else glows in its claws…':'')+'</p>':'')+'</div>');
+  ui.modalBody.onclick=ev=>{ const b=ev.target.closest('[data-ex]'); if(!b) return; if(b.classList.contains('off')){ nope(b); return; } expPick(pi,+b.dataset.ex); }; }
+function expPick(pi,oi){ const Hh=S.hollow, p=(Hh.pend||[])[pi]; if(!p) return; const o=p.opts[oi]; if(!o) return;
+  if(o.k==='egg'&&Hh.dragons.length>=nestCap()) return;
+  Hh.pend.splice(pi,1); const d=Hh.dragons.find(x=>x.id===p.id);
+  if(o.k==='sc'){ Hh.scales+=o.n; Hh.scalesAll+=o.n; } else if(o.k==='em') earnEmbers(o.n); else Hh.dragons.push({id:Hh.nextId++,name:pickName(),el:rollElem(),st:0,born:false,hatchAt:nowT()+15000,job:'home'});
+  sfx('goldGet'); if(!ui.modal.hidden) closeModal();
+  toast((d?'<img src="'+dragonImg(d.el,d.st,d.el2)+'" alt="">':'<span class="ti">🧭</span>')+'<span><b>'+(o.k==='sc'?'+'+fmtE(o.n)+' 🐉 Dragon Scales':o.k==='em'?'+'+fmtE(o.n)+' embers':'A dragon egg for the nest!')+'</b></span>','gold');
+  if(p.relic!=null) setTimeout(()=>openModal('<div class="mcenter"><div style="font-size:64px">📜</div><h2 class="mh">Relic found: '+RELICS[p.relic].n+'</h2><p>'+RELICS[p.relic].t+'</p><p>This page is now in the Chronicle. <b>+2 bonus scales.</b></p></div>'),500);
+  if(p.heart) setTimeout(()=>{ const go=()=>{ if(!ui.modal.hidden){ setTimeout(go,500); return; } heartFound(); }; go(); },p.relic!=null?900:500);
+  renderExp(true); renderNest(true); }
+function pendHtml(){ const P=S.hollow.pend||[]; if(!P.length) return ''; return P.map((p,i)=>{ const d=S.hollow.dragons.find(x=>x.id===p.id)||{name:'?',el:0,st:0}; return '<div class="exp-slot card pend"><img src="'+dragonImg(d.el,d.st,d.el2)+'" alt=""><div><b>'+esc(d.name)+'</b><div class="ds">Back with treasure. Pick what to keep!</div></div><button class="btn gold" data-pend="'+i+'">Choose</button></div>'; }).join(''); }
+
+// the Dragon's Hoard: scales buy permanent perks only (the old Scale Shop's boosts moved to the five boosts)
+SHOP_PERM.push(
+ {k:'basket',ico:'🧺',name:'Bigger Basket',max:3,cost:l=>10+10*l,desc:l=>l>=3?'The dragon basket holds 6 hours of embers.':'The dragon basket holds '+(3+l)+' → '+(4+l)+' hours of embers.'},
+ {k:'coach',ico:'🏋️',name:'Dragon Coach',max:2,cost:l=>15+15*l,desc:l=>l>=2?'Training needs 50% fewer stokes.':'Training needs '+(25*l)+'% → '+(25*(l+1))+'% fewer stokes.'},
+ {k:'tmap',ico:'🗺️',name:'Treasure Map',max:3,cost:l=>12+12*l,desc:l=>l>=3?'The treasure you keep from an expedition is +60%.':'The treasure you keep from an expedition is +'+(20*l)+'% → +'+(20*(l+1))+'%.'});
+function hoardAffordable(){ const Hh=S.hollow; return SHOP_PERM.some(p=>{ const l=Hh.sh[p.k]||0; return l<p.max&&Hh.scales>=p.cost(l); }); }
+document.addEventListener('click',e=>{ const p=e.target.closest&&e.target.closest('[data-pend]'); if(p){ sfx('click'); openExpChoice(+p.dataset.pend); } });
 
 /* ================= loop ================= */
 let lastT=0, saveAcc=0, achAcc=0, cloudAcc=0, uiAcc=0, lastHud='', hudV=null;
